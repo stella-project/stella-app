@@ -1,4 +1,4 @@
-# STELLA Application
+# STELLA application
 
 ## Prototype
 This repository contains a first prototype of the STELLA application which will be deployed at the sites.
