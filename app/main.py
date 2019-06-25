@@ -6,12 +6,31 @@ from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
+container_dict = {"lucene": {"requests": 0},
+                  "solr": {"requests": 0}}
+
+
+def get_least_served(container_dict):
+    least_served = list(container_dict.keys())[0]
+    requests = container_dict[least_served]["requests"]
+
+    for entry in container_dict.keys():
+        if container_dict[entry]['requests'] < requests:
+            least_served = entry
+
+    container_dict[least_served]['requests'] += 1
+    return least_served
+
 
 def index():
     client = docker.DockerClient(base_url='unix://var/run/docker.sock')
-    container = client.containers.get("solr-container")
+    container_list = list(container_dict.keys())
+
     cmd = 'python /script/index'
-    exec_res = container.exec_run(cmd)
+
+    for entry in container_list:
+        container = client.containers.get(entry)
+        exec_res = container.exec_run(cmd)
 
 
 @app.route("/")
@@ -44,7 +63,9 @@ def home():
 @app.route("/stella/api/site/ranking/<string:query>", methods=["GET"])
 def ranking(query):
     client = docker.DockerClient(base_url='unix://var/run/docker.sock')
-    container = client.containers.get("solr-container")
+    least_served = get_least_served(container_dict)
+
+    container = client.containers.get(least_served)
 
     cmd = 'python /script/search ' + query
 

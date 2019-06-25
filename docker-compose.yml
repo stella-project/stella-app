@@ -11,10 +11,19 @@ services:
 
     solr:
       image: solr
-      container_name: solr-container
+      container_name: solr
       volumes:
         - ~/data/sample/:/opt/solr/collection/
         - ./solr/script/:/script/
         # - ./solr/init/:/docker-entrypoint-initdb.d/
       ports:
         - "8983:8983"
+
+    lucene:
+      image: openjdk
+      container_name: lucene
+      command: tail -F anything
+      volumes:
+        - ~/data/sample/:/data/
+        - ./lucene/:/lucene/
+        - ./lucene/script/:/script/
