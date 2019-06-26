@@ -1,7 +1,7 @@
 version: '3'
 services:
     web:
-        build: .
+        build: ./app
         volumes:
           - /var/run/docker.sock/:/var/run/docker.sock
         ports:
