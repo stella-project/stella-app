@@ -1,6 +1,0 @@
-#!/usr/bin/env python2.7
-
-import subprocess
-
-subprocess.call("solr create_core -c collection -p 8983".split())
-subprocess.call("post -c collection -p 8983 /opt/solr/collection/".split())
