@@ -28,5 +28,5 @@ the first request to the API in order to retrieve results.
 - [ ] output format of search script
 - [ ] initial indexing of all containers, when starting the application
 - [x] additional (prototypical) search engine, e.g. elasticsearch, and scheduling between search engines
-- [ ] outsource Solr to external repository
+- [x] Solr to external repository
 - [ ] DB/storage containing meta-info about docker-containers
