@@ -30,3 +30,4 @@ the first request to the API in order to retrieve results.
 - [x] additional (prototypical) search engine, e.g. elasticsearch, and scheduling between search engines
 - [x] Solr to external repository
 - [ ] DB/storage containing meta-info about docker-containers
+- [ ] Webhook in repos of experimental systems: PING stella-server
