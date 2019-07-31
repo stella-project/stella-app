@@ -5,7 +5,7 @@ This repository contains a first prototype of the STELLA application which will 
 The API can be used to send a request to a (minimal) flask application. In return, the flask app will send back a
 ranking which is retrieved from a container running Solr.
 
-### Setup
+### Setup - Linux
 
 1. Install [Docker](https://docs.docker.com/v17.12/install/)
 2. Install [docker-compose](https://docs.docker.com/compose/install/)
@@ -14,6 +14,12 @@ ranking which is retrieved from a container running Solr.
 5. Set path to sample data which will be indexed by Solr-container (&rarr; `docker-compose.yml`)
 6. Run `docker-compose up`. Depending on the size of the sample data collection, you have to wait before sending
 the first request to the API in order to retrieve results.
+
+### Setup - MacOS
+
+0. Install [Homebrew](https://brew.sh)
+1. Install Docker:`brew cask install docker` 
+2. Install Docker-compose:`brew cask install docker-compose` 
 
 ### Endpoints
 
