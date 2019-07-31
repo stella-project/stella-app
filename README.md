@@ -12,14 +12,16 @@ ranking which is retrieved from a container running Solr.
 3. [Add user to Docker group](https://docs.docker.com/install/linux/linux-postinstall/)
 4. Make sure `docker.sock` is accessible (`/var/run/docker.sock` &rarr; `docker-compose.yml`)
 5. Set path to sample data which will be indexed by Solr-container (&rarr; `docker-compose.yml`)
-6. Run `docker-compose up`. Depending on the size of the sample data collection, you have to wait before sending
-the first request to the API in order to retrieve results.
+6. Copy some sample data to `~/data/sample`
+7. Run `docker-compose up`. Depending on the size of the sample data collection, you have to wait before sending the first request to the API in order to retrieve results.
 
 ### Setup - MacOS
 
 0. Install [Homebrew](https://brew.sh)
 1. Install Docker:`brew cask install docker` 
 2. Install Docker-compose:`brew cask install docker-compose` 
+3. Copy some sample data to `~/data/sample`
+4. Run `docker-compose up`. Depending on the size of the sample data collection, you have to wait before sending the first request to the API in order to retrieve results.
 
 ### Endpoints
 
