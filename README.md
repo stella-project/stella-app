@@ -26,6 +26,10 @@ ranking which is retrieved from a container running Solr.
 ### Setup - Windows Desktop
 
 1. Install [Docker](https://docs.docker.com/v17.12/install/)
+   - Use Community edition (for free) and the latest stable version
+   - When installing choose to use Windows containers instead if Linux containers
+   - Enable Hyper-V and Container Features
+      - To this end also enable Virtualization in your BIOS, if it is disabled
 2. [docker-compose](https://docs.docker.com/compose/install/) is not needed in the Docker Desktop Version, as it is already installed; skip this step
 3. No need to add user to [Docker group](https://docs.docker.com/install/linux/linux-postinstall/); skip this step
 4. Make sure `docker.sock` is accessible (`/var/run/docker.sock` &rarr; `docker-compose.yml`); skip this step
