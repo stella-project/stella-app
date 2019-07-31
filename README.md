@@ -23,6 +23,19 @@ ranking which is retrieved from a container running Solr.
 3. Copy some sample data to `~/data/sample`
 4. Run `docker-compose up`. Depending on the size of the sample data collection, you have to wait before sending the first request to the API in order to retrieve results.
 
+### Setup - Windows Desktop
+
+1. Install [Docker](https://docs.docker.com/v17.12/install/)
+2. [docker-compose](https://docs.docker.com/compose/install/) is not needed in the Docker Desktop Version, as it is already installed; skip this step
+3. No need to add user to [Docker group](https://docs.docker.com/install/linux/linux-postinstall/); skip this step
+4. Make sure `docker.sock` is accessible (`/var/run/docker.sock` &rarr; `docker-compose.yml`); skip this step
+5. Set path to sample data which will be indexed by Solr-container (&rarr; `docker-compose.yml`); based on the standard script in the stella-app the path to the data is $HOME\data\sample
+7. Run `docker-compose up`. A s of now, using a CMD or Powershell (also Cygwin possible) go to stella app and run docker-compose with "docker-compose.exe up" (on windows). Depending on the size of the sample data collection, you have to wait before sending the first request to the API in order to retrieve results.
+8. Typically, Docker needs access to the sample data --> share the drive the data with admin rights in the Docker settings under  "shared drives". 
+    - If blocked by firewall, disable VPN
+    - If still blocked by a firewall, check out https://success.docker.com/article/error-a-firewall-is-blocking-file-sharing-between-windows-and-the-containers
+	
+  
 ### Endpoints
 
 - `GET /`: See a list of available containers that are running.
