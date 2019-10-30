@@ -56,3 +56,4 @@ ranking which is retrieved from a container running Solr.
 - [x] Solr to external repository
 - [ ] DB/storage containing meta-info about docker-containers
 - [ ] Webhook in repos of experimental systems: PING stella-server
+- [x] implement easier logging (write logging file to host System)
