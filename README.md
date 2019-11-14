@@ -9,10 +9,10 @@
 - [ ] How to update the applications once they are deployed at the sites?
 - [ ] output format of search script
 - [ ] initial indexing of all containers, when starting the application
-- [x] additional (prototypical) search engine, e.g. elasticsearch, and scheduling between search engines
-- [x] Solr to external repository
 - [ ] DB/storage containing meta-info about docker-containers
 - [ ] Webhook in repos of experimental systems: PING stella-server
+- [x] additional (prototypical) search engine, e.g. elasticsearch, and scheduling between search engines
+- [x] Solr to external repository
 - [x] implement easier logging (write logging file to host system)
 
 
