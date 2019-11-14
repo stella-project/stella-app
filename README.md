@@ -1,5 +1,21 @@
 # STELLA application
 
+# To do
+
+- [ ] Container-Interface (scheduled for 2019-11-28)
+- [ ] Large application project structure (Timo)
+- [ ] Integrate Interleaving (cf. [LL4IR-API](https://bitbucket.org/living-labs/ll-api/src/master/))
+- [ ] [LL4IR-API](https://bitbucket.org/living-labs/ll-api/src/master/) + [OSIRRC jig](https://github.com/osirrc/jig) &rarr; best practices
+- [ ] How to update the applications once they are deployed at the sites?
+- [ ] output format of search script
+- [ ] initial indexing of all containers, when starting the application
+- [x] additional (prototypical) search engine, e.g. elasticsearch, and scheduling between search engines
+- [x] Solr to external repository
+- [ ] DB/storage containing meta-info about docker-containers
+- [ ] Webhook in repos of experimental systems: PING stella-server
+- [x] implement easier logging (write logging file to host system)
+
+
 ## Prototype
 This repository contains a first prototype of the STELLA application which will be deployed at the sites.
 The API can be used to send a request to a (minimal) flask application. In return, the flask app will send back a
@@ -47,13 +63,3 @@ ranking which is retrieved from a container running Solr.
 - `GET /stella/api/site/test/<string:container_name>`: Run test script in container whose name is specified by the endpoint (currently only `solr-container` is supported).
 
 - `GET /stella/api/site/ranking/<string:query>`: Retrieve a ranking corresponding to the query specified at the endpoint. A JSON object with maximally 10 entries will be returned.
-
-### To do
-
-- [ ] output format of search script
-- [ ] initial indexing of all containers, when starting the application
-- [x] additional (prototypical) search engine, e.g. elasticsearch, and scheduling between search engines
-- [x] Solr to external repository
-- [ ] DB/storage containing meta-info about docker-containers
-- [ ] Webhook in repos of experimental systems: PING stella-server
-- [x] implement easier logging (write logging file to host system)
