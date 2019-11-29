@@ -15,7 +15,7 @@ def test(container_name):
     if request.method == 'GET':
         container = client.containers.get(container_name)
 
-        cmd = 'python3 /script/test'
+        cmd = 'python /script/test'
 
         out = container.exec_run(cmd)
 
@@ -29,7 +29,7 @@ def ranking(query):
 
     container = client.containers.get(least_served)
 
-    cmd = 'python3 /script/search ' + query
+    cmd = 'python /script/search ' + query
 
     logger = logging.getLogger("stella-app")
     logger.debug(f'produce ranking with container: "{least_served}"...')

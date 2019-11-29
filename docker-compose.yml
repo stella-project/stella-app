@@ -1,17 +1,43 @@
 version: '3'
 services:
     web:
-      build: ./app
-      volumes:
-        - /var/run/docker.sock/:/var/run/docker.sock
-        - ./app/log:/app/log
-      ports:
-        - "80:80"
-      depends_on:
-        - elastic
-
-    elastic:
-        build: ./elastic
-        container_name: elastic
+        build: ./app
         volumes:
-          - ~/data/sample/:/data/
+          - /var/run/docker.sock/:/var/run/docker.sock
+          - ./app/log:/app/log
+        ports:
+            - "80:80"
+        depends_on:
+          - solr
+          - lucene
+
+#    solr:
+#      image: solr
+#      container_name: solr
+#      volumes:
+#        - ~/data/sample/:/opt/solr/collection/
+#        - ./solr/script/:/script/
+#        # - ./solr/init/:/docker-entrypoint-initdb.d/
+#      ports:
+#        - "8983:8983"
+
+    solr:
+      build: https://github.com/stella-project/solr-docker.git
+      container_name: solr
+      volumes:
+        - ~/data/sample/:/data/
+
+#    lucene:
+#      image: openjdk
+#      container_name: lucene
+#      command: tail -F anything
+#      volumes:
+#        - ~/data/sample/:/data/
+#        - ./lucene/:/lucene/
+#        - ./lucene/script/:/script/
+
+    lucene:
+      build: https://github.com/stella-project/lucene-ranker-docker.git
+      container_name: lucene
+      volumes:
+        - ~/data/sample/:/data/
