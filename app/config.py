@@ -2,7 +2,7 @@ conf = {}
 
 # app settings
 conf["app"] = {}
-conf["app"]["container_list"] = ["lucene","solr"]
+conf["app"]["container_list"] = ["elastic"]
 
 # create container_dict from list values (easier)
 conf["app"]["container_dict"] = {}
