@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+
+from elasticsearch import Elasticsearch
+import json
+from bs4 import BeautifulSoup
+import sys
+import os
+
+PATH = '/data/'
+
+def parse(obj: dict):
+
+    doc = {}
+    text = ""
+    for content in obj['contents']:
+        try:
+            con = content.get('content')
+            if con is not None:
+                try:
+                    soup = BeautifulSoup(con)
+                    text += soup.text
+                    text += '\n'
+                except Exception as e:
+                    pass  # soup may not have text
+        except Exception as e:
+            print("Beautifulsoup cannot get content for: ", obj['id'])
+
+    doc['id'] = obj['id']
+    doc['article_url'] = obj['article_url']
+    doc['title'] = obj['title']
+    doc['author'] = obj['author']
+    doc['published_date'] = obj['published_date']
+    doc['text'] = text
+    doc['type'] = obj['type']
+    doc['source'] = obj['source']
+
+    return doc
+
+es = Elasticsearch([{'host': 'localhost',
+                     'port': 9200}])
+
+count = 0
+lim = 1000
+for file in os.listdir(PATH):
+    if file.endswith(".jl"):
+        with open(os.path.join(PATH, file), 'r', encoding="utf-8") as f:
+            for line in f:
+                obj = json.loads(line)
+
+                doc = parse(obj)
+
+                es.index(index='wapo',
+                         doc_type=doc['type'],
+                         id=doc['id'],
+                         body=doc)
+                count += 1
+
+                if count >= lim:
+                    sys.exit()
+
+
+# .txt-version
+# from elasticsearch import Elasticsearch
+# import os
+#
+# PATH = '/data/'
+#
+# es = Elasticsearch([{'host': 'localhost',
+#                      'port': 9200}])
+#
+# for file in os.listdir(PATH):
+#     if file.endswith(".txt"):
+#
+#         with open(os.path.join(PATH, file), encoding="utf-8") as f:
+#             # text = ''.join([line for line in f.readlines()])
+#            text = f.read()
+#
+#             es.index(index='idx',
+#                      doc_type='document',
+#                     id=file[:-4],
+#                      body={'text': text})

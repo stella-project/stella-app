@@ -1,8 +1,28 @@
 from flask import Flask
-from core.index import index
 from utils import create_logger
 from config import conf
 import logging
+import docker
+import time
+
+SECS = 30
+
+client = docker.DockerClient(base_url='unix://var/run/docker.sock')
+
+
+def index():
+    ''' run indexing methods for all available containers '''
+    container_list = list(conf["app"]["container_dict"].keys())
+
+    cmd = 'python3 /script/index'
+
+    time.sleep(SECS)
+
+    for entry in container_list:
+        container = client.containers.get(entry)
+        logger = logging.getLogger("stella-app")
+        logger.debug(f'Indexing container "{container}"...')
+        exec_res = container.exec_run(cmd)
 
 
 def get_least_served(container_dict):
