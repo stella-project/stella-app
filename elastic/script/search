@@ -11,7 +11,7 @@ query = sys.argv[1]
 es = Elasticsearch([{'host': 'localhost',
                      'port': 9200}])
 
-s = Search().using(es).query("match", text=query)
+s = Search().using(es).query("match", contents=query)
 s.execute()
 
 output = {}
@@ -22,7 +22,7 @@ for hit in s:
     out['title'] = hit.title
     out['article_url'] = hit.article_url
     out['type'] = hit.type
-    out['text'] = hit.text
+    out['text'] = hit.contents
     out['author'] = hit.author
     out['source'] = hit.source
     out['published_date'] = hit.published_date
@@ -30,30 +30,3 @@ for hit in s:
     cnt += 1
 
 print(json.dumps(output))
-
-
-# import json
-# import os
-# import sys
-
-# from elasticsearch import Elasticsearch
-# from elasticsearch_dsl import Search
-
-# query = sys.argv[1]
-
-
-# es = Elasticsearch([{'host': 'localhost',
-#                      'port': 9200}])
-
-# s = Search().using(es).query("match", text=query)
-# s.execute()
-
-# count = 0
-
-# d = {}
-
-# for hit in s:
-#     d[count] = hit.meta.id
-#     count+=1
-
-# print(json.dumps(d))

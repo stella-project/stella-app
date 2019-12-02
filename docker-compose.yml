@@ -14,4 +14,4 @@ services:
         build: ./elastic
         container_name: elastic
         volumes:
-          - ~/data/sample/:/data/
+          - ./data/:/data/
