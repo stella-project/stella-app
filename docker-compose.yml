@@ -9,9 +9,18 @@ services:
         - "80:80"
       depends_on:
         - elastic
-
+        - recomm-sample
     elastic:
         build: ./elastic
         container_name: elastic
         volumes:
           - ./data/:/data/
+
+
+    recomm-sample:
+	build: ./recomm-sample
+        container_name: recomm-sample
+        volumes:
+           - ./data:/data
+        tty: true
+
