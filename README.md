@@ -2,8 +2,6 @@
 
 # To do
 
-- [ ] Container-Interface (scheduled for 2019-11-28)
-- [ ] Large application project structure (Timo)
 - [ ] Integrate Interleaving (cf. [LL4IR-API](https://bitbucket.org/living-labs/ll-api/src/master/))
 - [ ] [LL4IR-API](https://bitbucket.org/living-labs/ll-api/src/master/) + [OSIRRC jig](https://github.com/osirrc/jig) &rarr; best practices
 - [ ] How to update the applications once they are deployed at the sites?
@@ -11,6 +9,8 @@
 - [ ] initial indexing of all containers, when starting the application
 - [ ] DB/storage containing meta-info about docker-containers
 - [ ] Webhook in repos of experimental systems: PING stella-server
+- [x] Container-Interface (scheduled for 2019-11-28)
+- [x] Large application project structure (Timo)
 - [x] additional (prototypical) search engine, e.g. elasticsearch, and scheduling between search engines
 - [x] Solr to external repository
 - [x] implement easier logging (write logging file to host system)
