@@ -41,3 +41,7 @@ services:
       container_name: lucene
       volumes:
         - ~/data/sample/:/data/
+
+    livivo-solr:
+      build: ./livivo_solr_template
+      container_name: livivo-solr
