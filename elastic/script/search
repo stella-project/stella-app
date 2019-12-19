@@ -10,7 +10,7 @@ query = sys.argv[1]
 
 es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
-result = es.search(index="research_data", size= "1000", body={"query": {"match": {"title": query}}})
+result = es.search(index="publication", size= "1000", body={"query": {"match": {"title": query}}})
 
 output = {}
 cnt = 0

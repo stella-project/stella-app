@@ -5,14 +5,15 @@ from flask import jsonify, request
 from . import api
 from core import get_least_served
 from config import conf
+import ast
 
 client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 
 
-@api.route("/recommand_dataset/<string:doc_id>", methods=["GET"])
+@api.route("/recommend_dataset/<string:doc_id>", methods=["GET"])
 def recommand_dataset(doc_id):
-
-    least_served = get_least_served(container_dict)
+    
+    least_served = get_least_served(conf["app"]["container_dict_recommendation"])
     client = docker.DockerClient(base_url='unix://var/run/docker.sock')
     container = client.containers.get(least_served)
     cmd = 'python3 /script/recommand_dataset ' + doc_id
