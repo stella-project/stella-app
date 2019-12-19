@@ -8,24 +8,25 @@ import sys
 
 query = sys.argv[1]
 
-es = Elasticsearch([{'host': 'localhost',
-                     'port': 9200}])
+es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
-s = Search().using(es).query("match", contents=query)
-s.execute()
+result = es.search(index="research_data", size= "1000", body={"query": {"match": {"title": query}}})
 
 output = {}
 cnt = 0
-for hit in s:
+
+
+for res in result["hits"]["hits"]:
+    hit = res['_source']
     out = {}
-    out['id'] = hit.id
-    out['title'] = hit.title
-    out['article_url'] = hit.article_url
-    out['type'] = hit.type
-    out['text'] = hit.contents
-    out['author'] = hit.author
-    out['source'] = hit.source
-    out['published_date'] = hit.published_date
+    out['id'] = hit.get('id')
+    out['title'] = hit.get('title')
+    out['article_url'] = hit.get('links')
+    out['type'] = hit.get('type')
+    out['text'] = hit.get('abstract')
+    out['author'] = hit.get('person')
+    out['source'] = hit.get('data_source')
+    out['published_date'] = hit.get('date')
     output[cnt] = out
     cnt += 1
 

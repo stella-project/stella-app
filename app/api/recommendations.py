@@ -1,5 +1,3 @@
-
-
 import docker
 import logging
 import json
@@ -11,7 +9,7 @@ from config import conf
 client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 
 
-@app.route("/api/recommand_dataset/<string:doc_id>", methods=["GET"])
+@api.route("/recommand_dataset/<string:doc_id>", methods=["GET"])
 def recommand_dataset(doc_id):
 
     least_served = get_least_served(container_dict)
@@ -29,17 +27,17 @@ def recommand_dataset(doc_id):
     return jsonify(json_data)
 
 
-@app.route('/dashboard')
+@api.route('/dashboard')
 def dashboard():
     entities = {"Research_data": resources.get_datasets_len(), "Publication": resources.get_publications_len()}
     itemetadata=resources.get_dataset_metadata().iloc[0]['_source']
     return render_template('dashboard.html',entities = entities,itemetadata=itemetadata)
 
-@app.route('/', methods=['GET'])
+@api.route('/', methods=['GET'])
 def get():
     message = "GWS RecSys APP"
     return render_template('base.html', message=message)
 
-@app.errorhandler(404)
+@api.errorhandler(404)
 def page_not_found(error):
     return render_template('page_not_found.html'), 404

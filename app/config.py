@@ -2,8 +2,8 @@ conf = {}
 
 # app settings
 conf["app"] = {}
-#conf["app"]["container_list"] = ["elastic"]
-conf["app"]["container_list"] = ["recomm-sample"]
+conf["app"]["container_list"] = ["elastic"]
+#conf["app"]["container_list"] = ["recomm-sample"]
 
 # create container_dict from list values (easier)
 conf["app"]["container_dict"] = {}

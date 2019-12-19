@@ -18,9 +18,9 @@ services:
 
 
     recomm-sample:
-	build: ./recomm-sample
+        build: ./recomm-sample
         container_name: recomm-sample
         volumes:
-           - ./data:/data
+          - ./data:/data
         tty: true
 
