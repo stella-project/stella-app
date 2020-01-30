@@ -13,7 +13,7 @@ client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 def recommendation(docid):
     container = client.containers.get('livivo-solr')
 
-    cmd = 'python /script/recommend ' + docid
+    cmd = 'python3 /script/recommend ' + docid
 
     logger = logging.getLogger("stella-app")
     logger.debug(f'produce recommendation with container: livivo-solr"...')
