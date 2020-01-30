@@ -9,6 +9,8 @@ services:
             - "80:80"
         depends_on:
           - elastic
+          - elastic-external
+          - recomm-sample
 
     elastic:
         build: ./elastic
@@ -21,6 +23,13 @@ services:
         container_name: elastic-external
         volumes:
           - ./data/:/data/
+
+    recomm-sample:
+        build: ./recomm-sample
+        container_name: recomm-sample
+        volumes:
+          - ./data:/data
+        tty: true
 
 # DEPRECATED: Not compatible with new data structure
 #    solr:
