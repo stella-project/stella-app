@@ -4,12 +4,13 @@ def create_logger(name, file, loglevel=logging.NOTSET):
 	logging.basicConfig(level=loglevel,filename=file, format='%(asctime)s %(levelname)s %(filename)s %(funcName)s - %(message)s')
 
 def create_dict_response(status=0, q_time=0, container='', params={}, sid='',rid='',ts=0, 
-						 num_found=0, page=0, results_per_page=20, itemlist=[]):
+						 num_found=0, page=0, results_per_page=20, itemlist=[], query=''):
 	dict_response = {}
 	dict_response['response_header'] = {}
 	dict_response['response'] = {}
 
 	dict_response['response_header']['status'] = status
+	dict_response['response_header']['query'] = query
 	dict_response['response_header']['q_time'] = q_time
 	dict_response['response_header']['container'] = container
 	dict_response['response_header']['ts'] = ts

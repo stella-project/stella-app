@@ -52,6 +52,6 @@ def ranking(query):
 
     # TODO implement paging based on get-params
 
-    response_dict = create_dict_response(itemlist=result['itemlist'],params=request.args,q_time=q_time,container=least_served,num_found=num_found,ts=ts,page=page,results_per_page=results_per_page)
+    response_dict = create_dict_response(itemlist=result['itemlist'],params=request.args,q_time=q_time,container=least_served,num_found=num_found,ts=ts,page=page,results_per_page=results_per_page,query=query)
     
     return jsonify(response_dict)
