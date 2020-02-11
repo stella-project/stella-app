@@ -8,28 +8,29 @@ services:
         ports:
             - "80:80"
         depends_on:
-          - elastic
-          - elastic-external
-          - recomm-sample
+            - livivo
 
-    elastic:
-        build: ./elastic
-        container_name: elastic
-        volumes:
-          - ./data/:/data/
+# DEPRECATED: Not compatible with new data structure
+#    elastic:
+#        build: ./elastic
+#        container_name: elastic
+#        volumes:
+#          - ./data/:/data/
 
-    elastic-external:
-        build: https://github.com/stella-project/stella-elastic.git
-        container_name: elastic-external
-        volumes:
-          - ./data/:/data/
+# DEPRECATED: Not compatible with new data structure
+#    elastic-external:
+#        build: https://github.com/stella-project/stella-elastic.git
+#        container_name: elastic-external
+#        volumes:
+#          - ./data/:/data/
 
-    recomm-sample:
-        build: ./recomm-sample
-        container_name: recomm-sample
-        volumes:
-          - ./data:/data
-        tty: true
+# DEPRECATED: Not compatible with new data structure
+#    recomm-sample:
+#        build: ./recomm-sample
+#        container_name: recomm-sample
+#        volumes:
+#          - ./data:/data
+#        tty: true
 
 # DEPRECATED: Not compatible with new data structure
 #    solr:
@@ -66,7 +67,11 @@ services:
 #      volumes:
 #        - ~/data/sample/:/data/
 
-# DEPRECATED: Not compatible with new data structure
-#    livivo-solr:
-#      build: ./livivo_solr_template
-#      container_name: livivo-solr
+    livivo:
+      build: ../livivo_solr_template
+      container_name: livivo
+      volumes:
+        - ../livivo_solr_template/conf:/opt/solr/server/solr/configsets/livivo/conf
+        - ../livivo_solr_template/data:/opt/solr/livivo_data/data
+      ports:
+        - "8983:8983"
