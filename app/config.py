@@ -2,8 +2,8 @@ conf = {}
 
 # app settings
 conf["app"] = {}
-conf["app"]["container_list"] = ["elastic", "elastic-external"]
-conf["app"]["container_list_recommendation"] = ["recomm-sample"]
+conf["app"]["container_list"] = ["livivo"]
+conf["app"]["container_list_recommendation"] = []
 
 # create container_dict from list values (easier)
 conf["app"]["container_dict"] = {}
