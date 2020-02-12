@@ -27,42 +27,38 @@ def test(container_name):
 @api.route("/ranking", methods=["GET"])
 def ranking():
     logger = logging.getLogger("stella-app")
+    # look for mandatory GET-parameters (query, container_name)
     query = request.args.get('query',None)
     container_name = request.args.get('container',None)
+
+    # Look for optional GET-parameters and set default values
+    page = request.args.get('page', default=0,type=int)
+    rpp = request.args.get('rpp', default=20,type=int)
     
+    # no container_name specified? -> select least served container
     if(container_name is None):
         container_name = get_least_served(conf["app"]["container_dict"])
     else:
-        # check if container name exists
+        # container_name does not exist in config? -> Nothing to do
         if not (container_name in conf["app"]["container_dict"]):
             return create_dict_response(status=1,ts=round(time.time()*1000))
-             
             
-    container = client.containers.get(container_name)
-
+    container = client.containers.get(container_name)    
     logger.debug(f'produce ranking with container: "{container_name}"...')
 
+    # no query ? -> Nothing to do
     if(query is None):
         return create_dict_response(status=1,ts=round(time.time()*1000))
+
+    # return ranked documents in JSON-Format produced by least served container  
     else:
-        ''' return ranked documents in JSON-Format produced by least served container '''
-
-        #requests.args.get('container',default=False,type=boolean)
-
-        page = request.args.get('page', default=0,type=int)
-        rpp = request.args.get('rpp', default=20,type=int)
-        
         cmd = 'python3 /script/search {} {} {}'.format(query,rpp,page) 
-        logger.debug('cmd: {}'.format(cmd))
-         
         ts_start =  time.time()
         ts = round(ts_start*1000)
         exec_res = container.exec_run(cmd)
-        logger.debug(f'exec_res: {exec_res.output.decode("utf-8")}')
         result = json.loads(exec_res.output.decode('utf-8'))
         ts_end = time.time()
         # calc query execution time in ms
         q_time = round((ts_end-ts_start)*1000)
         response_dict = create_dict_response(itemlist=result['itemlist'],params=request.args,q_time=q_time,container=container_name,num_found=result['num_found'],ts=ts,page=page,rpp=rpp,query=query)
-    
     return jsonify(response_dict)
