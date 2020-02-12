@@ -35,14 +35,15 @@ def ranking():
     else:
         # check if container name exists
         if not (container_name in conf["app"]["container_dict"]):
-            return "TODO: Implement"
+            return create_dict_response(status=1,ts=round(time.time()*1000))
+             
             
     container = client.containers.get(container_name)
 
     logger.debug(f'produce ranking with container: "{container_name}"...')
 
     if(query is None):
-        return "TODO: Implement"
+        return create_dict_response(status=1,ts=round(time.time()*1000))
     else:
         ''' return ranked documents in JSON-Format produced by least served container '''
 
