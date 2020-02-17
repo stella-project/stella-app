@@ -11,7 +11,7 @@ from utils import create_dict_response
 client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 
 
-@api.route("/recommend", methods=["GET"])
+@api.route("/recommendation/publications", methods=["GET"])
 def recommend():
     logger = logging.getLogger("stella-app")
     # look for mandatory GET-parameters (query, container_name)
@@ -45,7 +45,7 @@ def recommend():
             raise e
         else:
             pass'''
-        cmd = 'python3 /script/recommend {} {} {}'.format(query,rpp,page) 
+        cmd = 'python3 /script/recommendation {} {} {}'.format(query,rpp,page) 
         ts_start =  time.time()
         ts = round(ts_start*1000)
         exec_res = container.exec_run(cmd)
@@ -56,6 +56,9 @@ def recommend():
         response_dict = create_dict_response(itemlist=result['itemlist'],params=request.args,q_time=q_time,container=container_name,num_found=result['num_found'],ts=ts,page=page,rpp=rpp,query=query)
     return jsonify(response_dict)
 
+@api.route("/recommendation/datasets", methods=["GET"])
+def recommend_dataset():
+    pass
 
 @api.route('/dashboard')
 def dashboard():

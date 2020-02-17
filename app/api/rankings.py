@@ -52,7 +52,13 @@ def ranking():
 
     # return ranked documents in JSON-Format produced by least served container  
     else:
-        cmd = 'python3 /script/search {} {} {}'.format(query,rpp,page) 
+        '''try:
+            pass
+        except Exception as e:
+            raise e
+        else:
+            pass'''
+        cmd = 'python3 /script/ranking {} {} {}'.format(query,rpp,page) 
         ts_start =  time.time()
         ts = round(ts_start*1000)
         exec_res = container.exec_run(cmd)
