@@ -28,7 +28,7 @@ def create_dict_response(status=0, q_time=0, container='', params={}, sid='',rid
 	#i = page*rpp
 	#j = page*rpp+rpp
 
-	dict_response['response']['itemlist'] = itemlist
+	dict_response['response']['items'] = itemlist
 
 	#try:
 	#	dict_response['response']['itemlist'] = itemlist[i:j]
