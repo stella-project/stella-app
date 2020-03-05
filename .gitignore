@@ -1,1 +1,7 @@
 .idea/
+
+recomm_new/script/DocVec_similarity_matrix_top_10
+recomm_new/script/model/model_de/pubSet_de_all.model.wv.vectors.npy      
+recomm_new/script/model/model_de/pubSet_de_all.model.docvecs.vectors_docs.npy  
+
+data    
