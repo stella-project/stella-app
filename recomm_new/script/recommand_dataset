@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+
+from subprocess import Popen, PIPE
+import json
+import os
+import sys
+from Similar import Similar
+import ast
+
+
+
+doc_id = sys.argv[1]
+similarity_all_eval = Similar.get_similarity_matrix_top_10()
+
+                    
+def getsimilarityjson(id):
+    try:
+        a= {"response_header":{
+           "status":0,
+           "q_time":0,
+           "container":"recomm_new",
+           "ts":"1580380932371",
+           "params":{
+           "q":"",
+           "page":0,
+           "results_per_page":0,
+           "sid":"0",
+           "rid":"0"
+        }
+        }}
+        a.update( [sim for sim in similarity_all_eval if sim['target_items']==id][0])
+        a['similar_items'] = [{"id":item[0], "detail":{"score": item[1],"reason":"" }} for item in a['similar_items']]
+        return json.dumps(a)
+    except:
+        return None
+
+
+sim = getsimilarityjson(doc_id)
+print(sim)

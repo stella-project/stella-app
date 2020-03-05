@@ -10,7 +10,22 @@ import os
 f = pickle.load(open("/script/cosine_similarity_matrix_top_10.pkl", "rb"))
 def getsimilarityjson(id):
     try:
-        return [sim for sim in f if sim["target_items"]==id][0]
+        a= {"response_header":{
+           "status":0,
+           "q_time":0,
+           "container":"recomm-sample",
+           "ts":"1580380932371",
+           "params":{
+           "q":"",
+           "page":0,
+           "results_per_page":0,
+           "sid":"0",
+           "rid":"0"
+           }
+           }}
+        a.update([sim for sim in f if sim["target_items"]==id][0])
+        a['similar_items']=[{"id":k, "detail":{"score": v,"reason":"" }} for k, v in a['similar_items'].items()] 
+        return json.dumps(a)
     except:
         return None
 

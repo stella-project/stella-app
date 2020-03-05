@@ -3,10 +3,12 @@ conf = {}
 # app settings
 conf["app"] = {}
 conf["app"]["container_list"] = ["elastic"]
-conf["app"]["container_list_recommendation"] = ["recomm-sample"]
+conf["app"]["container_list_recommendation"] = ["recomm-sample","recomm_new"]
+#conf["app"]["container_list_recommendation_new"] = ["recomm_new"]
 # create container_dict from list values (easier)
 conf["app"]["container_dict"] = {}
 conf["app"]["container_dict_recommendation"] = {}
+#conf["app"]["container_dict_recommendation_new"] = {}
 
 for container_name in conf["app"]["container_list"]:
     conf["app"]["container_dict"][container_name] = {"requests":0}
@@ -14,6 +16,8 @@ for container_name in conf["app"]["container_list"]:
 for container_name in conf["app"]["container_list_recommendation"]:
     conf["app"]["container_dict_recommendation"][container_name] = {"requests":0}
 
+#for container_name in conf["app"]["container_list_recommendation_new"]:
+#    conf["app"]["container_dict_recommendation_new"][container_name] = {"requests":0}
 
 '''
 conf["app"]["container_dict"] = {"lucene": {"requests": 0},

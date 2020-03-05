@@ -1,13 +1,14 @@
 import docker
 import logging
 import json
-from flask import jsonify, request
+from flask import jsonify, request, Flask
 from . import api
 from core import get_least_served
 from config import conf
 import ast
 
 client = docker.DockerClient(base_url='unix://var/run/docker.sock')
+app = Flask(__name__)
 
 
 @api.route("/recommend_dataset/<string:doc_id>", methods=["GET"])
@@ -19,13 +20,17 @@ def recommand_dataset(doc_id):
     cmd = 'python3 /script/recommand_dataset ' + doc_id
     logger = logging.getLogger("stella-app")
     logger.debug(f'produce ranking with container: "{least_served}"...')
-
+#--------------------------------------------------------------
     exec_res = container.exec_run(cmd)
+    try: 
+         json_data = json.loads(exec_res.output.decode("utf-8"))
+         json_data.update({'container': least_served})
+         return jsonify(json_data)
+    except json.decoder.JSONDecodeError:
+         return jsonify({"JSON file is:": exec_res.output.decode("utf-8")})
+    
+#--------------------------------------------------------------
 
-    json_data = {}
-    json_data = ast.literal_eval(exec_res.output.decode("utf-8"))
-    json_data.update({'container': least_served})
-    return jsonify(json_data)
 
 
 @api.route('/dashboard')

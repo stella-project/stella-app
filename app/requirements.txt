@@ -1,3 +1,4 @@
 flask
 urllib3
 docker
+werkzeug==0.16.1
