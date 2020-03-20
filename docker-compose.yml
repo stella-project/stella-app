@@ -6,7 +6,7 @@ services:
           - /var/run/docker.sock/:/var/run/docker.sock
           - ./app/log:/app/log
         ports:
-            - "80:80"
+            - "80:8000"
         depends_on:
             - livivo
 

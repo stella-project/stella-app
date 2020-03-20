@@ -1,7 +1,9 @@
 import logging
 
+
 def create_logger(name, file, loglevel=logging.NOTSET):
 	logging.basicConfig(level=loglevel,filename=file, format='%(asctime)s %(levelname)s %(filename)s %(funcName)s - %(message)s')
+
 
 def create_dict_response(status=0, q_time=0, container='', params={}, sid='',rid='',ts=0, 
 						 num_found=0, page=0, rpp=20, itemlist=[], query=''):
@@ -15,6 +17,8 @@ def create_dict_response(status=0, q_time=0, container='', params={}, sid='',rid
 	dict_response['response_header']['container'] = container
 	dict_response['response_header']['ts'] = ts
 	dict_response['response_header']['params'] = params
+	dict_response['response_header']['sid'] = sid
+	dict_response['response_header']['rid'] = rid
 	'''
 	if "page" in params:
 		page = int(params['page'])
@@ -35,4 +39,4 @@ def create_dict_response(status=0, q_time=0, container='', params={}, sid='',rid
 	#except:
 	#	dict_response['response']['itemlist'] = itemlist[0,rpp]
 
-	return dict_response  
+	return dict_response

@@ -4,6 +4,12 @@ from utils import create_logger
 from config import conf
 import logging
 import time
+from flask_sqlalchemy import SQLAlchemy
+import os
+from .models import db, System, Session
+
+
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 SECS = 30
 client = docker.DockerClient(base_url='unix://var/run/docker.sock')
@@ -40,13 +46,22 @@ def get_least_served(container_dict):
 
 def create_app(config_name):
 
-    index()
+    # index()
 
     create_logger("stella-app", f"{conf['log']['log_path']}/{conf['log']['log_file']}")
     logger = logging.getLogger("stella-app")
     logger.info("Logging started!")
 
     app = Flask(__name__)
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'data-dev.sqlite')
+    db.init_app(app)
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+        ranksys_livivo = System(name='livivo', type='RANK', num_requests=0)
+        db.session.add_all([ranksys_livivo])
+        db.session.commit()
 
     from main import main as main_blueprint
     app.register_blueprint(main_blueprint)

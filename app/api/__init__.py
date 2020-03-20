@@ -2,4 +2,4 @@ from flask import Blueprint
 
 api = Blueprint('api', __name__)
 
-from . import recommendations, rankings, datasets, items, publications
+from . import recommendations, rankings, datasets, items, publications, sessions
