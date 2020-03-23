@@ -29,6 +29,7 @@ class Result(db.Model):
     page = db.Column(db.Integer)
     rpp = db.Column(db.Integer)
     items = db.Column(db.JSON)
+    tdi = db.Column(db.Integer, db.ForeignKey('results.id'))
 
 
 class Feedback(db.Model):

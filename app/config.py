@@ -2,17 +2,27 @@ conf = {}
 
 # app settings
 conf["app"] = {}
-conf["app"]["container_list"] = ["livivo"]
+conf["app"]["container_list"] = ["livivo", "livivo_base"]
 conf["app"]["container_list_recommendation"] = []
+conf["app"]["container_baseline"] = "livivo_base"
+conf["app"]["container_recommendation_baseline"] = ""
 
 # create container_dict from list values (easier)
 conf["app"]["container_dict"] = {}
 for container_name in conf["app"]["container_list"]:
-    conf["app"]["container_dict"][container_name] = {"requests":0}
+    conf["app"]["container_dict"][container_name] = {"requests": 0}
 
 conf["app"]["container_dict_recommendation"] = {}
 for container_name in conf["app"]["container_list_recommendation"]:
-    conf["app"]["container_dict_recommendation"][container_name] = {"requests":0}
+    conf["app"]["container_dict_recommendation"][container_name] = {"requests": 0}
+
+conf['app']['DELETE_SENT_SESSION'] = True
+conf["app"]["INTERVAL_DB_CHECK"] = 3  # seconds
+
+conf["app"]["STELLA_SERVER_API"] = "http://localhost:8080/stella/api/v1"
+conf["app"]["STELLA_SERVER_USER"] = "site_a@stella.org"
+conf["app"]["STELLA_SERVER_PASS"] = "pass"
+conf["app"]["STELLA_SERVER_USERNAME"] = "Site A"
 
 # logger settings
 conf["log"] = {}

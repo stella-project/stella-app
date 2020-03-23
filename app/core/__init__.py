@@ -1,3 +1,5 @@
+from typing import List
+
 import docker
 from flask import Flask
 from utils import create_logger
@@ -6,6 +8,8 @@ import logging
 import time
 from flask_sqlalchemy import SQLAlchemy
 import os
+from pathlib import Path
+
 from .models import db, System, Session
 
 
@@ -54,13 +58,20 @@ def create_app(config_name):
 
     app = Flask(__name__)
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'data-dev.sqlite')
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(Path(basedir).parent, 'data-dev.sqlite')
     db.init_app(app)
     with app.app_context():
         db.drop_all()
         db.create_all()
-        ranksys_livivo = System(name='livivo', type='RANK', num_requests=0)
-        db.session.add_all([ranksys_livivo])
+
+        # add ranking systems to database
+        ranksys: List[System] = [System(name=sysname, type='RANK', num_requests=0) for sysname in conf['app']['container_list']]
+        db.session.add_all(ranksys)
+        db.session.commit()
+
+        # add recommendation systems to database
+        ranksys: List[System] = [System(name=sysname, type='RANK', num_requests=0) for sysname in conf['app']['container_list_recommendation']]
+        db.session.add_all(ranksys)
         db.session.commit()
 
     from main import main as main_blueprint

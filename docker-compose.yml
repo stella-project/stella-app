@@ -6,7 +6,7 @@ services:
           - /var/run/docker.sock/:/var/run/docker.sock
           - ./app/log:/app/log
         ports:
-            - "80:8000"
+            - "8080:8000"
         depends_on:
             - livivo
 
@@ -75,3 +75,10 @@ services:
         - ../livivo_solr_template/data:/opt/solr/livivo_data/data
       ports:
         - "8983:8983"
+
+    livivo_base:
+      build: ../livivo_solr_template
+      container_name: livivo_base
+      volumes:
+        - ../livivo_solr_template/conf:/opt/solr/server/solr/configsets/livivo/conf
+        - ../livivo_solr_template/data:/opt/solr/livivo_data/data
