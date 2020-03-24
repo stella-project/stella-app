@@ -18,6 +18,7 @@ for container_name in conf["app"]["container_list_recommendation"]:
 
 conf['app']['DELETE_SENT_SESSION'] = True
 conf["app"]["INTERVAL_DB_CHECK"] = 3  # seconds
+conf["app"]["SESSION_EXPIRATION"] = 30  # seconds
 
 conf["app"]["STELLA_SERVER_API"] = "http://localhost:8080/stella/api/v1"
 conf["app"]["STELLA_SERVER_USER"] = "site_a@stella.org"

@@ -5,13 +5,29 @@
 
 # To do
 
+- [ ] sync experimental systems -> stella-server will write to config-file
+- [ ] docker-container that wraps gesis-api
+- [x] update expired token
+- [x] check sessions that are not exited
+- [x] simple interleaver
+- [x] integrate api-endpoints into stella-app
+- [x] endpoint "exit session"
+- [x] endpoint "post feedback"
+- [x] scheduler
+- [x] scheduler: read local db
+- [x] scheduler: write to stella-server
+- [x] config-file  
+        .credentials for stella-server (service)  
+        .time interval of the scheduler  
+        .address of the stella-server
+- [x] user/session identification in stella-app (integrate possibility to send identifier)
 - [ ] Integrate Interleaving (cf. [LL4IR-API](https://bitbucket.org/living-labs/ll-api/src/master/))
-- [ ] [LL4IR-API](https://bitbucket.org/living-labs/ll-api/src/master/) + [OSIRRC jig](https://github.com/osirrc/jig) &rarr; best practices
 - [ ] How to update the applications once they are deployed at the sites?
 - [ ] output format of search script
 - [ ] initial indexing of all containers, when starting the application
 - [ ] DB/storage containing meta-info about docker-containers
 - [ ] Webhook in repos of experimental systems: PING stella-server
+- [x] [LL4IR-API](https://bitbucket.org/living-labs/ll-api/src/master/) + [OSIRRC jig](https://github.com/osirrc/jig) &rarr; best practices
 - [x] Container-Interface (scheduled for 2019-11-28)
 - [x] Large application project structure (Timo)
 - [x] additional (prototypical) search engine, e.g. elasticsearch, and scheduling between search engines

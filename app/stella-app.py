@@ -6,12 +6,26 @@ from core import create_app
 from core.models import db, System, Session, Result, Feedback
 from apscheduler.schedulers.background import BackgroundScheduler
 import requests as req
+from datetime import datetime, timedelta
 
 app = create_app('default')
 
 
 def check_db_sessions():
     with app.app_context():
+
+        sessions_not_exited = Session.query.filter_by(exit=False, sent=False).all()
+        num_sessions = len(sessions_not_exited)
+        print('There is/are ' + str(num_sessions) + ' running session(s).')
+
+        # set expired sessions to 'exit'
+        for session in sessions_not_exited:
+            delta = datetime.now() - session.start
+            if delta.seconds > conf['app']['SESSION_EXPIRATION']:
+                session.exit = True
+                db.session.add(session)
+                db.session.commit()
+
         sessions_exited = Session.query.filter_by(exit=True, sent=False).all()
         num_sessions = len(sessions_exited)
         if num_sessions > 0:
@@ -28,9 +42,11 @@ def check_db_sessions():
                 USERNAME = conf['app']['STELLA_SERVER_USERNAME']
 
                 # get token if not available
-                if conf["app"].get("STELLA_SERVER_TOKEN") is None:
+                if conf["app"].get("STELLA_SERVER_TOKEN") is None or conf['app']['TOKEN_EXPIRATION'] < datetime.now():
                     r = req.post(API + '/tokens', auth=(USER, PASS))
                     r_json = json.loads(r.text)
+                    delta_exp = r_json.get('expiration')
+                    conf['app']['TOKEN_EXPIRATION'] = datetime.now() + timedelta(seconds=delta_exp - 300)  # get new token five min before expiration
                     conf["app"]["STELLA_SERVER_TOKEN"] = r_json.get('token')
 
                 TOKEN = conf["app"]["STELLA_SERVER_TOKEN"]
@@ -118,12 +134,9 @@ def check_db_sessions():
                     db.session.delete(session)
                     db.session.commit()
 
-        sessions_not_exited = Session.query.filter_by(exit=False, sent=False).all()
-        num_sessions = len(sessions_not_exited)
-        print('There is/are ' + str(num_sessions) + ' running session(s).')
-
 
 def scheduler():
+    conf['app']['TOKEN_EXPIRATION'] = datetime.now()
     scheduler = BackgroundScheduler()
     scheduler.add_job(func=check_db_sessions, trigger="interval", seconds=conf['app']['INTERVAL_DB_CHECK'])
     return scheduler
