@@ -5,6 +5,7 @@
 
 # To do
 
+- [ ] make interleaving optional
 - [ ] sync experimental systems -> stella-server will write to config-file
 - [ ] docker-container that wraps gesis-api
 - [x] update expired token
