@@ -70,7 +70,7 @@ def create_app(config_name):
         db.session.commit()
 
         # add recommendation systems to database
-        ranksys: List[System] = [System(name=sysname, type='RANK', num_requests=0) for sysname in conf['app']['container_list_recommendation']]
+        ranksys: List[System] = [System(name=sysname, type='REC', num_requests=0) for sysname in conf['app']['container_list_recommendation']]
         db.session.add_all(ranksys)
         db.session.commit()
 

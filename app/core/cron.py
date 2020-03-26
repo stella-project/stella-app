@@ -1,7 +1,7 @@
 import logging
 import time
 import json
-from app.config import conf
+from config import conf
 from .models import db, Session, Result, Feedback
 from apscheduler.schedulers.background import BackgroundScheduler
 import requests as req

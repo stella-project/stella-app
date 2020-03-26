@@ -5,7 +5,7 @@
 
 # To do
 
-- [ ] make interleaving optional
+- [x] make interleaving optional
 - [ ] sync experimental systems -> stella-server will write to config-file
 - [ ] docker-container that wraps gesis-api
 - [x] update expired token
@@ -24,7 +24,7 @@
 - [x] user/session identification in stella-app (integrate possibility to send identifier)
 - [x] Integrate Interleaving (cf. [LL4IR-API](https://bitbucket.org/living-labs/ll-api/src/master/))
 - [ ] How to update the applications once they are deployed at the sites?
-- [ ] output format of search script
+- [x] output format of search script -> see concept/data.md
 - [ ] initial indexing of all containers, when starting the application
 - [ ] DB/storage containing meta-info about docker-containers
 - [ ] Webhook in repos of experimental systems: PING stella-server

@@ -7,9 +7,9 @@ app = create_app('default')
 
 
 def main():
-    logger = logging.getLogger("stella-app")
-    logger.info("Starting cron job...")
-    cron(app.app_context()).start()
+    # logger = logging.getLogger("stella-app")
+    # logger.info("Starting cron job...")
+    # cron(app.app_context()).start()
 
     logger = logging.getLogger("stella-app")
     logger.info("Starting app...")
