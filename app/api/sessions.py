@@ -16,4 +16,4 @@ def exit_session(sid):
     db.session.add(session)
     db.session.commit()
 
-    return 'ok'
+    return '', 204

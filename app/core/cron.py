@@ -59,7 +59,7 @@ def post_feedback(feedback, session_id_server):
     payload = {
         'start': feedback.start.strftime("%Y-%m-%d %H:%M:%S"),
         'end': feedback.start.strftime("%Y-%m-%d %H:%M:%S"),  # add end datetime
-        'interleave': True,
+        'interleave': feedback.interleave,
         'clicks': json.dumps(feedback.clicks)
     }
     # post feedback from local db

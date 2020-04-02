@@ -24,7 +24,7 @@ conf["app"]["STELLA_SERVER_API"] = "http://localhost:8080/stella/api/v1"
 conf["app"]["STELLA_SERVER_USER"] = "site_a@stella.org"
 conf["app"]["STELLA_SERVER_PASS"] = "pass"
 conf["app"]["STELLA_SERVER_USERNAME"] = "Site A"
-conf["app"]["INTERLEAVE"] = True
+conf["app"]["INTERLEAVE"] = False
 conf['app']['REST_QUERY'] = False
 
 # logger settings

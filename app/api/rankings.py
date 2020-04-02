@@ -102,6 +102,7 @@ def new_session(container_name):
                       sent=False)
     db.session.add(session)
     db.session.commit()
+
     return session.id
 
 
@@ -127,7 +128,7 @@ def post_feedback(id):
         ranking = Result.query.get_or_404(id)
         feedback = Feedback(start=ranking.q_date,
                             session_id=ranking.session_id,
-                            interleave=True,
+                            interleave=ranking.tdi is not None,
                             clicks=clicks)
 
         db.session.add(feedback)
@@ -141,7 +142,7 @@ def post_feedback(id):
         db.session.add_all(rankings)
         db.session.commit()
 
-        return 'ok'
+        return {"msg": "Added new feedback with success!"}, 201
 
 
 @api.route("/ranking", methods=["GET"])

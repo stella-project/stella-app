@@ -1,5 +1,4 @@
 import requests as req
-import json
 
 PORT = '8000'
 API = 'http://0.0.0.0:' + PORT + '/stella/api/v1'
@@ -9,7 +8,7 @@ SID = 1
 
 def main():
     r = req.put(API + '/sessions/' + str(SID) + '/exit')
-    print(r.text)
+    print(r.status_code)
 
 
 if __name__ == '__main__':
