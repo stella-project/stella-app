@@ -16,6 +16,7 @@ conf["app"]["container_dict_recommendation"] = {}
 for container_name in conf["app"]["container_list_recommendation"]:
     conf["app"]["container_dict_recommendation"][container_name] = {"requests": 0}
 
+conf['app']['DEBUG'] = True
 conf['app']['DELETE_SENT_SESSION'] = True
 conf["app"]["INTERVAL_DB_CHECK"] = 3  # seconds
 conf["app"]["SESSION_EXPIRATION"] = 30  # seconds

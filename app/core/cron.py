@@ -108,12 +108,13 @@ def delete_exited_session(session):
 def post_results(results, feedback_id_server):
     for result in results:
         # POST result
-        status_code = post_result(result, feedback_id_server)
+        post_result(result, feedback_id_server)
 
 
 def post_feedbacks(session, session_id_server):
     feedbacks = Feedback.query.filter_by(session_id=session.id).all()
-    print('Session with ' + str(len(feedbacks)) + " feedbacks")
+    if conf['app']['DEBUG']:
+        print('Session with ' + str(len(feedbacks)) + " feedbacks")
 
     for feedback in feedbacks:
         # POST feedback
@@ -152,13 +153,15 @@ def check_db_sessions(app_context):
         sessions_not_exited = Session.query.filter_by(exit=False, sent=False).all()
         logger.info(time.strftime("%A, %d. %B %Y %I:%M:%S %p"))
         logger.info('There is/are ' + str(len(sessions_not_exited)) + ' running session(s).')
-        print('There is/are ' + str(len(sessions_not_exited)) + ' running session(s).')
+        if conf['app']['DEBUG']:
+            print('There is/are ' + str(len(sessions_not_exited)) + ' running session(s).')
 
         # set expired sessions to 'exit'
         update_expired_sessions(sessions_not_exited)
 
         sessions_exited = Session.query.filter_by(exit=True, sent=False).all()
-        print('There is/are ' + str(len(sessions_exited)) + ' exited session(s).')
+        if conf['app']['DEBUG']:
+            print('There is/are ' + str(len(sessions_exited)) + ' exited session(s).')
 
         if conf["app"].get("STELLA_SERVER_TOKEN") is None or conf['app']['TOKEN_EXPIRATION'] < datetime.now():
             update_token()
