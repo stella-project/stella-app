@@ -56,20 +56,38 @@ def interleave(ranking_exp, ranking_base):
     return ranking.items
 
 
-def query_system(container_name, query, rpp, page, session_id, logger, type='EXP'):
+def rest(container_name, query, rpp, page):
+    if conf['app']['DEBUG']:
+        container = client.containers.get(container_name)
+        ip_address = container.attrs['NetworkSettings']['Networks']['stella-app_default']['IPAddress']
+        content = requests.get('http://' + ip_address + ':5000/ranking', params={'query': query, 'rpp': rpp, 'page': page}).content
+        return json.loads(content)
+
+    content = requests.get(f'http://{container_name}:5000/ranking', params={'query': query, 'rpp': rpp, 'page': page}).content
+    return json.loads(content)
+
+
+def cmd(container_name, query, rpp, page):
     container = client.containers.get(container_name)
+    cmd = 'python3 /script/ranking {} {} {}'.format(query, rpp, page)
+    exec_res = container.exec_run(cmd)
+    result = json.loads(exec_res.output.decode('utf-8'))
+    return result
+
+
+def query_system(container_name, query, rpp, page, session_id, logger, type='EXP'):
+
     logger.debug(f'produce ranking with container: "{container_name}"...')
 
     q_date = datetime.now().replace(microsecond=0)
-    cmd = 'python3 /script/ranking {} {} {}'.format(query, rpp, page)
+
     ts_start = time.time()
     ts = round(ts_start*1000)
-    exec_res = container.exec_run(cmd)
 
     if conf['app']['REST_QUERY']:
-        result = requests.get(f'http://{container_name}:5000/ranking', params={'query': query})
+        result = rest(container_name, query, rpp, page)
     else:
-        result = json.loads(exec_res.output.decode('utf-8'))
+        result = cmd(container_name, query, rpp, page)
 
     ts_end = time.time()
     # calc query execution time in ms

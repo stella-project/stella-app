@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+
+from elasticsearch import Elasticsearch
+import json
+import os
+import ast
+
+PATH = '/data/'
+INDEX = 'idx'
+
+es = Elasticsearch([{'host': 'localhost',
+                     'port': 9200}])
+
+for file in os.listdir(PATH):
+    if file.endswith(".jsonl"):
+        with open(os.path.join(PATH, file), 'r', encoding="utf-8") as f:
+            for line in f:
+                try:
+                    doc = ast.literal_eval(line)
+                    es.index(index=INDEX, doc_type=doc['DOCTYPE'], id=doc['DBRECORDID'], body=doc)
+                except:
+                    pass

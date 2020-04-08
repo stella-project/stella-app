@@ -2,9 +2,9 @@ conf = {}
 
 # app settings
 conf["app"] = {}
-conf["app"]["container_list"] = ["livivo", "livivo_base"]
+conf["app"]["container_list"] = ["livivo_elastic", "livivo_elastic_base"]
 conf["app"]["container_list_recommendation"] = []
-conf["app"]["container_baseline"] = "livivo_base"
+conf["app"]["container_baseline"] = "livivo_elastic_base"
 conf["app"]["container_recommendation_baseline"] = ""
 
 # create container_dict from list values (easier)
@@ -26,7 +26,7 @@ conf["app"]["STELLA_SERVER_USER"] = "site_a@stella.org"
 conf["app"]["STELLA_SERVER_PASS"] = "pass"
 conf["app"]["STELLA_SERVER_USERNAME"] = "Site A"
 conf["app"]["INTERLEAVE"] = False
-conf['app']['REST_QUERY'] = False
+conf['app']['REST_QUERY'] = True
 
 # logger settings
 conf["log"] = {}

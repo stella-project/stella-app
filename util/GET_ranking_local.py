@@ -1,7 +1,7 @@
 import requests as req
 import json
 
-PORT = '8000'
+PORT = '80'
 API = 'http://0.0.0.0:' + PORT + '/stella/api/v1'
 QUERY = 'study'
 

@@ -6,79 +6,35 @@ services:
           - /var/run/docker.sock/:/var/run/docker.sock
           - ./app/log:/app/log
         ports:
-            - "8080:8000"
+            - "80:8000"
         depends_on:
-            - livivo
+            - livivo_elastic
+            - livivo_elastic_base
 
-# DEPRECATED: Not compatible with new data structure
-#    elastic:
-#        build: ./elastic
-#        container_name: elastic
+    livivo_elastic:
+        build: ./livivo_elastic
+        container_name: livivo_elastic
+        volumes:
+          - ./livivo_elastic/data/:/data/
+
+    livivo_elastic_base:
+        build: ./livivo_elastic_base
+        container_name: livivo_elastic_base
+        volumes:
+          - ./livivo_elastic/data/:/data/
+
+#    livivo:
+#        build: ../livivo_solr_template
+#        container_name: livivo
 #        volumes:
-#          - ./data/:/data/
-
-# DEPRECATED: Not compatible with new data structure
-#    elastic-external:
-#        build: https://github.com/stella-project/stella-elastic.git
-#        container_name: elastic-external
+#          - ../livivo_solr_template/conf:/opt/solr/server/solr/configsets/livivo/conf
+#          - ../livivo_solr_template/data:/opt/solr/livivo_data/data
+#        ports:
+#          - "8983:8983"
+#
+#    livivo_base:
+#        build: ../livivo_solr_template
+#        container_name: livivo_base
 #        volumes:
-#          - ./data/:/data/
-
-# DEPRECATED: Not compatible with new data structure
-#    recomm-sample:
-#        build: ./recomm-sample
-#        container_name: recomm-sample
-#        volumes:
-#          - ./data:/data
-#        tty: true
-
-# DEPRECATED: Not compatible with new data structure
-#    solr:
-#      image: solr
-#      container_name: solr
-#      volumes:
-#        - ~/data/sample/:/opt/solr/collection/
-#        - ./solr/script/:/script/
-#        # - ./solr/init/:/docker-entrypoint-initdb.d/
-#      ports:
-#        - "8983:8983"
-
-# DEPRECATED: Not compatible with new data structure
-#    solr:
-#      build: https://github.com/stella-project/solr-docker.git
-#      container_name: solr
-#      volumes:
-#        - ~/data/sample/:/data/
-
-# DEPRECATED: Not compatible with new data structure
-#    lucene:
-#      image: openjdk
-#      container_name: lucene
-#      command: tail -F anything
-#      volumes:
-#        - ~/data/sample/:/data/
-#        - ./lucene/:/lucene/
-#        - ./lucene/script/:/script/
-
-# DEPRECATED: Not compatible with new data structure
-#    lucene:
-#      build: https://github.com/stella-project/lucene-ranker-docker.git
-#      container_name: lucene
-#      volumes:
-#        - ~/data/sample/:/data/
-
-    livivo:
-      build: ../livivo_solr_template
-      container_name: livivo
-      volumes:
-        - ../livivo_solr_template/conf:/opt/solr/server/solr/configsets/livivo/conf
-        - ../livivo_solr_template/data:/opt/solr/livivo_data/data
-      ports:
-        - "8983:8983"
-
-    livivo_base:
-      build: ../livivo_solr_template
-      container_name: livivo_base
-      volumes:
-        - ../livivo_solr_template/conf:/opt/solr/server/solr/configsets/livivo/conf
-        - ../livivo_solr_template/data:/opt/solr/livivo_data/data
+#          - ../livivo_solr_template/conf:/opt/solr/server/solr/configsets/livivo/conf
+#          - ../livivo_solr_template/data:/opt/solr/livivo_data/data
