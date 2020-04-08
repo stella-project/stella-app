@@ -56,7 +56,7 @@ def create_app(config_name):
     logger = logging.getLogger("stella-app")
     logger.info("Logging started!")
 
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder='../templates')
 
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(Path(basedir).parent, 'data-dev.sqlite')
     db.init_app(app)
