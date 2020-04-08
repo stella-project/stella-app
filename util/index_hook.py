@@ -1,4 +1,7 @@
 import requests as rq
 
-r = rq.get('http://172.20.0.2:5000/index')
+STELLA_URL = 'http://0.0.0.0:8000'
+CONT_NAME = 'livivo_elastic'
+
+r = rq.get(STELLA_URL + '/index/' + CONT_NAME)
 print(r.text)

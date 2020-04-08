@@ -20,15 +20,12 @@
         </tr>
       </thead>
       <tbody>
-
       </tbody>
     </table>
   </div>
-
     <!-- Modal -->
     <div id="myModal" class="modal fade" role="dialog">
       <div class="modal-dialog">
-
         <!-- Modal content-->
         <div class="modal-content">
           <div class="modal-header">
@@ -42,14 +39,9 @@
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
           </div>
         </div>
-
       </div>
     </div>
-
-
     <script>
-
-
             var $table = $('#table');
             var mydata = {{data|tojson}};
 
@@ -64,25 +56,20 @@
                   valign: 'middle',
                   clickToSelect: false,
                   formatter : function(value,row,index) {
-                    //return '<input name="elementname"  value="'+value+'"/>';
                     return '<button class=\'btn btn-primary \' pageName="'+row.name+'" pageDetails="'+row.index+'"  >Start indexing</button> ';
                   }
                 }
               ]
               });
 
-
-            $(".btn").click(function(){
-                var pageDetails = $(this).attr('pageDetails');
-                var pageName = $(this).attr('pageName');
-                $(".modal .modal-title").html(pageName);
-                $(".modal .modal-body").html(pageDetails);
-                $(".modal").modal("show");
-
+              $(".btn").click(function(){
+                  var pageDetails = $(this).attr('pageDetails');
+                  var pageName = $(this).attr('pageName');
+                  $(".modal .modal-title").html(pageName);
+                  $(".modal .modal-body").html(pageDetails);
+                  $(".modal").modal("show");
+              });
             });
-
-            });
-
     </script>
 </body>
 </html>
