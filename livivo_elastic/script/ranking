@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search
+import json
+import os
+import sys
+
+INDEX = 'idx'
+
+exit = False
+
+n_args = len(sys.argv)
+
+if(n_args) > 1:
+	query = sys.argv[1]
+else:
+	exit = True
+if(n_args > 2):
+	rpp = int(sys.argv[2])
+else:
+	exit = True
+if (n_args > 3):
+	page = int(sys.argv[3])
+else:
+	start = 0
+
+if(exit):
+	sys.exit("parameter error")
+
+start = page*rpp
+rows = rpp
+
+es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+
+result = es.search(index=INDEX,
+                   from_=start,
+                   size=rpp,
+                   body={"query": {"query_string": {"query": query, "default_field": "*"}}})
+
+response = {}
+response['page'] = page
+response['rpp'] = rpp
+response['query'] = query
+response['num_found'] = 0
+response['itemlist'] = []
+
+if (query is not None):
+    for res in result["hits"]["hits"]:
+        try:
+            response['itemlist'].append(res['_source']['DBRECORDID'])
+        except:
+            pass
+
+print(json.dumps(response))

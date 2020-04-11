@@ -1,9 +1,19 @@
+from typing import List
+
 import docker
 from flask import Flask
 from utils import create_logger
 from config import conf
 import logging
 import time
+from flask_sqlalchemy import SQLAlchemy
+import os
+from pathlib import Path
+
+from .models import db, System, Session
+
+
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 SECS = 30
 client = docker.DockerClient(base_url='unix://var/run/docker.sock')
@@ -40,13 +50,29 @@ def get_least_served(container_dict):
 
 def create_app(config_name):
 
-    index()
+    # index()
 
     create_logger("stella-app", f"{conf['log']['log_path']}/{conf['log']['log_file']}")
     logger = logging.getLogger("stella-app")
     logger.info("Logging started!")
 
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder='../templates')
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(Path(basedir).parent, 'data-dev.sqlite')
+    db.init_app(app)
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+
+        # add ranking systems to database
+        ranksys: List[System] = [System(name=sysname, type='RANK', num_requests=0) for sysname in conf['app']['container_list']]
+        db.session.add_all(ranksys)
+        db.session.commit()
+
+        # add recommendation systems to database
+        ranksys: List[System] = [System(name=sysname, type='REC', num_requests=0) for sysname in conf['app']['container_list_recommendation']]
+        db.session.add_all(ranksys)
+        db.session.commit()
 
     from main import main as main_blueprint
     app.register_blueprint(main_blueprint)

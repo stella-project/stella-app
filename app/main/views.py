@@ -1,18 +1,19 @@
-import docker
 from . import main
+from config import conf
+from flask import render_template
 
-client = docker.DockerClient(base_url='unix://var/run/docker.sock')
+
+def prep_list(container_list):
+    data = []
+    for container in container_list:
+        data.append({'name': container,
+                     'index': True})
+
+    return data
 
 
 @main.route("/")
 def home():
-    ''' display running containers '''
-
-    html = "<h1> Here is a list of containers that are running: </h1> </br> <ul>"
-
-    for c in client.containers.list():
-        html += "<li> " + c.name + " </li>"
-
-    html += " </ul>"
-
-    return html
+    return render_template("table.html",
+                           data=prep_list(container_list=conf["app"]["container_list"]),
+                           title='List of running containers')
