@@ -63,11 +63,12 @@
               });
 
               $(".btn").click(function(){
-                  var pageDetails = $(this).attr('pageDetails');
-                  var pageName = $(this).attr('pageName');
-                  $(".modal .modal-title").html(pageName);
-                  $(".modal .modal-body").html(pageDetails);
-                  $(".modal").modal("show");
+                  $.get("/index/".concat($(this).attr('pageName')));
+                  // var pageDetails = $(this).attr('pageDetails');
+                  // var pageName = $(this).attr('pageName');
+                  // $(".modal .modal-title").html(pageName);
+                  // $(".modal .modal-body").html(pageDetails);
+                  // $(".modal").modal("show");
               });
             });
     </script>
