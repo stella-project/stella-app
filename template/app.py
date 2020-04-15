@@ -70,6 +70,7 @@ def rec_data():
     ### CUSTOM - END ###
     ####################
 
+    return jsonify(response)
 
 @app.route('/recommendation/publications', methods=["GET"])
 def rec_pub():
@@ -90,6 +91,8 @@ def rec_pub():
     ####################
     ### CUSTOM - END ###
     ####################
+
+    return jsonify(response)
 
 
 if __name__ == '__main__':
