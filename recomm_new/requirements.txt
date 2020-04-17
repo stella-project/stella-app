@@ -5,7 +5,7 @@ bleach==3.0.2
 bokeh==1.0.2
 contextlib2==0.5.5
 elasticsearch==7.0.0
-Flask==0.12.2
+Flask==0.12.5
 Flask-Cors==3.0.7
 flask-marshmallow==0.8.0
 Flask-Migrate==2.1.1

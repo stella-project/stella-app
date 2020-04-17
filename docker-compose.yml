@@ -10,6 +10,7 @@ services:
       depends_on:
         - elastic
         - recomm-sample
+        - recomm_new
     elastic:
         build: ./elastic
         container_name: elastic
@@ -20,7 +21,17 @@ services:
     recomm-sample:
         build: ./recomm-sample
         container_name: recomm-sample
+        ports:
+        - "8889:8889"        
         volumes:
           - ./data:/data
         tty: true
 
+    recomm_new:
+        build: ./recomm_new
+        container_name: recomm_new
+        ports:
+        - "8888:8888"          
+        volumes:
+          - ./data:/data
+        tty: true

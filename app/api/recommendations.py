@@ -6,28 +6,26 @@ from . import api
 from core import get_least_served
 from config import conf
 import ast
+import requests
 
 client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 app = Flask(__name__)
 
 
 @api.route("/recommend_dataset/<string:doc_id>", methods=["GET"])
+
 def recommand_dataset(doc_id):
     
     least_served = get_least_served(conf["app"]["container_dict_recommendation"])
-    client = docker.DockerClient(base_url='unix://var/run/docker.sock')
-    container = client.containers.get(least_served)
-    cmd = 'python3 /script/recommand_dataset ' + doc_id
     logger = logging.getLogger("stella-app")
     logger.debug(f'produce ranking with container: "{least_served}"...')
-#--------------------------------------------------------------
-    exec_res = container.exec_run(cmd)
-    try: 
-         json_data = json.loads(exec_res.output.decode("utf-8"))
-         json_data.update({'container': least_served})
-         return jsonify(json_data)
-    except json.decoder.JSONDecodeError:
-         return jsonify({"JSON file is:": exec_res.output.decode("utf-8")})
+    if least_served == "recomm-sample":
+        r= requests.get('http://recomm-sample:8889/api/recomm-sample/'+doc_id).json()
+        return jsonify(r)
+    else :
+        r= requests.get('http://recomm_new:8888/api/recomm_new/'+doc_id).json()
+        return jsonify(r)   
+
     
 #--------------------------------------------------------------
 

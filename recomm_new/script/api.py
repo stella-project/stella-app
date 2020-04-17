@@ -32,4 +32,4 @@ api = Api(app)
 api.add_resource(Recommand, '/<string:doc_id>')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=9210, debug=True)
+    app.run(host='0.0.0.0', port=9210, debug=False)

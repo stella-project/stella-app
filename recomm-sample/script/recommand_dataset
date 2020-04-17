@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
+#!/usr/bin/env python3
+import json
+from flask import jsonify, request, Flask
+import pickle
+import os
+import sys
+import ast
 
+app = Flask(__name__)
 import pandas as pd 
 import sys 
 import json
@@ -7,7 +15,7 @@ import pickle
 import os
 
 
-f = pickle.load(open("/script/cosine_similarity_matrix_top_10.pkl", "rb"))
+f = pickle.load(open("cosine_similarity_matrix_top_10.pkl", "rb"))
 def getsimilarityjson(id):
     try:
         a= {"response_header":{
@@ -25,12 +33,21 @@ def getsimilarityjson(id):
            }}
         a.update([sim for sim in f if sim["target_items"]==id][0])
         a['similar_items']=[{"id":k, "detail":{"score": v,"reason":"" }} for k, v in a['similar_items'].items()] 
-        return json.dumps(a)
+        return a 
     except:
         return None
+        
+@app.route('/api/recomm-sample/')
+def hello_world():
+   return('Hello recomm-sample')
 
-doc_id = sys.argv[1]
-sim = getsimilarityjson(doc_id)
+@app.route('/api/recomm-sample/<string:id>', methods=['GET'])
+def home(id):
+    sim = getsimilarityjson(id)
+    return(jsonify(sim))
 
-print(sim)
+if __name__ == '__main__':
+   app.run(host='0.0.0.0', port=8889 , debug = True)
+
+
 
