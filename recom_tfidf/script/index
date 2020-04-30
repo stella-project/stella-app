@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import json
 import pandas as pd 
 import re
@@ -17,14 +19,24 @@ nltk.download('punkt')
 
 final_stopwords_list = list(en_stop) + list(de_stop)
 
-with open("../../data/json/publication.json") as f :
-    d = json.load(f)["_source"]
+PATH = "/data/"
 
-with open("../../data/json/dataset.json") as f2 :
-    ds = json.load(f2)["_source"]
+with open(PATH+"publication.json") as f :
+    pub = json.load(f)
 
-datasetdf = pd.DataFrame(ds).T
-pubdf=pd.DataFrame(d).T
+with open(PATH+"dataset.json") as f2 :
+    dataset = json.load(f2)
+    
+pub_df = pd.DataFrame(pub)
+source = list(pub_df["_source"])
+pubdf = pd.DataFrame(source)
+pubdf = pubdf.set_index('id')
+  
+
+dataset_df = pd.DataFrame(dataset)
+source = list(dataset_df["_source"])
+datasetdf = pd.DataFrame(source)
+datasetdf = datasetdf.set_index('id')
 
 
 flrt_dts_df = datasetdf.loc[:,["id","title","abstract","topic","title_en","abstract_en","topic_en"]]
@@ -77,10 +89,10 @@ df_f_all['text'] = df_f_all['text'].apply(lambda x:pre_process(x))
 
 
 #RUN TO CREATE FILE : cosine_similarity_matrix.pkl
-#count_vectorizer = TfidfVectorizer(tokenizer=tokenize,stop_words=final_stopwords_list)
-#sparse_matrix = count_vectorizer.fit_transform(df_f_all['text'].values.tolist())
-#output = pd.DataFrame(data=cosine_similarity(sparse_matrix[0:len(flrt_dts_df)],sparse_matrix[len(flrt_dts_df):]), index= flrt_dts_df.index, columns=flrt_pub_df.index , dtype = "float16")
-#output.to_pickle('cosine_similarity_matrix.pkl')
+count_vectorizer = TfidfVectorizer(tokenizer=tokenize,stop_words=final_stopwords_list)
+sparse_matrix = count_vectorizer.fit_transform(df_f_all['text'].values.tolist())
+output = pd.DataFrame(data=cosine_similarity(sparse_matrix[0:len(flrt_dts_df)],sparse_matrix[len(flrt_dts_df):]), index= flrt_dts_df.index, columns=flrt_pub_df.index , dtype = "float16")
+output.to_pickle('cosine_similarity_matrix.pkl')
 
 output = pd.read_pickle('cosine_similarity_matrix.pkl')
 similary_matxix=[]
@@ -88,6 +100,6 @@ for pid in flrt_pub_df["id"].values.tolist():
     A = output[pid].sort_values(ascending=False)[:10]
     similary_matxix.append({"target_items":pid,"similar_items":A.drop(A.index[0]).to_dict()})
 
-with open('cosine_similarity_matrix_top_10.pkl', 'wb') as b:
+with open('../cosine_similarity_matrix_top_10.pkl', 'wb') as b:
     pickle.dump(similary_matxix,b)
 

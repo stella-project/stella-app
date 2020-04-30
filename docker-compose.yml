@@ -10,6 +10,7 @@ services:
         depends_on:
             - livivo_elastic
             - livivo_elastic_base
+            - recom_tfidf
 
     livivo_elastic:
         build: ./livivo_elastic
@@ -22,6 +23,12 @@ services:
         container_name: livivo_elastic_base
         volumes:
           - ./livivo_elastic/data/:/data/
+          
+    recom_tfidf:
+        build: ./recom_tfidf
+        container_name: recom_tfidf
+        volumes:
+          - ./data:/data
 
 #    livivo:
 #        build: ../livivo_solr_template
