@@ -12,6 +12,8 @@
 - [ ] sync experimental systems -> stella-server will write to config-file
 - [ ] docker-container that wraps gesis-api / livivo-api
 - [ ] How to update the applications once they are deployed at the sites?
+- [ ] code documentation
+- [ ] unit tests
 - [x] cron job for non-interleaved results: it was acutally a bug of the stella-server
 - [x] make interleaving optional
 - [x] update expired token
