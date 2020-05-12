@@ -183,7 +183,7 @@ def ranking():
     # no container_name specified? -> select least served container
     if container_name is None:
         # container_name = get_least_served(conf["app"]["container_dict"])
-        container_name = System.query.filter(System.name != conf['app']['container_baseline']).order_by(System.num_requests).first().name
+        container_name = System.query.filter(System.name != conf['app']['container_baseline']).filter(System.name.notin_(conf["app"]["container_list_recommendation"])).order_by(System.num_requests).first().name
 
     # container_name does not exist in config? -> Nothing to do
     # i think this check is not necessary anymore. the system names in the database are extracted from
