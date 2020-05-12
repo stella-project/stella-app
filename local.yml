@@ -25,15 +25,21 @@ services:
         container_name: livivo_elastic
         volumes:
           - ./livivo_elastic/data/:/data/
+        networks:
+            - stella-shared
 
     livivo_elastic_base:
         build: ./livivo_elastic_base
         container_name: livivo_elastic_base
         volumes:
           - ./livivo_elastic/data/:/data/
+        networks:
+            - stella-shared
           
     recom_tfidf:
         build: ./recom_tfidf
         container_name: recom_tfidf
         volumes:
           - ./data:/data
+        networks:
+            - stella-shared
