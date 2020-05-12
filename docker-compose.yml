@@ -11,8 +11,6 @@ services:
             - livivo_elastic
             - livivo_elastic_base
             - recom_tfidf
-        networks:
-            - stella-shared
 
     livivo_elastic:
         build: ./livivo_elastic
