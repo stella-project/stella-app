@@ -1,4 +1,10 @@
 version: '3'
+
+networks:
+    stella-shared:
+        external:
+            name: stella-server_default
+
 services:
     app:
         build: ./app
