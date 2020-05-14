@@ -28,4 +28,5 @@ services:
         build: ./recom_tfidf
         container_name: recom_tfidf
         volumes:
-          - ./data:/data
+          - ./livivo_data/:/data/
+#          - ./data:/data

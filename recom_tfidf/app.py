@@ -1,21 +1,28 @@
 from flask import Flask, request, jsonify
-import pandas as pd 
-import sys 
 import json
 import pickle
-import os
-import ast
+import random
 
-
+JL_PATH = './data/pubmed_2015_2016.jsonl'
 app = Flask(__name__)
 cos_sim_mat = pickle.load(open("cosine_similarity_matrix_top_10.pkl", "rb"))
+
+
+def index_data(jl_path):
+    corpus = {}
+    with open(jl_path) as jl:
+        for line in jl:
+            j = json.loads(line)
+            corpus[j['DBRECORDID']] = json.loads(line)
+    return corpus
+
 
 @app.route('/test', methods=["GET"])
 def test():
     ######################
     ### CUSTOM - START ###
     ######################
-    pass
+    print("tfidf vectorizer!")
     ####################
     ### CUSTOM - END ###
     ####################
@@ -32,7 +39,6 @@ def index():
     ####################
 
 
-        
 @app.route('/recommendation/datasets', methods=["GET"])
 def rec_data():
     item_id = request.args.get('item_id', None)
@@ -49,13 +55,14 @@ def rec_data():
     
     result = [sim for sim in cos_sim_mat if sim["target_items"]==item_id][0]['similar_items']
     response['itemlist'] = [{"id":k, "detail":{"score": v,"reason":"" }} for k, v in result.items()]
-    
+
     #pass
     ####################
     ### CUSTOM - END ###
     ####################
 
     return jsonify(response)
+
 
 @app.route('/recommendation/publications', methods=["GET"])
 def rec_pub():
@@ -68,11 +75,10 @@ def rec_pub():
     response['rpp'] = rpp
     response['item_id'] = item_id
     response['num_found'] = 0
-    response['itemlist'] = []
     ######################
     ### CUSTOM - START ###
     ######################
-    pass
+    response['itemlist'] = random.choices(list(corpus.keys()), k=rpp)
     ####################
     ### CUSTOM - END ###
     ####################
@@ -81,4 +87,5 @@ def rec_pub():
 
 
 if __name__ == '__main__':
+    corpus = index_data(JL_PATH)
     app.run(host='0.0.0.0', port=5000, debug=True)
