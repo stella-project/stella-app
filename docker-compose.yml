@@ -16,13 +16,13 @@ services:
         build: ./livivo_elastic
         container_name: livivo_elastic
         volumes:
-          - ./livivo_elastic/data/:/data/
+          - ./livivo_data/:/data/
 
     livivo_elastic_base:
         build: ./livivo_elastic_base
         container_name: livivo_elastic_base
         volumes:
-          - ./livivo_elastic/data/:/data/
+          - ./livivo_data/:/data/
           
     recom_tfidf:
         build: ./recom_tfidf
