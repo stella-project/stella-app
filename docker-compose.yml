@@ -8,19 +8,20 @@ services:
         ports:
             - "8080:8000"
         depends_on:
-            - livivo_elastic
-            - livivo_elastic_base
+            - rank_elastic
+            - rank_elastic_base
             - recom_tfidf
+            - recom_tfidf_base
 
-    livivo_elastic:
-        build: ./livivo_elastic
-        container_name: livivo_elastic
+    rank_elastic:
+        build: ./rank_elastic
+        container_name: rank_elastic
         volumes:
           - ./data/livivo/:/data/
 
-    livivo_elastic_base:
-        build: ./livivo_elastic_base
-        container_name: livivo_elastic_base
+    rank_elastic_base:
+        build: ./rank_elastic_base
+        container_name: rank_elastic_base
         volumes:
           - ./data/livivo/:/data/
           
@@ -29,4 +30,9 @@ services:
         container_name: recom_tfidf
         volumes:
           - ./data/livivo/:/data/
-#          - ./data:/data
+
+    recom_tfidf_base:
+        build: ./recom_tfidf
+        container_name: recom_tfidf_base
+        volumes:
+          - ./data/livivo/:/data/
