@@ -3,7 +3,7 @@ import json
 import pickle
 import random
 
-JL_PATH = './data/pubmed_2015_2016.jsonl'
+JL_PATH = './data/livivo/pubmed_2015_2016.jsonl'
 app = Flask(__name__)
 cos_sim_mat = pickle.load(open("cosine_similarity_matrix_top_10.pkl", "rb"))
 

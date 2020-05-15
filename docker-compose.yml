@@ -17,22 +17,22 @@ services:
         build: ./rank_elastic
         container_name: rank_elastic
         volumes:
-          - ./data/livivo/:/data/
+          - ./data/:/data/
 
     rank_elastic_base:
         build: ./rank_elastic_base
         container_name: rank_elastic_base
         volumes:
-          - ./data/livivo/:/data/
+          - ./data/:/data/
           
     recom_tfidf:
         build: ./recom_tfidf
         container_name: recom_tfidf
         volumes:
-          - ./data/livivo/:/data/
+          - ./data/:/data/
 
     recom_tfidf_base:
         build: ./recom_tfidf
         container_name: recom_tfidf_base
         volumes:
-          - ./data/livivo/:/data/
+          - ./data/:/data/

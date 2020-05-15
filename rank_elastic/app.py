@@ -4,7 +4,7 @@ import json
 import os
 import ast
 
-PATH = '/data/'
+PATH = '/data/index'
 INDEX = 'idx'
 app = Flask(__name__)
 
@@ -36,7 +36,7 @@ def index():
                 for line in f:
                     try:
                         doc = ast.literal_eval(line)
-                        es.index(index=INDEX, doc_type=doc['DOCTYPE'], id=doc['DBRECORDID'], body=doc)
+                        es.index(index=INDEX, doc_type=doc['type'], id=doc['id'], body=doc)
                         docs += 1
                     except:
                         pass
@@ -76,9 +76,11 @@ def ranking():
 
         for res in result["hits"]["hits"]:
             try:
-                response['itemlist'].append(res['_source']['DBRECORDID'])
+                response['itemlist'].append(res['_source']['id'])
             except:
                 pass
+
+        response['num_found'] = len(result["hits"]["hits"])
     ####################
     ### CUSTOM - END ###
     ####################
