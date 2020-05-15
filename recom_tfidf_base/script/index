@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+
+import json
+import pandas as pd 
+import re
+import spacy
+import nltk
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+#from nltk.corpus import stopwords
+
+from spacy.lang.de.stop_words import STOP_WORDS as de_stop
+from spacy.lang.en.stop_words import STOP_WORDS as en_stop
+from nltk.stem.porter import PorterStemmer
+import string
+import pickle
+
+nltk.download('punkt')
+
+final_stopwords_list = list(en_stop) + list(de_stop)
+
+PATH = "/data/"
+
+with open(PATH+"publication.json") as f :
+    pub = json.load(f)
+
+with open(PATH+"dataset.json") as f2 :
+    dataset = json.load(f2)
+    
+pub_df = pd.DataFrame(pub)
+source = list(pub_df["_source"])
+pubdf = pd.DataFrame(source)
+pubdf = pubdf.set_index('id')
+  
+
+dataset_df = pd.DataFrame(dataset)
+source = list(dataset_df["_source"])
+datasetdf = pd.DataFrame(source)
+datasetdf = datasetdf.set_index('id')
+
+
+flrt_dts_df = datasetdf.loc[:,["id","title","abstract","topic","title_en","abstract_en","topic_en"]]
+flrt_pub_df = pubdf.loc[:,["id","title","abstract","topic","title_en","abstract_en","topic_en"]]
+
+all_filter = [flrt_dts_df, flrt_pub_df]
+
+df_f_all = pd.concat(all_filter)
+
+#print(df_f_all.head(20))
+trans_table = {ord(c): None for c in string.punctuation + string.digits}    
+stemmer = PorterStemmer()
+
+def tokenize(text):
+    tokens = [word for word in nltk.word_tokenize(text.translate(trans_table)) if len(word) > 1] 
+    stems = [stemmer.stem(item) for item in tokens]
+    return stems
+
+
+def pre_process(text):
+    
+    # lowercase
+    text=text.lower()
+    
+    #remove tags
+    text=re.sub("<!--?.*?-->","",text)
+    
+    # remove special characters and digits
+    text=re.sub("(\\d|\\W)+"," ",text)
+    
+    return text
+
+ 
+#df_f_all['text'] = df_f_all.fillna('').apply(lambda row: row['title'] +' '+str(row['abstract'])+ str(' '.join(str(v) for v in row["topic"])), axis=1)
+
+def getText(row):
+    text = " "
+    try:
+        for x in ["title","abstract","topic","title_en","abstract_en","topic_en"]:
+            if row[x] is not None:
+                text = text+str(row[x])
+        return text
+    except:
+        print(row['id'])
+
+df_f_all['text'] =  df_f_all.fillna('').apply(lambda row: getText(row), axis=1)
+
+df_f_all['text'] = df_f_all['text'].apply(lambda x:pre_process(x))
+
+
+
+#RUN TO CREATE FILE : cosine_similarity_matrix.pkl
+count_vectorizer = TfidfVectorizer(tokenizer=tokenize,stop_words=final_stopwords_list)
+sparse_matrix = count_vectorizer.fit_transform(df_f_all['text'].values.tolist())
+output = pd.DataFrame(data=cosine_similarity(sparse_matrix[0:len(flrt_dts_df)],sparse_matrix[len(flrt_dts_df):]), index= flrt_dts_df.index, columns=flrt_pub_df.index , dtype = "float16")
+output.to_pickle('cosine_similarity_matrix.pkl')
+
+output = pd.read_pickle('cosine_similarity_matrix.pkl')
+similary_matxix=[]
+for pid in flrt_pub_df["id"].values.tolist():
+    A = output[pid].sort_values(ascending=False)[:10]
+    similary_matxix.append({"target_items":pid,"similar_items":A.drop(A.index[0]).to_dict()})
+
+with open('../cosine_similarity_matrix_top_10.pkl', 'wb') as b:
+    pickle.dump(similary_matxix,b)
+

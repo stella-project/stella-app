@@ -5,7 +5,7 @@ conf["app"] = {}
 conf["app"]["container_list"] = ["livivo_elastic", "livivo_elastic_base"]
 conf["app"]["container_list_recommendation"] = ["recom_tfidf"]
 conf["app"]["container_baseline"] = "livivo_elastic_base"
-conf["app"]["container_recommendation_baseline"] = "recom_tfidf"
+conf["app"]["container_recommendation_baseline"] = "recom_tfidf_base"
 
 # create container_dict from list values (easier)
 conf["app"]["container_dict"] = {}
