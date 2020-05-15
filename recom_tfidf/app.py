@@ -89,6 +89,6 @@ def rec_pub():
 if __name__ == '__main__':
     for file in os.listdir(JL_PATH):
         if file.endswith(".jsonl"):
-            corpus = index_data(file)
+            corpus = index_data(os.path.join(JL_PATH, file))
 
     app.run(host='0.0.0.0', port=5000, debug=True)
