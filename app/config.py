@@ -3,7 +3,7 @@ conf = {}
 # app settings
 conf["app"] = {}
 conf["app"]["container_list"] = ["rank_elastic", "rank_elastic_base"]
-conf["app"]["container_list_recommendation"] = ["recom_tfidf"]
+conf["app"]["container_list_recommendation"] = ["recom_tfidf", "recom_tfidf_base"]
 conf["app"]["container_baseline"] = "rank_elastic_base"
 conf["app"]["container_recommendation_baseline"] = "recom_tfidf_base"
 
@@ -16,7 +16,7 @@ conf["app"]["container_dict_recommendation"] = {}
 for container_name in conf["app"]["container_list_recommendation"]:
     conf["app"]["container_dict_recommendation"][container_name] = {"requests": 0}
 
-conf['app']['DEBUG'] = False
+conf['app']['DEBUG'] = True
 conf['app']['DELETE_SENT_SESSION'] = True
 conf["app"]["INTERVAL_DB_CHECK"] = 3  # seconds
 conf["app"]["SESSION_EXPIRATION"] = 30  # seconds
