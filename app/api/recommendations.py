@@ -10,7 +10,7 @@ from core import get_least_served
 from core.models import db, System, Session, Result
 from config import conf
 from utils import create_dict_response
-from core.interleave import tdi_rec
+from core.interleave import tdi, tdi_rec
 
 client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 
@@ -42,16 +42,40 @@ def cmd_rec_data(container_name, query, rpp, page):
     pass
 
 
-def query_system(container_name, item_id, rpp, page, session_id, logger, type='EXP'):
+def rest_rec_pub(container_name, item_id, rpp, page):
+    if conf['app']['DEBUG']:
+        container = client.containers.get(container_name)
+        ip_address = container.attrs['NetworkSettings']['Networks']['stella-app_default']['IPAddress']
+        content = requests.get('http://' + ip_address + ':5000/recommendation/publications',
+                               params={'item_id': item_id, 'rpp': rpp, 'page': page}).content
+        return json.loads(content)
+
+    content = requests.get(f'http://{container_name}:5000/recommendation/publications',
+                           params={'item_id': item_id, 'rpp': rpp, 'page': page}).content
+    return json.loads(content)
+    pass
+
+
+def cmd_rec_pub():
+    pass
+
+
+def query_system(container_name, item_id, rpp, page, session_id, logger, type='EXP', rec_type='DATA'):
     logger.debug(f'produce recommendation with container: "{container_name}"...')
     q_date = datetime.now().replace(microsecond=0)
     ts_start = time.time()
     ts = round(ts_start*1000)
 
     if conf['app']['REST_QUERY']:
-        result = rest_rec_data(container_name, item_id, rpp, page)
+        if rec_type == 'DATA':
+            result = rest_rec_data(container_name, item_id, rpp, page)
+        if rec_type == 'PUB':
+            result = rest_rec_pub(container_name, item_id, rpp, page)
     else:
-        result = cmd_rec_data(container_name, item_id, rpp, page)
+        if rec_type == 'DATA':
+            result = cmd_rec_data(container_name, item_id, rpp, page)
+        if rec_type == 'PUB':
+            result = cmd_rec_pub(container_name, item_id, rpp, page)
 
     ts_end = time.time()
     # calc query execution time in ms
@@ -76,11 +100,14 @@ def query_system(container_name, item_id, rpp, page, session_id, logger, type='E
     return recommendation
 
 
-def interleave(recommendation_exp, recommendation_base):
+def interleave(recommendation_exp, recommendation_base, rec_type='DATA'):
     base = {k: v.get('docid') for k, v in recommendation_base.items.items()}
     exp = {k: v.get('docid') for k, v in recommendation_exp.items.items()}
 
-    item_dict = tdi_rec(base, exp)
+    if rec_type == 'DATA':
+        item_dict = tdi_rec(base, exp)
+    if rec_type == 'PUB':
+        item_dict = tdi(base, exp)
     recommendation = Result(session_id=recommendation_exp.session_id,
                             system_id=recommendation_exp.system_id,
                             type='REC_DATA',
@@ -158,6 +185,42 @@ def recommend_dataset():
 
 @api.route("/recommendation/publications", methods=["GET"])
 def recommend():
+    logger = logging.getLogger("stella-app")
+    # look for mandatory GET-parameters (query, container_name)
+    item_id = request.args.get('item_id', None)
+    container_name = request.args.get('container', None)
+    session_id = request.args.get('sid', None)
+
+    # Look for optional GET-parameters and set default values
+    page = request.args.get('page', default=0, type=int)
+    rpp = request.args.get('rpp', default=10, type=int)
+
+    # no item_id ? -> Nothing to do
+    if item_id is None:
+        return create_dict_response(status=1,
+                                    ts=round(time.time()*1000))
+
+    # no container_name specified? -> select least served container
+    if container_name is None:
+        # container_name = get_least_served(conf["app"]["container_dict"])
+        container_name = System.query.filter(System.name != conf['app']['container_recommendation_baseline']).filter(System.name.notin_(conf["app"]["container_list"])).order_by(System.num_requests).first().name
+
+    if session_id is None:
+        # make new session and get session_id as sid
+        session_id = new_session(container_name)
+    else:
+        recommendation_id = Session.query.get_or_404(session_id).system_recommendation
+        container_name = System.query.filter_by(id=recommendation_id).first().name
+
+    recommendation_exp = query_system(container_name, item_id, rpp, page, session_id, logger, rec_type='PUB')
+
+    if conf['app']['INTERLEAVE']:
+        recommendation_base = query_system(conf['app']['container_recommendation_baseline'], item_id, rpp, page, session_id, logger, type='BASE', rec_type='PUB')
+        response = interleave(recommendation_exp, recommendation_base, rec_type='PUB')
+    else:
+        response = single_recommendation(recommendation_exp)
+
+    return jsonify(response)
     # logger = logging.getLogger("stella-app")
     # # look for mandatory GET-parameters (query, container_name)
     # query = request.args.get('query',None)
@@ -200,7 +263,7 @@ def recommend():
     #     q_time = round((ts_end-ts_start)*1000)
     #     response_dict = create_dict_response(itemlist=result['itemlist'],params=request.args,q_time=q_time,container=container_name,num_found=result['num_found'],ts=ts,page=page,rpp=rpp,query=query)
     # return jsonify(response_dict)
-    pass
+
 
 # @api.route('/dashboard')
 # def dashboard():
