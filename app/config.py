@@ -16,15 +16,16 @@ conf["app"]["container_dict_recommendation"] = {}
 for container_name in conf["app"]["container_list_recommendation"]:
     conf["app"]["container_dict_recommendation"][container_name] = {"requests": 0}
 
-conf['app']['DEBUG'] = False
+conf['app']['DEBUG'] = True
 conf['app']['DELETE_SENT_SESSION'] = True
 conf["app"]["INTERVAL_DB_CHECK"] = 3  # seconds
-conf["app"]["SESSION_EXPIRATION"] = 30  # seconds
+conf["app"]["SESSION_EXPIRATION"] = 6  # seconds
 
-conf["app"]["STELLA_SERVER_API"] = "http://nginx/stella/api/v1"
+# conf["app"]["STELLA_SERVER_API"] = "http://nginx/stella/api/v1"
+conf["app"]["STELLA_SERVER_API"] = "http://localhost/stella/api/v1"
 conf["app"]["STELLA_SERVER_USER"] = "site_a@stella.org"
 conf["app"]["STELLA_SERVER_PASS"] = "pass"
-conf["app"]["STELLA_SERVER_USERNAME"] = "Site A"
+conf["app"]["STELLA_SERVER_USERNAME"] = "site_a"
 conf["app"]["INTERLEAVE"] = True
 conf['app']['REST_QUERY'] = True
 

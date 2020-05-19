@@ -2,7 +2,7 @@ import logging
 import time
 import json
 from config import conf
-from .models import db, Session, Result, Feedback
+from .models import db, Session, Result, Feedback, System
 from apscheduler.schedulers.background import BackgroundScheduler
 import requests as req
 from datetime import datetime, timedelta
@@ -43,8 +43,8 @@ def post_session(session, site_id):
         'site_user': session.site_user,
         'start': session.start.strftime("%Y-%m-%d %H:%M:%S"),
         'end': session.start.strftime("%Y-%m-%d %H:%M:%S"),
-        'system_ranking': 'Experimental Ranker A',
-        'system_recommendation': 'Experimental Recommender A'
+        'system_ranking': System.query.filter_by(id=session.system_ranking, type='RANK').first().name,
+        'system_recommendation': System.query.filter_by(id=session.system_recommendation, type='REC').first().name
     }
 
     r = req.post(API + '/sites/' + str(site_id) + '/sessions',

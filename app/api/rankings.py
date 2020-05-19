@@ -113,9 +113,11 @@ def query_system(container_name, query, rpp, page, session_id, logger, type='EXP
     return ranking
 
 
-def new_session(container_name):
+def new_session(container_name, container_rec_name):
     session = Session(start=datetime.now(),
                       system_ranking=System.query.filter_by(name=container_name).first().id,
+                      system_recommendation=System.query.filter_by(name=container_rec_name).first().id,
+                      site_user='unknown',
                       exit=False,
                       sent=False)
     db.session.add(session)
@@ -184,7 +186,7 @@ def ranking():
     if container_name is None:
         # container_name = get_least_served(conf["app"]["container_dict"])
         container_name = System.query.filter(System.name != conf['app']['container_baseline']).filter(System.name.notin_(conf["app"]["container_list_recommendation"])).order_by(System.num_requests).first().name
-
+        container_rec_name = System.query.filter(System.name != conf['app']['container_baseline']).filter(System.name.notin_(conf["app"]["container_list"])).order_by(System.num_requests).first().name
     # container_name does not exist in config? -> Nothing to do
     # i think this check is not necessary anymore. the system names in the database are extracted from
     # the config file when the application starts
@@ -194,7 +196,7 @@ def ranking():
 
     if session_id is None:
         # make new session and get session_id as sid
-        session_id = new_session(container_name)
+        session_id = new_session(container_name, container_rec_name)
     else:
         ranking_id = Session.query.get_or_404(session_id).system_ranking
         container_name = System.query.filter_by(id=ranking_id).first().name
@@ -204,7 +206,11 @@ def ranking():
     if conf['app']['INTERLEAVE']:
         ranking_base = query_system(conf['app']['container_baseline'], query, rpp, page, session_id, logger, type='BASE')
         response = interleave(ranking_exp, ranking_base)
+        response_complete = {'header': {'session': ranking_exp.session_id},
+                             'body': response}
     else:
         response = single_ranking(ranking_exp)
+        response_complete = {'header': {'session': ranking_exp.session_id},
+                             'body': response}
 
-    return jsonify(response)
+    return jsonify(response_complete)

@@ -15,9 +15,11 @@ from core.interleave import tdi, tdi_rec
 client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 
 
-def new_session(container_name):
+def new_session(container_name, container_rec_name):
     session = Session(start=datetime.now(),
                       system_ranking=System.query.filter_by(name=container_name).first().id,
+                      system_recommendation=System.query.filter_by(name=container_rec_name).first().id,
+                      site_user='unknown',
                       exit=False,
                       sent=False)
     db.session.add(session)
@@ -164,10 +166,11 @@ def recommend_dataset():
     if container_name is None:
         # container_name = get_least_served(conf["app"]["container_dict"])
         container_name = System.query.filter(System.name != conf['app']['container_recommendation_baseline']).filter(System.name.notin_(conf["app"]["container_list"])).order_by(System.num_requests).first().name
+        container_rank_name = System.query.filter(System.name != conf['app']['container_recommendation_baseline']).filter(System.name.notin_(conf["app"]["container_list_recommendation"])).order_by(System.num_requests).first().name
 
     if session_id is None:
         # make new session and get session_id as sid
-        session_id = new_session(container_name)
+        session_id = new_session(container_rank_name, container_name)
     else:
         recommendation_id = Session.query.get_or_404(session_id).system_recommendation
         container_name = System.query.filter_by(id=recommendation_id).first().name
@@ -204,10 +207,11 @@ def recommend():
     if container_name is None:
         # container_name = get_least_served(conf["app"]["container_dict"])
         container_name = System.query.filter(System.name != conf['app']['container_recommendation_baseline']).filter(System.name.notin_(conf["app"]["container_list"])).order_by(System.num_requests).first().name
+        container_rank_name = System.query.filter(System.name != conf['app']['container_recommendation_baseline']).filter(System.name.notin_(conf["app"]["container_list_recommendation"])).order_by(System.num_requests).first().name
 
     if session_id is None:
         # make new session and get session_id as sid
-        session_id = new_session(container_name)
+        session_id = new_session(container_rank_name, container_name)
     else:
         recommendation_id = Session.query.get_or_404(session_id).system_recommendation
         container_name = System.query.filter_by(id=recommendation_id).first().name
