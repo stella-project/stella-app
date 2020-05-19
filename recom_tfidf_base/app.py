@@ -6,7 +6,8 @@ import random
 
 JL_PATH = './data/index'
 app = Flask(__name__)
-cos_sim_mat = pickle.load(open("cosine_similarity_matrix_top_10.pkl", "rb"))
+cos_sim_mat = None
+corpus = None
 
 
 def index_data(jl_path):
@@ -34,7 +35,12 @@ def index():
     ######################
     ### CUSTOM - START ###
     ######################
-    pass
+    global cos_sim_mat
+    cos_sim_mat = pickle.load(open("cosine_similarity_matrix_top_10.pkl", "rb"))
+    global corpus
+    for file in os.listdir(JL_PATH):
+        if file.endswith(".jsonl"):
+            corpus = index_data(os.path.join(JL_PATH, file))
     ####################
     ### CUSTOM - END ###
     ####################
@@ -87,8 +93,4 @@ def rec_pub():
 
 
 if __name__ == '__main__':
-    for file in os.listdir(JL_PATH):
-        if file.endswith(".jsonl"):
-            corpus = index_data(os.path.join(JL_PATH, file))
-
     app.run(host='0.0.0.0', port=5000, debug=True)
