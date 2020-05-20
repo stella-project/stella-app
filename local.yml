@@ -14,25 +14,26 @@ services:
         ports:
             - "8080:8000"
         depends_on:
-            - livivo_elastic
-            - livivo_elastic_base
+            - rank_elastic
+            - rank_elastic_base
             - recom_tfidf
+            - recom_tfidf_base
         networks:
             - stella-shared
 
-    livivo_elastic:
-        build: ./livivo_elastic
-        container_name: livivo_elastic
+    rank_elastic:
+        build: ./rank_elastic
+        container_name: rank_elastic
         volumes:
-          - ./livivo_elastic/data/:/data/
+          - ./data/:/data/
         networks:
             - stella-shared
 
-    livivo_elastic_base:
-        build: ./livivo_elastic_base
-        container_name: livivo_elastic_base
+    rank_elastic_base:
+        build: ./rank_elastic_base
+        container_name: rank_elastic_base
         volumes:
-          - ./livivo_elastic/data/:/data/
+          - ./data/:/data/
         networks:
             - stella-shared
           
@@ -41,5 +42,13 @@ services:
         container_name: recom_tfidf
         volumes:
           - ./data:/data
+        networks:
+            - stella-shared
+
+    recom_tfidf_base:
+        build: ./recom_tfidf
+        container_name: recom_tfidf_base
+        volumes:
+            - ./data/:/data/
         networks:
             - stella-shared

@@ -108,6 +108,7 @@ def query_system(container_name, query, rpp, page, session_id, logger, type='EXP
 
     system = System.query.filter_by(name=container_name).first()
     system.num_requests += 1
+    db.session.add(ranking)
     db.session.commit()
 
     return ranking
@@ -206,11 +207,13 @@ def ranking():
     if conf['app']['INTERLEAVE']:
         ranking_base = query_system(conf['app']['container_baseline'], query, rpp, page, session_id, logger, type='BASE')
         response = interleave(ranking_exp, ranking_base)
-        response_complete = {'header': {'session': ranking_exp.session_id},
+        response_complete = {'header': {'session': ranking_exp.session_id,
+                                        'ranking': ranking_exp.tdi},
                              'body': response}
     else:
         response = single_ranking(ranking_exp)
-        response_complete = {'header': {'session': ranking_exp.session_id},
+        response_complete = {'header': {'session': ranking_exp.session_id,
+                                        'ranking': ranking_exp.id},
                              'body': response}
 
     return jsonify(response_complete)

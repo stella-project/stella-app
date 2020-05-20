@@ -60,7 +60,7 @@ def post_feedback(feedback, session_id_server):
         'start': feedback.start.strftime("%Y-%m-%d %H:%M:%S"),
         'end': feedback.start.strftime("%Y-%m-%d %H:%M:%S"),  # add end datetime
         'interleave': feedback.interleave,
-        'clicks': json.dumps(feedback.clicks)
+        'clicks': (feedback.clicks if type(feedback.clicks) is str else json.dumps(feedback.clicks))
     }
     # post feedback from local db
     r = req.post(API + '/sessions/' + str(session_id_server) + '/feedbacks',
