@@ -8,7 +8,7 @@
 
 #### participants' systems
 - [ ] docker-container that wraps gesis-api / livivo-api
-- [ ] docker-container that ingest static pre-computed ranking in TREC-style format
+- [ ] docker-container that ingests a static pre-computed ranking in TREC-style format
 
 #### internal behavior of app
 - [ ] replace toy data from `payload` of `cron/post_session`
