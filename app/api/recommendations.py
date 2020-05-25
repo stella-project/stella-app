@@ -97,6 +97,7 @@ def query_system(container_name, item_id, rpp, page, session_id, logger, type='E
 
     system = System.query.filter_by(name=container_name).first()
     system.num_requests += 1
+    db.session.add(recommendation)
     db.session.commit()
 
     return recommendation
@@ -127,12 +128,12 @@ def interleave(recommendation_exp, recommendation_base, rec_type='DATA'):
     recommendation_id = recommendation.id
     recommendation.tdi = recommendation_id
 
-    recommendation_exp.tdi = recommendation_id
+    recommendation_base.tdi = recommendation_id
     db.session.add(recommendation_base)
     db.session.commit()
 
     recommendation_exp.tdi = recommendation_id
-    db.session.add(recommendation_base)
+    db.session.add(recommendation_exp)
     db.session.commit()
 
     return recommendation.items
