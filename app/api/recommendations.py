@@ -86,7 +86,7 @@ def query_system(container_name, item_id, rpp, page, session_id, logger, type='E
 
     recommendation = Result(session_id=session_id,
                             system_id=System.query.filter_by(name=container_name).first().id,
-                            type='REC_DATA',
+                            type='REC_' + rec_type,
                             q=item_id,
                             q_date=q_date,
                             q_time=q_time,
@@ -113,7 +113,7 @@ def interleave(recommendation_exp, recommendation_base, rec_type='DATA'):
         item_dict = tdi(base, exp)
     recommendation = Result(session_id=recommendation_exp.session_id,
                             system_id=recommendation_exp.system_id,
-                            type='REC_DATA',
+                            type='REC_' + rec_type,
                             q=recommendation_exp.q,
                             q_date=recommendation_exp.q_date,
                             q_time=recommendation_exp.q_time,
