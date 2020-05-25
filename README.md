@@ -11,8 +11,8 @@
 - [ ] docker-container that ingests a static pre-computed ranking in TREC-style format
 
 #### internal behavior of app
-- [ ] replace toy data from `payload` of `cron/post_session`
-- [ ] replace toy data from `payload` of `cron/post_feedback`
+- [x] replace toy data from `payload` of `cron/post_session`
+- [x] replace toy data from `payload` of `cron/post_feedback`
 - [ ] recommendation endpoints
 - [ ] send feedback for recommender
 - [ ] initial indexing of all containers, when starting the application
