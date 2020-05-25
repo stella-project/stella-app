@@ -16,7 +16,7 @@
       <thead>
         <tr>
           <th data-field="name" data-sortable="true">System</th>
-          <th data-field="index" data-sortable="true">Index available</th>
+          <!-- <th data-field="index" data-sortable="true">Index available</th>-->
         </tr>
       </thead>
       <tbody>
@@ -48,10 +48,10 @@
             $(function() {
               $('#table').bootstrapTable({
                 data: mydata,
-                columns: [ {},{},
+                columns: [ {},
                 {
                   field: 'operate',
-                  title: 'Edit',
+                  title: 'Index',
                   align: 'center',
                   valign: 'middle',
                   clickToSelect: false,
