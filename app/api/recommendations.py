@@ -7,7 +7,7 @@ import requests
 from flask import jsonify, request
 from . import api
 from core import get_least_served
-from core.models import db, System, Session, Result
+from core.models import db, System, Session, Result, Feedback
 from config import conf
 from utils import create_dict_response
 from core.interleave import tdi, tdi_rec
@@ -144,6 +144,30 @@ def single_recommendation(recommendation):
     db.session.commit()
 
     return recommendation.items
+
+
+@api.route('/recommendation/<int:id>/feedback', methods=['POST'])
+def post_rec_feedback(id):
+    clicks = request.values.get('clicks', None)
+    if clicks is not None:
+        recommendation = Result.query.get_or_404(id)
+        feedback = Feedback(start=recommendation.q_date,
+                            session_id=recommendation.session_id,
+                            interleave=recommendation.tdi is not None,
+                            clicks=clicks)
+
+        db.session.add(feedback)
+        db.session.commit()
+        recommendation.feedback_id = feedback.id
+        db.session.add(recommendation)
+        db.session.commit()
+        recommendations = Result.query.filter_by(tdi=recommendation.id).all()
+        for r in recommendations:
+            r.feedback_id = feedback.id
+        db.session.add_all(recommendations)
+        db.session.commit()
+
+        return {"msg": "Added new feedback with success!"}, 201
 
 
 @api.route("/recommendation/datasets", methods=["GET"])
