@@ -208,7 +208,12 @@ def recommend_dataset():
     else:
         response = single_recommendation(recommendation_exp)
 
-    return jsonify(response)
+    response_complete = {'header': {'session': recommendation_exp.session_id,
+                                    'recommendation': recommendation_exp.id},
+                         'body': response}
+
+    # return jsonify(response)
+    return jsonify(response_complete)
 
 
 @api.route("/recommendation/publications", methods=["GET"])
@@ -249,4 +254,9 @@ def recommend():
     else:
         response = single_recommendation(recommendation_exp)
 
-    return jsonify(response)
+    response_complete = {'header': {'session': recommendation_exp.session_id,
+                                    'recommendation': recommendation_exp.id},
+                         'body': response}
+
+    # return jsonify(response)
+    return jsonify(response_complete)

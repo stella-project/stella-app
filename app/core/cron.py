@@ -85,9 +85,14 @@ def post_result(result, feedback_id_server):
     }
 
     # post rankings to stella-server with (remote) feedback id
-    r = req.post(API + '/feedbacks/' + str(feedback_id_server) + '/rankings',
-                 data=payload,
-                 auth=(conf["app"].get("STELLA_SERVER_TOKEN"), ''))
+    if result.type == 'RANK':
+        r = req.post(API + '/feedbacks/' + str(feedback_id_server) + '/rankings',
+                     data=payload,
+                     auth=(conf["app"].get("STELLA_SERVER_TOKEN"), ''))
+    else:
+        r = req.post(API + '/feedbacks/' + str(feedback_id_server) + '/recommendations',
+                     data=payload,
+                     auth=(conf["app"].get("STELLA_SERVER_TOKEN"), ''))
 
     return r.status_code
 
