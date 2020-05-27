@@ -8,18 +8,18 @@
 
 #### participants' systems
 - [ ] docker-container that wraps gesis-api / livivo-api
-- [ ] docker-container that ingests a static pre-computed ranking in TREC-style format
+- [ ] docker-container template for pre-computed rankings in TREC-style format
 
 #### internal behavior of app
+- [ ] bulk indexing: initial indexing of all containers, when starting the application
 - [x] replace toy data from `payload` of `cron/post_session`
 - [x] replace toy data from `payload` of `cron/post_feedback`
-- [ ] recommendation endpoints
-- [ ] send feedback for recommender
-- [ ] initial indexing of all containers, when starting the application
-- [ ] sync experimental systems -> stella-server will write to config-file
+- [x] recommendation endpoints
+- [x] send feedback for recommender
 
 #### sw dev
 - [ ] code documentation
+- [ ] cleaner code
 - [ ] unit tests
 
 #### done
