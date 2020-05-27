@@ -1,10 +1,4 @@
 version: '3'
-
-networks:
-    stella-shared:
-        external:
-            name: stella-server_default
-
 services:
     app:
         build: ./app
@@ -18,37 +12,27 @@ services:
             - rank_elastic_base
             - recom_tfidf
             - recom_tfidf_base
-        networks:
-            - stella-shared
 
     rank_elastic:
         build: ./rank_elastic
         container_name: rank_elastic
         volumes:
           - ./data/:/data/
-        networks:
-            - stella-shared
 
     rank_elastic_base:
         build: ./rank_elastic_base
         container_name: rank_elastic_base
         volumes:
           - ./data/:/data/
-        networks:
-            - stella-shared
-          
+
     recom_tfidf:
         build: ./recom_tfidf
         container_name: recom_tfidf
         volumes:
-          - ./data:/data
-        networks:
-            - stella-shared
+          - ./data/:/data/
 
     recom_tfidf_base:
         build: ./recom_tfidf
         container_name: recom_tfidf_base
         volumes:
-            - ./data/:/data/
-        networks:
-            - stella-shared
+          - ./data/:/data/
