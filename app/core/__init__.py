@@ -1,5 +1,5 @@
 from typing import List
-
+import threading
 import docker
 from flask import Flask
 from utils import create_logger
@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 
 from .models import db, System, Session
-
+from .index import rest_index, cmd_index
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -21,17 +21,22 @@ client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 
 def index():
     ''' run indexing methods for all available containers '''
-    container_list = list(conf["app"]["container_dict"].keys())
-
-    cmd = 'python3 /script/index'
+    container_list = conf["app"]["container_list"] + conf["app"]["container_list_recommendation"]
 
     time.sleep(SECS)
 
-    for entry in container_list:
-        container = client.containers.get(entry)
-        logger = logging.getLogger("stella-app")
-        logger.debug(f'Indexing container "{container}"...')
-        exec_res = container.exec_run(cmd)
+    threads = []
+
+    if conf['app']['REST_QUERY']:
+        for container_name in container_list:
+            t = threading.Thread(target=rest_index, args=(container_name,))
+            threads.append(t)
+            t.start()
+    else:
+        for container_name in container_list:
+            t = threading.Thread(target=cmd_index, args=(container_name,))
+            threads.append(t)
+            t.start()
 
 
 def get_least_served(container_dict):
@@ -50,7 +55,8 @@ def get_least_served(container_dict):
 
 def create_app(config_name):
 
-    # index()
+    if conf['app']['BULK_INDEX']:
+        index()
 
     create_logger("stella-app", f"{conf['log']['log_path']}/{conf['log']['log_file']}")
     logger = logging.getLogger("stella-app")

@@ -28,6 +28,7 @@ conf["app"]["STELLA_SERVER_PASS"] = "pass"
 conf["app"]["STELLA_SERVER_USERNAME"] = "site_a"
 conf["app"]["INTERLEAVE"] = True
 conf['app']['REST_QUERY'] = True
+conf['app']['BULK_INDEX'] = True
 
 # logger settings
 conf["log"] = {}
