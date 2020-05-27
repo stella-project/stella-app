@@ -11,7 +11,7 @@
 - [ ] docker-container template for pre-computed rankings in TREC-style format
 
 #### internal behavior of app
-- [ ] bulk indexing: initial indexing of all containers, when starting the application
+- [x] bulk indexing: initial indexing of all containers, when starting the application
 - [x] replace toy data from `payload` of `cron/post_session`
 - [x] replace toy data from `payload` of `cron/post_feedback`
 - [x] recommendation endpoints
