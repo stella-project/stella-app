@@ -1,0 +1,46 @@
+from gensim.models.doc2vec import Doc2Vec, TaggedDocument
+import util
+import json
+import pandas as pd
+import pickle
+
+model_pubset_en = Doc2Vec.load("model/model_en/pubset_en")
+model_pubset_de = Doc2Vec.load("model/model_de/pubSet_de_all.model")
+model_language = FastText('model/lid.176.ftz')
+
+with open("data/publication.json", encoding ='utf-8') as f :
+    pubs = json.load(f)
+    
+pubdf=pd.DataFrame(pubs).T
+
+def getSimilarDataset(idf):
+    words = util.get_Vocabs(item,idf)
+    res_datast = []
+    langg = model_language.predict_proba_single(" ".join(words))
+    if (len(langg)==0):
+        print(" ".join(words))
+    else:
+        lang = langg[0][0]
+        #print("create infer_vector...")
+        if lang=="en":
+            paragvector = model_pubset_en.infer_vector(words)
+            #paragraph_vectors.append(paragvector)
+            result = model_pubset_en.docvecs.most_similar(positive=[paragvector], topn=50)
+        else:
+            paragvector = model_pubset_de.infer_vector(words)
+            #paragraph_vectors.append(paragvector)
+            result = model_pubset_de.docvecs.most_similar(positive=[paragvector], topn=50)
+            
+        #print("filter datasets...")
+        res_datast = [(a,b) for (a,b) in result if isDataset(a)][0:10]  
+    return res_datas
+
+similarity_all=[]
+for idf in pubdf.index:
+    try:
+        similarity_all.append({"target_items":idf,"similar_items":getSimilarDataset(idf)})
+    except:
+        print(idf)
+    
+with open('DocVec_similarity_matrix_top_10.pkl', 'wb') as b:
+    pickle.dump(similarity_all,b)

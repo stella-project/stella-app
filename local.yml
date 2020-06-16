@@ -12,6 +12,7 @@ services:
             - rank_elastic_base
             - recom_tfidf
             - recom_tfidf_base
+            - recom_new
 
     rank_elastic:
         build: ./rank_elastic
@@ -36,3 +37,9 @@ services:
         container_name: recom_tfidf_base
         volumes:
           - ./data/:/data/
+
+    recom_new:
+        build: ./recom_new
+        container_name: recom_new
+        volumes:
+            - ./data/:/data/

@@ -52,3 +52,11 @@ services:
             - ./data/:/data/
         networks:
             - stella-shared
+
+    recom_new:
+        build: ./recom_new
+        container_name: recom_new
+        volumes:
+            - ./data/:/data/
+        networks:
+            - stella-shared

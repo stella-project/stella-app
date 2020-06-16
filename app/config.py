@@ -3,7 +3,7 @@ conf = {}
 # app settings
 conf["app"] = {}
 conf["app"]["container_list"] = ["rank_elastic", "rank_elastic_base"]
-conf["app"]["container_list_recommendation"] = ["recom_tfidf", "recom_tfidf_base"]
+conf["app"]["container_list_recommendation"] = ["recom_tfidf", "recom_tfidf_base","recom_new"]
 conf["app"]["container_baseline"] = "rank_elastic_base"
 conf["app"]["container_recommendation_baseline"] = "recom_tfidf_base"
 
