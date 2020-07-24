@@ -207,13 +207,22 @@ def ranking():
     if conf['app']['INTERLEAVE']:
         ranking_base = query_system(conf['app']['container_baseline'], query, rpp, page, session_id, logger, type='BASE')
         response = interleave(ranking_exp, ranking_base)
-        response_complete = {'header': {'session': ranking_exp.session_id,
-                                        'ranking': ranking_exp.tdi},
+        response_complete = {'header': {'sid': ranking_exp.session_id,
+                                        'rid': ranking_exp.tdi,
+                                        'q': query,
+                                        'page': page,
+                                        'rpp': rpp,
+                                        'container': {'base': conf['app']['container_baseline'],
+                                                      'exp': container_name}},
                              'body': response}
     else:
         response = single_ranking(ranking_exp)
-        response_complete = {'header': {'session': ranking_exp.session_id,
-                                        'ranking': ranking_exp.id},
+        response_complete = {'header': {'sid': ranking_exp.session_id,
+                                        'rid': ranking_exp.id,
+                                        'q': query,
+                                        'page': page,
+                                        'rpp': rpp,
+                                        'container': {'base': conf['app']['container_baseline']}},
                              'body': response}
 
     return jsonify(response_complete)
