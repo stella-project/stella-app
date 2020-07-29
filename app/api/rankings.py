@@ -222,7 +222,7 @@ def ranking():
                                         'q': query,
                                         'page': page,
                                         'rpp': rpp,
-                                        'container': {'base': conf['app']['container_baseline']}},
+                                        'container': {'exp': container_name}},
                              'body': response}
 
     return jsonify(response_complete)

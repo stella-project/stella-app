@@ -174,7 +174,7 @@ def post_rec_feedback(id):
 def recommend_dataset():
     logger = logging.getLogger("stella-app")
     # look for mandatory GET-parameters (query, container_name)
-    item_id = request.args.get('item_id', None)
+    itemid = request.args.get('itemid', None)
     container_name = request.args.get('container', None)
     session_id = request.args.get('sid', None)
 
@@ -183,7 +183,7 @@ def recommend_dataset():
     rpp = request.args.get('rpp', default=10, type=int)
 
     # no item_id ? -> Nothing to do
-    if item_id is None:
+    if itemid is None:
         return create_dict_response(status=1,
                                     ts=round(time.time()*1000))
 
@@ -200,17 +200,36 @@ def recommend_dataset():
         recommendation_id = Session.query.get_or_404(session_id).system_recommendation
         container_name = System.query.filter_by(id=recommendation_id).first().name
 
-    recommendation_exp = query_system(container_name, item_id, rpp, page, session_id, logger)
+    recommendation_exp = query_system(container_name, itemid, rpp, page, session_id, logger)
 
     if conf['app']['INTERLEAVE']:
-        recommendation_base = query_system(conf['app']['container_recommendation_baseline'], item_id, rpp, page, session_id, logger, type='BASE')
+        recommendation_base = query_system(conf['app']['container_recommendation_baseline'], itemid, rpp, page, session_id, logger, type='BASE')
         response = interleave(recommendation_exp, recommendation_base)
+
+        response_complete = {'header': {'sid': recommendation_exp.session_id,
+                                        'rid': recommendation_exp.id,
+                                        'itemid': itemid,
+                                        'page': page,
+                                        'rpp': rpp,
+                                        'type': 'DATA',
+                                        'container': {'base': conf['app']['container_recommendation_baseline'],
+                                                      'exp': container_name}},
+                             'body': response}
     else:
         response = single_recommendation(recommendation_exp)
 
-    response_complete = {'header': {'session': recommendation_exp.session_id,
-                                    'recommendation': recommendation_exp.id},
-                         'body': response}
+        response_complete = {'header': {'sid': recommendation_exp.session_id,
+                                        'rid': recommendation_exp.id,
+                                        'itemid': itemid,
+                                        'page': page,
+                                        'rpp': rpp,
+                                        'type': 'DATA',
+                                        'container': {'exp': container_name}},
+                             'body': response}
+
+    # response_complete = {'header': {'session': recommendation_exp.session_id,
+    #                                 'recommendation': recommendation_exp.id},
+    #                      'body': response}
 
     # return jsonify(response)
     return jsonify(response_complete)
@@ -220,7 +239,7 @@ def recommend_dataset():
 def recommend():
     logger = logging.getLogger("stella-app")
     # look for mandatory GET-parameters (query, container_name)
-    item_id = request.args.get('item_id', None)
+    itemid = request.args.get('itemid', None)
     container_name = request.args.get('container', None)
     session_id = request.args.get('sid', None)
 
@@ -229,7 +248,7 @@ def recommend():
     rpp = request.args.get('rpp', default=10, type=int)
 
     # no item_id ? -> Nothing to do
-    if item_id is None:
+    if itemid is None:
         return create_dict_response(status=1,
                                     ts=round(time.time()*1000))
 
@@ -246,17 +265,34 @@ def recommend():
         recommendation_id = Session.query.get_or_404(session_id).system_recommendation
         container_name = System.query.filter_by(id=recommendation_id).first().name
 
-    recommendation_exp = query_system(container_name, item_id, rpp, page, session_id, logger, rec_type='PUB')
+    recommendation_exp = query_system(container_name, itemid, rpp, page, session_id, logger, rec_type='PUB')
 
     if conf['app']['INTERLEAVE']:
-        recommendation_base = query_system(conf['app']['container_recommendation_baseline'], item_id, rpp, page, session_id, logger, type='BASE', rec_type='PUB')
+        recommendation_base = query_system(conf['app']['container_recommendation_baseline'], itemid, rpp, page, session_id, logger, type='BASE', rec_type='PUB')
         response = interleave(recommendation_exp, recommendation_base, rec_type='PUB')
+
+        response_complete = {'header': {'sid': recommendation_exp.session_id,
+                                        'rid': recommendation_exp.id,
+                                        'itemid': itemid,
+                                        'page': page,
+                                        'rpp': rpp,
+                                        'type': 'PUB',
+                                        'container': {'base': conf['app']['container_recommendation_baseline'],
+                                                      'exp': container_name}},
+                             'body': response}
     else:
         response = single_recommendation(recommendation_exp)
-
-    response_complete = {'header': {'session': recommendation_exp.session_id,
-                                    'recommendation': recommendation_exp.id},
-                         'body': response}
+        # response_complete = {'header': {'session': recommendation_exp.session_id,
+        #                                 'recommendation': recommendation_exp.id},
+        #                      'body': response}
+        response_complete = {'header': {'sid': recommendation_exp.session_id,
+                                        'rid': recommendation_exp.id,
+                                        'itemid': itemid,
+                                        'page': page,
+                                        'rpp': rpp,
+                                        'type': 'PUB',
+                                        'container': {'exp': container_name}},
+                             'body': response}
 
     # return jsonify(response)
     return jsonify(response_complete)
