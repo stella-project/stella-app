@@ -76,7 +76,7 @@ ranking which is retrieved from a container running Solr.
 4. Run `docker-compose up`. Depending on the size of the sample data collection, you have to wait before sending the first request to the API in order to retrieve results.
 
 _Limitations:_
-Due to a different networking setup in Docker for OS X it’s not possible to debug the components on OS X at the moment. Docker itself is a virtual environment and without port mapping and exposing the containers can’t communicate. For further information see this [issue](https://github.com/docker/for-mac/issues/2670). 
+Due to a different networking setup in Docker for OS X it’s not possible to debug the components on OS X at the moment. Docker itself is a virtual machine and without port mapping and exposing the containers can’t communicate. For further information see this [issue](https://github.com/docker/for-mac/issues/2670). 
 
 ### Setup - Windows Desktop
 
