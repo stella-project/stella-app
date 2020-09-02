@@ -17,6 +17,15 @@ client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 
 
 def single_ranking(ranking):
+    '''
+    Add ranking to database
+
+    @param ranking: a ranking of type Result
+    
+    @return
+        ranked items (dict)
+
+    '''
     db.session.add(ranking)
     db.session.commit()
 
@@ -24,6 +33,18 @@ def single_ranking(ranking):
 
 
 def interleave(ranking_exp, ranking_base):
+    '''
+    Create interleaved ranking from experimental and baseline system
+    Used method: Team-Draft-Interleaving (TDI) [1]
+
+    [1] "How Does Clickthrough Data Reflect Retrieval Quality?"
+        Radlinski, Kurup, Joachims
+        Published in CIKM '15 2015
+
+    @param ranking_exp:     experimental ranking (Result)
+    @param ranking_base:    baseline ranking (Result)
+    @return:                interleaved ranking (dict)
+    '''
     base = {k: v.get('docid') for k, v in ranking_base.items.items()}
     exp = {k: v.get('docid') for k, v in ranking_exp.items.items()}
 
@@ -57,6 +78,16 @@ def interleave(ranking_exp, ranking_base):
 
 
 def rest(container_name, query, rpp, page):
+    '''
+    Produce container-ranking via rest-call implementation
+
+    @param container_name:  container name (str)
+    @param query:           search query (str)
+    @param rpp:             results per page (int)
+    @param page:            page number (int)
+
+    @return:                container-ranking (dict)
+    '''
     if conf['app']['DEBUG']:
         container = client.containers.get(container_name)
         ip_address = container.attrs['NetworkSettings']['Networks']['stella-app_default']['IPAddress']
@@ -68,6 +99,16 @@ def rest(container_name, query, rpp, page):
 
 
 def cmd(container_name, query, rpp, page):
+    '''
+    Produce container-ranking via classical cmd-call (fallback solution, much slower than rest-implementation)
+
+    @param container_name:  container name (str)
+    @param query:           search query (str)
+    @param rpp:             results per page (int)
+    @param page:            page number (int)
+
+    @return:                container-ranking (dict)
+    '''
     container = client.containers.get(container_name)
     cmd = 'python3 /script/ranking {} {} {}'.format(query, rpp, page)
     exec_res = container.exec_run(cmd)
@@ -76,6 +117,19 @@ def cmd(container_name, query, rpp, page):
 
 
 def query_system(container_name, query, rpp, page, session_id, logger, type='EXP'):
+    '''
+    Produce ranking from dockerized system
+
+    @param container_name:  container name (str)
+    @param query:           search query (str)
+    @param rpp:             results per page (int)
+    @param page:            page number (int)
+    @param session_id:      session_id (int)
+    @param logger:          logger object
+    @param type:            ranking type (str 'EXP' or 'BASE')
+
+    @return:                ranking (Result)
+    '''
 
     logger.debug(f'produce ranking with container: "{container_name}"...')
 
@@ -115,6 +169,14 @@ def query_system(container_name, query, rpp, page, session_id, logger, type='EXP
 
 
 def new_session(container_name, container_rec_name):
+    '''
+    create a new session and set experimental ranking and recommender-container for session
+
+    @param container_name:      ranking container name (str)
+    @param container_rec_name:  recommendation container name (str)
+
+    @return:                    session-id (int)
+    '''
     session = Session(start=datetime.now(),
                       system_ranking=System.query.filter_by(name=container_name).first().id,
                       system_recommendation=System.query.filter_by(name=container_rec_name).first().id,
@@ -129,7 +191,14 @@ def new_session(container_name, container_rec_name):
 
 @api.route("/test/<string:container_name>", methods=["GET"])
 def test(container_name):
-    ''' run test script for given container name'''
+    '''
+    run test script for given container name
+
+    @param container_name:  container name (str)
+
+    @return: Test-Message (str)
+    '''
+
     if request.method == 'GET':
         container = client.containers.get(container_name)
 
@@ -144,6 +213,15 @@ def test(container_name):
 def post_feedback(id):
     # 1) check if ranking with id exists
     # 2) check if feedback is not already in db
+
+    '''
+    add user feedback to database (collect data for statistics)
+
+    @param id:  ranking id (int)
+
+    @return:    HTTP status message 
+    '''
+
     clicks = request.values.get('clicks', None)
     if clicks is not None:
         ranking = Result.query.get_or_404(id)
@@ -168,6 +246,13 @@ def post_feedback(id):
 
 @api.route("/ranking", methods=["GET"])
 def ranking():
+    '''
+    produce a ranking for actual session 
+
+    @return:    ranking result (dict)
+                header contains meta-data
+                body contains ranked document list
+    '''
     logger = logging.getLogger("stella-app")
     # look for mandatory GET-parameters (query, container_name)
     query = request.args.get('query', None)
