@@ -1,5 +1,7 @@
 # STELLA application
 
+[Demo setup of the entire infrastructure](https://github.com/stella-project/stella-search#demo-setup-of-the-entire-infrastructure)
+
 ## Setup
 This repository contains a first prototype of the STELLA application which will be deployed at the sites.
 The API can be used to send a request to a (minimal) flask application. In return, the flask app will send back a
