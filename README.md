@@ -1,4 +1,4 @@
-# STELLA application
+# STELLA Application
 
 [Demo setup of the entire infrastructure](https://github.com/stella-project/stella-search#demo-setup-of-the-entire-infrastructure)
 
