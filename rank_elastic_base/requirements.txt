@@ -1,3 +1,0 @@
-elasticsearch
-elasticsearch-dsl
-flask

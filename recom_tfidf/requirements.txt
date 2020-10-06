@@ -1,7 +1,0 @@
-numpy
-pandas
-scipy
-scikit-learn
-nltk
-Flask
-spacy

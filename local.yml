@@ -14,25 +14,25 @@ services:
             - recom_tfidf_base
 
     rank_elastic:
-        build: ./rank_elastic
+        build: https://github.com/stella-project/rank_elastic.git
         container_name: rank_elastic
         volumes:
           - ./data/:/data/
 
     rank_elastic_base:
-        build: ./rank_elastic_base
+        build: https://github.com/stella-project/rank_elastic_base.git
         container_name: rank_elastic_base
         volumes:
           - ./data/:/data/
 
     recom_tfidf:
-        build: ./recom_tfidf
+        build: https://github.com/stella-project/recom_tfidf.git
         container_name: recom_tfidf
         volumes:
           - ./data/:/data/
 
     recom_tfidf_base:
-        build: ./recom_tfidf
+        build: https://github.com/stella-project/recom_tfidf_base.git
         container_name: recom_tfidf_base
         volumes:
           - ./data/:/data/
