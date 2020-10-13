@@ -36,7 +36,7 @@ def index():
     q_idx = query_index('./data/topic/head_queries_rnd1.xml')
 
     global doc_idx
-    doc_idx = pd.read_csv('./data/run/run_rnd1.txt', sep=' ', names=['num', 'Q0', 'rank', 'docid', 'score', 'runid'])
+    doc_idx = pd.read_csv('./data/run/run_rnd1.txt', sep=' ', names=['num', 'Q0', 'docid', 'rank', 'score', 'runid'])
     return 'MADE INDEX', 200
     ####################
     ### CUSTOM - END ###
