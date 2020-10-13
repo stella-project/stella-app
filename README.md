@@ -55,3 +55,61 @@ Due to a different networking setup in Docker for OS X it’s not possible to de
 
 # Workflow for sending feedback to the stella-app
 [![](https://mermaid.ink/img/eyJjb2RlIjoic2VxdWVuY2VEaWFncmFtXG4gICAgc2l0ZSAtPj4gc3RlbGxhX2FwcDogR0VUIC9yYW5raW5nP3E9PHN0cmluZzpxdWVyeT5cbiAgICBOb3RlIHJpZ2h0IG9mIHN0ZWxsYV9hcHA6IDEpIHVwb24gcmVxdWVzdCBvZiBhIDxicj4gcmFua2luZyBhIG5ldyA8YnI-IHNlc3Npb24gd2lsbCBiZSB3cml0dGVuIDxicj4gdG8gdGhlIGxvY2FsIGRiXG4gICAgTm90ZSByaWdodCBvZiBzdGVsbGFfYXBwOiAyKSBvbmUgcmFua3N5cyArIDxicj4gb25lIHJlY3N5cyA8YnI-IGFyZSBhc3NpZ25lZCB0byA8YnI-IHRoZSBzZXNzaW9uXG4gICAgc3RlbGxhX2FwcCAtLT4-IHNpdGU6IDxpdGVtcz4gPGJyPiA8YnI-ICgrIHJhbmtpbmdfaWQgKyBzZXNzaW9uX2lkKVxuICAgIE5vdGUgbGVmdCBvZiBzaXRlOiBsb2dzIHVzZXIgZGF0YSA8YnI-IGFuZCBpbnRlcmFjdGlvbnNcbiAgICBOb3RlIGxlZnQgb2Ygc2l0ZTogVXNlciBlbnRlcnMgPGJyPiBuZXcgcXVlcnlcbiAgICBzaXRlIC0-PiBzdGVsbGFfYXBwOiBHRVQgL3Jhbmtpbmc_cT0uLi4_cz1zZXNzaW9uX2lkXG4gICAgTm90ZSByaWdodCBvZiBzdGVsbGFfYXBwOiBzdGVsbGFfYXBwIHJldHVybnMgPGJyPiBhbm90aGVyIHJhbmtpbmcgYnkgPGJyPiB0aGUgc3lzdGVtIHRoYXQgaXMgPGJyPiBhc3NpZ25lZCB0byB0aGUgPGJyPiBzZXNzaW9uIHdpdGggPGJyPiBzZXNzaW9uX2lkXG4gICAgc3RlbGxhX2FwcCAtLT4-IHNpdGU6IDxpdGVtcz4gPGJyPiA8YnI-ICgrIHJhbmtpbmdfaWQgKyBzZXNzaW9uX2lkKVxuICAgIE5vdGUgbGVmdCBvZiBzaXRlOiBsb2dzIHVzZXIgZGF0YSA8YnI-IGFuZCBpbnRlcmFjdGlvbnNcbiAgICBzaXRlIC0-PiBzdGVsbGFfYXBwOiBQT1NUIC9mZWVkYmFja3MvPHJhbmtpbmdfaWQ-XG4gICAgTm90ZSByaWdodCBvZiBzdGVsbGFfYXBwOiBzdGVsbGFfYXBwIHdyaXRlcyA8YnI-IChjbGljaykgZmVlZGJhY2sgPGJyPiB0byBsb2NhbCBkYlxuICAgIHNpdGUgLT4-IHN0ZWxsYV9hcHA6IEdFVCBzZXNzaW9ucy88c2Vzc2lvbl9pZD4vZXhpdCBcbiAgICBOb3RlIHJpZ2h0IG9mIHN0ZWxsYV9hcHA6IE9wdGlvbmFsbHkgdGhlIDxicj4gc3RlbGxhX2FwcCBpcyBub3RpZmllZCA8YnI-IHdoZW4gc2Vzc2lvbnMgZW5kc1xuICAgIE5vdGUgcmlnaHQgb2Ygc3RlbGxhX2FwcDogc3RlbGxhX2FwcCBjaGVja3MgPGJyPiBsb2NhbCBkYiByZWd1bGFybHkgPGJyPiAoYnkgYSBnaXZlbiBpbnRlcnZhbCA8YnI-IGluIHRoZSBjb25maWctZmlsZSkgPGJyPiBhbmQgdXBsb2FkcyA8YnI-IGFsbCBlbmRlZCBzZXNzaW9ucyA8YnI-IHRvIHRoZSBzdGVsbGFfc2VydmVyXG5cbiIsIm1lcm1haWQiOnsidGhlbWUiOiJkZWZhdWx0In0sInVwZGF0ZUVkaXRvciI6ZmFsc2V9)](https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoic2VxdWVuY2VEaWFncmFtXG4gICAgc2l0ZSAtPj4gc3RlbGxhX2FwcDogR0VUIC9yYW5raW5nP3E9PHN0cmluZzpxdWVyeT5cbiAgICBOb3RlIHJpZ2h0IG9mIHN0ZWxsYV9hcHA6IDEpIHVwb24gcmVxdWVzdCBvZiBhIDxicj4gcmFua2luZyBhIG5ldyA8YnI-IHNlc3Npb24gd2lsbCBiZSB3cml0dGVuIDxicj4gdG8gdGhlIGxvY2FsIGRiXG4gICAgTm90ZSByaWdodCBvZiBzdGVsbGFfYXBwOiAyKSBvbmUgcmFua3N5cyArIDxicj4gb25lIHJlY3N5cyA8YnI-IGFyZSBhc3NpZ25lZCB0byA8YnI-IHRoZSBzZXNzaW9uXG4gICAgc3RlbGxhX2FwcCAtLT4-IHNpdGU6IDxpdGVtcz4gPGJyPiA8YnI-ICgrIHJhbmtpbmdfaWQgKyBzZXNzaW9uX2lkKVxuICAgIE5vdGUgbGVmdCBvZiBzaXRlOiBsb2dzIHVzZXIgZGF0YSA8YnI-IGFuZCBpbnRlcmFjdGlvbnNcbiAgICBOb3RlIGxlZnQgb2Ygc2l0ZTogVXNlciBlbnRlcnMgPGJyPiBuZXcgcXVlcnlcbiAgICBzaXRlIC0-PiBzdGVsbGFfYXBwOiBHRVQgL3Jhbmtpbmc_cT0uLi4_cz1zZXNzaW9uX2lkXG4gICAgTm90ZSByaWdodCBvZiBzdGVsbGFfYXBwOiBzdGVsbGFfYXBwIHJldHVybnMgPGJyPiBhbm90aGVyIHJhbmtpbmcgYnkgPGJyPiB0aGUgc3lzdGVtIHRoYXQgaXMgPGJyPiBhc3NpZ25lZCB0byB0aGUgPGJyPiBzZXNzaW9uIHdpdGggPGJyPiBzZXNzaW9uX2lkXG4gICAgc3RlbGxhX2FwcCAtLT4-IHNpdGU6IDxpdGVtcz4gPGJyPiA8YnI-ICgrIHJhbmtpbmdfaWQgKyBzZXNzaW9uX2lkKVxuICAgIE5vdGUgbGVmdCBvZiBzaXRlOiBsb2dzIHVzZXIgZGF0YSA8YnI-IGFuZCBpbnRlcmFjdGlvbnNcbiAgICBzaXRlIC0-PiBzdGVsbGFfYXBwOiBQT1NUIC9mZWVkYmFja3MvPHJhbmtpbmdfaWQ-XG4gICAgTm90ZSByaWdodCBvZiBzdGVsbGFfYXBwOiBzdGVsbGFfYXBwIHdyaXRlcyA8YnI-IChjbGljaykgZmVlZGJhY2sgPGJyPiB0byBsb2NhbCBkYlxuICAgIHNpdGUgLT4-IHN0ZWxsYV9hcHA6IEdFVCBzZXNzaW9ucy88c2Vzc2lvbl9pZD4vZXhpdCBcbiAgICBOb3RlIHJpZ2h0IG9mIHN0ZWxsYV9hcHA6IE9wdGlvbmFsbHkgdGhlIDxicj4gc3RlbGxhX2FwcCBpcyBub3RpZmllZCA8YnI-IHdoZW4gc2Vzc2lvbnMgZW5kc1xuICAgIE5vdGUgcmlnaHQgb2Ygc3RlbGxhX2FwcDogc3RlbGxhX2FwcCBjaGVja3MgPGJyPiBsb2NhbCBkYiByZWd1bGFybHkgPGJyPiAoYnkgYSBnaXZlbiBpbnRlcnZhbCA8YnI-IGluIHRoZSBjb25maWctZmlsZSkgPGJyPiBhbmQgdXBsb2FkcyA8YnI-IGFsbCBlbmRlZCBzZXNzaW9ucyA8YnI-IHRvIHRoZSBzdGVsbGFfc2VydmVyXG5cbiIsIm1lcm1haWQiOnsidGhlbWUiOiJkZWZhdWx0In0sInVwZGF0ZUVkaXRvciI6ZmFsc2V9)
+
+
+
+## Citation
+
+If you use `stella-app` in your work, please refer to it by the `CITATION.cff` file:
+
+```
+# YAML 1.2
+---
+abstract: "STELLA Application is a multi-container flask application and provides an API for transforming the experimental components and feedback between sites and the lab Infrastructure."
+authors: 
+  -
+    affiliation: "TH Köln - University of Applied Sciences, Germany"
+    family-names: Schaer
+    given-names: Philipp
+    orcid: "https://orcid.org/0000-0002-8817-4632"
+  -
+    affiliation: "GESIS - Leibniz Institute for the Social Sciences, Germany"
+    family-names: Schaible
+    given-names: Johann
+    orcid: "https://orcid.org/0000-0002-5441-7640"
+  -
+    affiliation: "ZB MED - Information Centre for Life Sciences, Germany"
+    family-names: "Garcia Castro"
+    given-names: "Leyla Jael"
+    orcid: "https://orcid.org/0000-0003-3986-0510"
+  -
+    affiliation: "TH Köln - University of Applied Sciences, Germany"
+    family-names: Breuer
+    given-names: Timo
+    orcid: "https://orcid.org/0000-0002-1765-2449"
+  -
+    affiliation: "GESIS - Leibniz Institute for the Social Sciences, Germany"
+    family-names: Tavakolpoursaleh
+    given-names: Narges
+    orcid: "https://orcid.org/0000-0001-9324-3252"
+  -
+    affiliation: "ZB MED - Information Centre for Life Sciences, Germany"
+    family-names: Wolff
+    given-names: Benjamin
+    orcid: "https://orcid.org/0000-0001-9345-8958"
+cff-version: "1.1.0"
+date-released: 2020-09-21
+keywords: 
+  - "Living Lab"
+  - "Evaluation Infrastructure"
+  - "Shared Task"
+license: MIT
+message: "If you use this software, please cite it using these metadata."
+title: "STELLA App"
+version: "0.1"
+...
+```
+
+## License
+
+`stella-app` is licensed under the MIT license. If you modify `stella-app` in any way, please link back to this repository.
