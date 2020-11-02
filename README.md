@@ -60,55 +60,11 @@ Due to a different networking setup in Docker for OS X it’s not possible to de
 
 ## Citation
 
-If you use `stella-app` in your work, please refer to it by the `CITATION.cff` file:
+We provide citation information via the [CITATION file](./CITATION.cff). If you use `stella-app` in your work, please cite our repository as follows:
 
-```
-# YAML 1.2
----
-abstract: "STELLA Application is a multi-container flask application and provides an API for transforming the experimental components and feedback between sites and the lab Infrastructure."
-authors: 
-  -
-    affiliation: "TH Köln - University of Applied Sciences, Germany"
-    family-names: Schaer
-    given-names: Philipp
-    orcid: "https://orcid.org/0000-0002-8817-4632"
-  -
-    affiliation: "GESIS - Leibniz Institute for the Social Sciences, Germany"
-    family-names: Schaible
-    given-names: Johann
-    orcid: "https://orcid.org/0000-0002-5441-7640"
-  -
-    affiliation: "ZB MED - Information Centre for Life Sciences, Germany"
-    family-names: "Garcia Castro"
-    given-names: "Leyla Jael"
-    orcid: "https://orcid.org/0000-0003-3986-0510"
-  -
-    affiliation: "TH Köln - University of Applied Sciences, Germany"
-    family-names: Breuer
-    given-names: Timo
-    orcid: "https://orcid.org/0000-0002-1765-2449"
-  -
-    affiliation: "GESIS - Leibniz Institute for the Social Sciences, Germany"
-    family-names: Tavakolpoursaleh
-    given-names: Narges
-    orcid: "https://orcid.org/0000-0001-9324-3252"
-  -
-    affiliation: "ZB MED - Information Centre for Life Sciences, Germany"
-    family-names: Wolff
-    given-names: Benjamin
-    orcid: "https://orcid.org/0000-0001-9345-8958"
-cff-version: "1.1.0"
-date-released: 2020-09-21
-keywords: 
-  - "Living Lab"
-  - "Evaluation Infrastructure"
-  - "Shared Task"
-license: MIT
-message: "If you use this software, please cite it using these metadata."
-title: "STELLA App"
-version: "0.1"
-...
-```
+> Schaer P, Schaible J, Garcia Castro LJ, Breuer T, Tavakolpoursaleh N, Wolff B. STELLA Search. Available at https://github.com/stella-project/stella-app/
+
+We recommend you include the retrieval date.
 
 ## License
 
