@@ -68,4 +68,4 @@ We recommend you include the retrieval date.
 
 ## License
 
-`stella-app` is licensed under the MIT license. If you modify `stella-app` in any way, please link back to this repository.
+`stella-app` is licensed under the [GNU GPLv3 license](https://github.com/stella-project/stella-app/blob/master/LICENSE). If you modify `stella-app` in any way, please link back to this repository.
