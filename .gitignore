@@ -3,3 +3,5 @@ __pycache__/
 data-dev.sqlite
 venv/
 app/log/
+data/gesis-search/*
+data/livivo/*

@@ -2,10 +2,10 @@ conf = {}
 
 # app settings
 conf["app"] = {}
-conf["app"]["container_list"] = ["rank_elastic", "rank_elastic_base"]
-conf["app"]["container_list_recommendation"] = ["recom_tfidf", "recom_tfidf_base"]
-conf["app"]["container_baseline"] = "rank_elastic_base"
-conf["app"]["container_recommendation_baseline"] = "recom_tfidf_base"
+conf["app"]["container_list"] =  ["dummy_rank", "dummy_rank_base"]
+conf["app"]["container_list_recommendation"] = ["gesis_rec_micro", "gesis_rec_precom"]
+conf["app"]["container_baseline"] = "dummy_rank_base"
+conf["app"]["container_recommendation_baseline"] = "gesis_rec_micro"
 
 # create container_dict from list values (easier)
 conf["app"]["container_dict"] = {}

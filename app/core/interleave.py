@@ -53,8 +53,8 @@ def tdi_rec(item_dict_base, item_dict_exp):
     pointer_exp = 0
     pointer_base = 0
 
-    recommendation_exp = [rec['id'] for rec in item_dict_exp.values()]
-    recommendation_base = [rec['id'] for rec in item_dict_base.values()]
+    recommendation_exp = [rec for rec in item_dict_exp.values()]
+    recommendation_base = [rec for rec in item_dict_base.values()]
     length_ranking_exp = len(recommendation_exp)
     length_ranking_base = len(recommendation_base)
 

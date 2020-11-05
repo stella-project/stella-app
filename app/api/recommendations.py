@@ -268,7 +268,11 @@ def recommend_dataset():
     if container_name is None:
         # container_name = get_least_served(conf["app"]["container_dict"])
         container_name = System.query.filter(System.name != conf['app']['container_recommendation_baseline']).filter(System.name.notin_(conf["app"]["container_list"])).order_by(System.num_requests).first().name
-        container_rank_name = System.query.filter(System.name != conf['app']['container_recommendation_baseline']).filter(System.name.notin_(conf["app"]["container_list_recommendation"])).order_by(System.num_requests).first().name
+        container_rank = System.query.filter(System.name != conf['app']['container_recommendation_baseline']).filter(System.name.notin_(conf["app"]["container_list_recommendation"])).order_by(System.num_requests).first()
+        if container_rank is not None:
+            container_rank_name = container_rank.name
+        else:
+            container_rank_name = None
 
     if session_id is None:
         # make new session and get session_id as sid

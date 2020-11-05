@@ -8,31 +8,17 @@ services:
         ports:
             - "8080:8000"
         depends_on:
-            - rank_elastic
-            - rank_elastic_base
-            - recom_tfidf
-            - recom_tfidf_base
+            - gesis_rec_micro
+            - gesis_rec_precom
 
-    rank_elastic:
-        build: https://github.com/stella-project/rank_elastic.git
-        container_name: rank_elastic
+    gesis_rec_micro:
+        build: https://github.com/stella-project/gesis_rec_micro.git
+        container_name: gesis_rec_micro
         volumes:
-          - ./data/:/data/
+          - ./data:/data
 
-    rank_elastic_base:
-        build: https://github.com/stella-project/rank_elastic_base.git
-        container_name: rank_elastic_base
+    gesis_rec_precom:
+        build: https://github.com/stella-project/gesis_rec_precom.git
+        container_name: gesis_rec_precom
         volumes:
-          - ./data/:/data/
-
-    recom_tfidf:
-        build: https://github.com/stella-project/recom_tfidf.git
-        container_name: recom_tfidf
-        volumes:
-          - ./data/:/data/
-
-    recom_tfidf_base:
-        build: https://github.com/stella-project/recom_tfidf_base.git
-        container_name: recom_tfidf_base
-        volumes:
-          - ./data/:/data/
+            - ./data/:/data/
