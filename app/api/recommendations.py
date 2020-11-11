@@ -2,6 +2,7 @@ import docker
 import logging
 import json
 import time
+from uuid import uuid4
 from datetime import datetime
 import requests
 from flask import jsonify, request
@@ -15,7 +16,7 @@ from core.interleave import tdi, tdi_rec
 client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 
 
-def new_session(container_name, container_rec_name):
+def new_session(container_name, container_rec_name, sid=None):
     '''
     create a new session which sets container_name as a ranking system and container_rec_name as a recommendation system
     and return session_id
@@ -26,7 +27,12 @@ def new_session(container_name, container_rec_name):
     Returns:
         session_id: the created session id
     '''
-    session = Session(start=datetime.now(),
+
+    if sid is None or not isinstance(sid, str):
+        sid = uuid4().hex
+
+    session = Session(id=sid,
+                      start=datetime.now(),
                       system_ranking=System.query.filter_by(name=container_name).first().id,
                       system_recommendation=System.query.filter_by(name=container_rec_name).first().id,
                       site_user='unknown',
@@ -278,6 +284,9 @@ def recommend_dataset():
         # make new session and get session_id as sid
         session_id = new_session(container_rank_name, container_name)
     else:
+        if Session.query.get(session_id) is None:
+            session_id = new_session(container_rank_name, container_name, session_id)
+
         recommendation_id = Session.query.get_or_404(session_id).system_recommendation
         container_name = System.query.filter_by(id=recommendation_id).first().name
 
@@ -348,6 +357,9 @@ def recommend():
         # make new session and get session_id as sid
         session_id = new_session(container_rank_name, container_name)
     else:
+        if Session.query.get(session_id) is None:
+            session_id = new_session(container_rank_name, container_name, session_id)
+
         recommendation_id = Session.query.get_or_404(session_id).system_recommendation
         container_name = System.query.filter_by(id=recommendation_id).first().name
 

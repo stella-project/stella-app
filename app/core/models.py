@@ -4,7 +4,7 @@ db = SQLAlchemy()
 
 class Session(db.Model):
     __tablename__ = 'sessions'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(64), primary_key=True)
     start = db.Column(db.DateTime, nullable=True)
     end = db.Column(db.DateTime, nullable=True)
     site_user = db.Column(db.String(64), index=True)

@@ -2,6 +2,7 @@ import docker
 import logging
 import json
 import time
+from uuid import uuid4
 from datetime import datetime
 import requests
 import random
@@ -168,7 +169,7 @@ def query_system(container_name, query, rpp, page, session_id, logger, type='EXP
     return ranking
 
 
-def new_session(container_name, container_rec_name):
+def new_session(container_name, container_rec_name, sid=None):
     '''
     create a new session and set experimental ranking and recommender-container for session
 
@@ -177,7 +178,12 @@ def new_session(container_name, container_rec_name):
 
     @return:                    session-id (int)
     '''
-    session = Session(start=datetime.now(),
+
+    if sid is None or not isinstance(sid, str):
+        sid = uuid4().hex
+
+    session = Session(id=sid,
+                      start=datetime.now(),
                       system_ranking=System.query.filter_by(name=container_name).first().id,
                       system_recommendation=System.query.filter_by(name=container_rec_name).first().id,
                       site_user='unknown',
@@ -284,8 +290,11 @@ def ranking():
         # make new session and get session_id as sid
         session_id = new_session(container_name, container_rec_name)
     else:
-        ranking_id = Session.query.get_or_404(session_id).system_ranking
-        container_name = System.query.filter_by(id=ranking_id).first().name
+        if Session.query.get(session_id) is None:
+            session_id = new_session(container_name, container_rec_name, session_id)
+
+        recommendation_id = Session.query.get_or_404(session_id).system_recommendation
+        container_name = System.query.filter_by(id=recommendation_id).first().name
 
     ranking_exp = query_system(container_name, query, rpp, page, session_id, logger)
 
