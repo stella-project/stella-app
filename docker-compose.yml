@@ -1,54 +1,32 @@
 version: '3'
-
 networks:
-    stella-shared:
-        external:
-            name: stella-server_default
-
+  stella-shared:
+    external:
+      name: stella-server_default
 services:
-    app:
-        build: ./app
-        volumes:
-          - /var/run/docker.sock/:/var/run/docker.sock
-          - ./app/log:/app/log
-        ports:
-            - "8080:8000"
-        depends_on:
-            - rank_elastic
-            - rank_elastic_base
-            - recom_tfidf
-            - recom_tfidf_base
-        networks:
-            - stella-shared
-
-    rank_elastic:
-        build: https://github.com/stella-project/rank_elastic.git
-        container_name: rank_elastic
-        volumes:
-          - ./data/:/data/
-        networks:
-            - stella-shared
-
-    rank_elastic_base:
-        build: https://github.com/stella-project/rank_elastic_base.git
-        container_name: rank_elastic_base
-        volumes:
-          - ./data/:/data/
-        networks:
-            - stella-shared
-
-    recom_tfidf:
-        build: https://github.com/stella-project/recom_tfidf.git
-        container_name: recom_tfidf
-        volumes:
-          - ./data:/data
-        networks:
-            - stella-shared
-
-    recom_tfidf_base:
-        build: https://github.com/stella-project/recom_tfidf_base.git
-        container_name: recom_tfidf_base
-        volumes:
-            - ./data/:/data/
-        networks:
-            - stella-shared
+  app:
+    build: ./app
+    volumes:
+        - /var/run/docker.sock/:/var/run/docker.sock
+        - ./app/log:/app/log
+    ports:
+        - 8080:8000
+    depends_on:
+        - gesis_rec_precom
+        - gesis_rec_micro
+    networks:
+        - stella-shared
+  gesis_rec_precom:
+    build: https://github.com/stella-project/gesis_rec_precom
+    container_name: gesis_rec_precom
+    volumes:
+        - ./data/:/data/
+    networks:
+        - stella-shared
+  gesis_rec_micro:
+    build: https://github.com/stella-project/gesis_rec_micro
+    container_name: gesis_rec_micro
+    volumes:
+        - ./data/:/data/
+    networks:
+        - stella-shared
