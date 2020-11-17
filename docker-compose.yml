@@ -11,6 +11,22 @@ services:
         - ./app/log:/app/log
     ports:
         - 8080:8000
-    depends_on: []
+    depends_on:
+        - gesis_rec_precom
+        - gesis_rec_micro
+    networks:
+        - stella-shared
+  gesis_rec_precom:
+    build: https://github.com/stella-project/gesis_rec_precom
+    container_name: gesis_rec_precom
+    volumes:
+        - ./data/:/data/
+    networks:
+        - stella-shared
+  gesis_rec_micro:
+    build: https://github.com/stella-project/gesis_rec_micro
+    container_name: gesis_rec_micro
+    volumes:
+        - ./data/:/data/
     networks:
         - stella-shared
