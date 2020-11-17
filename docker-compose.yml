@@ -12,27 +12,8 @@ services:
     ports:
         - 8080:8000
     depends_on:
-        - rank_dummy
-        - rank_dummy_base
         - gesis_rec_precom
         - gesis_rec_micro
-        - asdf
-        - wasd
-        - dummy
-    networks:
-        - stella-shared
-  rank_dummy:
-    build: https://github.com/stella-project
-    container_name: rank_dummy
-    volumes:
-        - ./data/:/data/
-    networks:
-        - stella-shared
-  rank_dummy_base:
-    build: https://github.com/stella-project
-    container_name: rank_dummy_base
-    volumes:
-        - ./data/:/data/
     networks:
         - stella-shared
   gesis_rec_precom:
@@ -45,27 +26,6 @@ services:
   gesis_rec_micro:
     build: https://github.com/stella-project/gesis_rec_micro
     container_name: gesis_rec_micro
-    volumes:
-        - ./data/:/data/
-    networks:
-        - stella-shared
-  asdf:
-    build: http://asdf.asdf.asdf
-    container_name: asdf
-    volumes:
-        - ./data/:/data/
-    networks:
-        - stella-shared
-  wasd:
-    build: http://wasd.wasd
-    container_name: wasd
-    volumes:
-        - ./data/:/data/
-    networks:
-        - stella-shared
-  dummy:
-    build: http://google.com
-    container_name: dummy
     volumes:
         - ./data/:/data/
     networks:
