@@ -300,7 +300,7 @@ def recommend_dataset():
         response = interleave(recommendation_exp, recommendation_base)
 
         response_complete = {'header': {'sid': recommendation_exp.session_id,
-                                        'rid': recommendation_exp.id,
+                                        'rid': recommendation_exp.tdi,
                                         'itemid': itemid,
                                         'page': page,
                                         'rpp': rpp,
@@ -373,7 +373,7 @@ def recommend():
         response = interleave(recommendation_exp, recommendation_base, rec_type='PUB')
 
         response_complete = {'header': {'sid': recommendation_exp.session_id,
-                                        'rid': recommendation_exp.id,
+                                        'rid': recommendation_exp.tdi,
                                         'itemid': itemid,
                                         'page': page,
                                         'rpp': rpp,
