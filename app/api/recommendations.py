@@ -228,6 +228,9 @@ def post_rec_feedback(id):
         post message
     '''
     clicks = request.values.get('clicks', None)
+    if clicks is None:
+        clicks = request.json.get('clicks', None)
+
     if clicks is not None:
         recommendation = Result.query.get_or_404(id)
         feedback = Feedback(start=recommendation.q_date,

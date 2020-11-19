@@ -229,6 +229,9 @@ def post_feedback(id):
     '''
 
     clicks = request.values.get('clicks', None)
+    if clicks is None:
+        clicks = request.json.get('clicks', None)
+
     if clicks is not None:
         ranking = Result.query.get_or_404(id)
         feedback = Feedback(start=ranking.q_date,
