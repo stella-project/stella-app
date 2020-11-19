@@ -247,7 +247,7 @@ def post_feedback(id):
         db.session.add_all(rankings)
         db.session.commit()
 
-        return {"msg": "Added new feedback with success!"}, 201
+        return jsonify({"msg": "Added new feedback with success!"}), 201
 
 
 @api.route("/ranking", methods=["GET"])

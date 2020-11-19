@@ -246,7 +246,7 @@ def post_rec_feedback(id):
         db.session.add_all(recommendations)
         db.session.commit()
 
-        return {"msg": "Added new feedback with success!"}, 201
+        return jsonify({"msg": "Added new feedback with success!"}), 201
 
 
 @api.route("/recommendation/datasets", methods=["GET"])
