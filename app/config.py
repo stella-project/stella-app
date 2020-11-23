@@ -23,9 +23,9 @@ conf["app"]["SESSION_EXPIRATION"] = 6  # seconds
 
 conf["app"]["STELLA_SERVER_API"] = "http://nginx/stella/api/v1"
 # conf["app"]["STELLA_SERVER_API"] = "http://localhost/stella/api/v1"
-conf["app"]["STELLA_SERVER_USER"] = "site_a@stella.org"
+conf["app"]["STELLA_SERVER_USER"] = "gesis@stella.org"
 conf["app"]["STELLA_SERVER_PASS"] = "pass"
-conf["app"]["STELLA_SERVER_USERNAME"] = "site_a"
+conf["app"]["STELLA_SERVER_USERNAME"] = "GESIS"
 conf["app"]["INTERLEAVE"] = True
 conf['app']['REST_QUERY'] = True
 conf['app']['BULK_INDEX'] = True
