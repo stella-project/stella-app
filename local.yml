@@ -10,6 +10,9 @@ services:
         depends_on:
             - gesis_rec_micro
             - gesis_rec_precom
+        environment:
+            - RECSYS_LIST=gesis_rec_micro gesis_rec_precom
+            - RECSYS_BASE=gesis_rec_micro
 
     gesis_rec_micro:
         build: https://github.com/stella-project/gesis_rec_micro.git
