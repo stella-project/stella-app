@@ -1,11 +1,23 @@
+import os
+
 conf = {}
 
 # app settings
 conf["app"] = {}
-conf["app"]["container_list"] =  ["dummy_rank", "dummy_rank_base"]
-conf["app"]["container_list_recommendation"] = ["gesis_rec_micro", "gesis_rec_precom"]
-conf["app"]["container_baseline"] = "dummy_rank_base"
-conf["app"]["container_recommendation_baseline"] = "gesis_rec_micro"
+
+if os.environ.get("RANKSYS_LIST"):
+    conf["app"]["container_list"] = [ranksys for ranksys in os.environ.get("RANKSYS_LIST").split(" ")]
+else:
+    conf["app"]["container_list"] = []  # optionally hard-code a list with experimental ranking systems (cf. recsys)
+
+conf["app"]["container_baseline"] = os.environ.get("RANKSYS_BASE")  # optionally provide a baseline system (cf. recsys)
+
+if os.environ.get("RECSYS_LIST"):
+    conf["app"]["container_list_recommendation"] = [recsys for recsys in os.environ.get("RECSYS_LIST").split(" ")]
+else:
+    conf["app"]["container_list_recommendation"] = ["gesis_rec_micro", "gesis_rec_precom"]
+
+conf["app"]["container_recommendation_baseline"] = os.environ.get("RECSYS_BASE") or "gesis_rec_micro"
 
 # create container_dict from list values (easier)
 conf["app"]["container_dict"] = {}
