@@ -31,6 +31,22 @@ class Result(db.Model):
     items = db.Column(db.JSON)
     tdi = db.Column(db.Integer, db.ForeignKey('results.id'))
 
+    @property
+    def serialize(self):
+        return {'rid': self.id,
+                'session_id': self.session_id,
+                'system_id': self.system_id,
+                'feedback_id': self.feedback_id,
+                'type': self.type,
+                'q': self.q,
+                'q_date': self.q_date,
+                'q_time': self.q_time,
+                'num_found': self.num_found,
+                'page': self.page,
+                'rpp': self.rpp,
+                'items': self.items,
+                'tdi': self.tdi}
+
 
 class Feedback(db.Model):
     __tablename__ = 'feedbacks'

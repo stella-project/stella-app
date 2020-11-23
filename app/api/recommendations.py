@@ -16,7 +16,7 @@ from core.interleave import tdi, tdi_rec
 client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 
 
-def new_session(container_name, container_rec_name, sid=None):
+def new_session(container_rec_name=None, container_name=None, sid=None):
     '''
     create a new session which sets container_name as a ranking system and container_rec_name as a recommendation system
     and return session_id
@@ -33,8 +33,8 @@ def new_session(container_name, container_rec_name, sid=None):
 
     session = Session(id=sid,
                       start=datetime.now(),
-                      system_ranking=System.query.filter_by(name=container_name).first().id,
-                      system_recommendation=System.query.filter_by(name=container_rec_name).first().id,
+                      system_ranking=System.query.filter_by(name=container_name).first().id if container_name is not None else None,
+                      system_recommendation=System.query.filter_by(name=container_rec_name).first().id if container_rec_name is not None else None,
                       site_user='unknown',
                       exit=False,
                       sent=False)
@@ -252,12 +252,19 @@ def post_rec_feedback(id):
         return jsonify({"msg": "Added new feedback with success!"}), 201
 
 
+@api.route("/recommendation/datasets/<int:rid>", methods=["GET"])
+def recommend_dataset_from_db(rid):
+    recommendation = Result.query.get_or_404(rid)
+    return jsonify(recommendation.serialize)
+
+
 @api.route("/recommendation/datasets", methods=["GET"])
 def recommend_dataset():
     '''
     Returns:
         ranked list for recommending dataset for itemid
     '''
+
     logger = logging.getLogger("stella-app")
     # look for mandatory GET-parameters (query, container_name)
     itemid = request.args.get('itemid', None)
@@ -285,10 +292,10 @@ def recommend_dataset():
 
     if session_id is None:
         # make new session and get session_id as sid
-        session_id = new_session(container_rank_name, container_name)
+        session_id = new_session(container_rec_name=container_name)
     else:
         if Session.query.get(session_id) is None:
-            session_id = new_session(container_rank_name, container_name, session_id)
+            session_id = new_session(container_rec_name=container_name, sid=session_id)
 
         recommendation_id = Session.query.get_or_404(session_id).system_recommendation
         container_name = System.query.filter_by(id=recommendation_id).first().name
@@ -326,6 +333,12 @@ def recommend_dataset():
 
     # return jsonify(response)
     return jsonify(response_complete)
+
+
+@api.route("/recommendation/publications/<int:rid>", methods=["GET"])
+def recommend_from_db(rid):
+    recommendation = Result.query.get_or_404(rid)
+    return jsonify(recommendation.serialize)
 
 
 @api.route("/recommendation/publications", methods=["GET"])

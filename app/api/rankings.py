@@ -169,7 +169,7 @@ def query_system(container_name, query, rpp, page, session_id, logger, type='EXP
     return ranking
 
 
-def new_session(container_name, container_rec_name, sid=None):
+def new_session(container_name=None, container_rec_name=None, sid=None):
     '''
     create a new session and set experimental ranking and recommender-container for session
 
@@ -184,8 +184,8 @@ def new_session(container_name, container_rec_name, sid=None):
 
     session = Session(id=sid,
                       start=datetime.now(),
-                      system_ranking=System.query.filter_by(name=container_name).first().id,
-                      system_recommendation=System.query.filter_by(name=container_rec_name).first().id,
+                      system_ranking=System.query.filter_by(name=container_name).first().id if container_name is not None else None,
+                      system_recommendation=System.query.filter_by(name=container_rec_name).first().id if container_rec_name is not None else None,
                       site_user='unknown',
                       exit=False,
                       sent=False)
@@ -253,6 +253,12 @@ def post_feedback(id):
         return jsonify({"msg": "Added new feedback with success!"}), 201
 
 
+@api.route("/ranking/<int:rid>", methods=["GET"])
+def ranking_from_db(rid):
+    ranking = Result.query.get_or_404(rid)
+    return jsonify(ranking.serialize)
+
+
 @api.route("/ranking", methods=["GET"])
 def ranking():
     '''
@@ -262,6 +268,7 @@ def ranking():
                 header contains meta-data
                 body contains ranked document list
     '''
+
     logger = logging.getLogger("stella-app")
     # look for mandatory GET-parameters (query, container_name)
     query = request.args.get('query', None)
@@ -291,10 +298,10 @@ def ranking():
 
     if session_id is None:
         # make new session and get session_id as sid
-        session_id = new_session(container_name, container_rec_name)
+        session_id = new_session(container_name)
     else:
         if Session.query.get(session_id) is None:
-            session_id = new_session(container_name, container_rec_name, session_id)
+            session_id = new_session(container_name, session_id)
 
         recommendation_id = Session.query.get_or_404(session_id).system_recommendation
         container_name = System.query.filter_by(id=recommendation_id).first().name
