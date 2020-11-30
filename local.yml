@@ -1,27 +1,37 @@
 version: '3'
 services:
-    app:
-        build: ./app
-        volumes:
-          - /var/run/docker.sock/:/var/run/docker.sock
-          - ./app/log:/app/log
-        ports:
-            - "8080:8000"
-        depends_on:
-            - gesis_rec_micro
-            - gesis_rec_precom
-        environment:
-            - RECSYS_LIST=gesis_rec_micro gesis_rec_precom
-            - RECSYS_BASE=gesis_rec_micro
-
-    gesis_rec_micro:
-        build: https://github.com/stella-project/gesis_rec_micro.git
-        container_name: gesis_rec_micro
-        volumes:
-          - ./data:/data
-
-    gesis_rec_precom:
-        build: https://github.com/stella-project/gesis_rec_precom.git
-        container_name: gesis_rec_precom
-        volumes:
-            - ./data/:/data/
+  app:
+    build: ./app
+    volumes:
+        - /var/run/docker.sock/:/var/run/docker.sock
+        - ./app/log:/app/log
+    ports:
+        - 8080:8000
+    depends_on:
+        - gesis_rec_precom
+        - gesis_rec_pyterrier
+        - gesis_rec_pyserini
+        - gesis_rec_whoosh
+    environment:
+        - RECSYS_LIST=gesis_rec_precom gesis_rec_pyterrier gesis_rec_pyserini gesis_rec_whoosh
+        - RECSYS_BASE=gesis_rec_precom
+  gesis_rec_precom:
+    build: https://github.com/stella-project/gesis_rec_precom
+    container_name: gesis_rec_precom
+    volumes:
+        - ./data/:/data/
+  gesis_rec_pyterrier:
+    build: https://github.com/stella-project/gesis_rec_pyterrier
+    container_name: gesis_rec_pyterrier
+    volumes:
+        - ./data/:/data/
+  gesis_rec_pyserini:
+    build: https://github.com/stella-project/gesis_rec_pyserini
+    container_name: gesis_rec_pyserini
+    volumes:
+        - ./data/:/data/
+  gesis_rec_whoosh:
+    build: https://github.com/stella-project/gesis_rec_whoosh
+    container_name: gesis_rec_whoosh
+    volumes:
+        - ./data/:/data/
