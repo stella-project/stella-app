@@ -15,7 +15,6 @@ services:
         - gesis_rec_precom
         - gesis_rec_pyterrier
         - gesis_rec_pyserini
-        - gesis_rec_whoosh
     networks:
         - stella-shared
     environment:
