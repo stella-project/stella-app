@@ -135,7 +135,7 @@ def query_system(container_name, item_id, rpp, page, session_id, logger, type='E
     ts_end = time.time()
     # calc query execution time in ms
     q_time = round((ts_end-ts_start)*1000)
-    item_dict = {i: {'docid': result['itemlist'][i], 'type': type} for i in range(1, len(result['itemlist']))}
+    item_dict = {i+1: {'docid': result['itemlist'][i], 'type': type} for i in range(0, len(result['itemlist']))}
 
     recommendation = Result(session_id=session_id,
                             system_id=System.query.filter_by(name=container_name).first().id,
