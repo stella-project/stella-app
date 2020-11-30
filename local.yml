@@ -11,7 +11,6 @@ services:
         - gesis_rec_precom
         - gesis_rec_pyterrier
         - gesis_rec_pyserini
-        - gesis_rec_whoosh
     environment:
         - RECSYS_LIST=gesis_rec_precom gesis_rec_pyterrier gesis_rec_pyserini
         - RECSYS_BASE=gesis_rec_precom
