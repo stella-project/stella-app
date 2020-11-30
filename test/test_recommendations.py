@@ -63,3 +63,11 @@ class TestApp(unittest.TestCase):
         payload = simulate(req_json)
         req = requests.post(STELLA_APP_API + "recommendation/" + str(rec_id) + "/feedback", data=payload)
         self.assertEqual(req.status_code, 201)
+
+    def test_03_get_previous_recommendation(self):
+        req_first = requests.get(STELLA_APP_API + "recommendation/datasets?itemid=" + itemid)
+        req_first_json = req_first.json()
+        rec_id = req_first_json.get('header').get('rid')
+        req_second = requests.get(STELLA_APP_API + "recommendation/datasets/" + str(rec_id))
+        req_second_json = req_second.json()
+        self.assertDictEqual(req_first_json.get('body'), req_second_json.get('items'))
