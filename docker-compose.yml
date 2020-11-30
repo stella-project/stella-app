@@ -42,11 +42,3 @@ services:
         - ./data/:/data/
     networks:
         - stella-shared
-  gesis_rec_whoosh:
-    build: https://github.com/stella-project/gesis_rec_whoosh.git
-    container_name: gesis_rec_whoosh
-    volumes:
-        - ./data/:/data/
-    networks:
-        - stella-shared
-

@@ -30,8 +30,3 @@ services:
     container_name: gesis_rec_pyserini
     volumes:
         - ./data/:/data/
-  gesis_rec_whoosh:
-    build: https://github.com/stella-project/gesis_rec_whoosh.git
-    container_name: gesis_rec_whoosh
-    volumes:
-        - ./data/:/data/
