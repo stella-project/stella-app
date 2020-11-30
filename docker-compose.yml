@@ -19,7 +19,7 @@ services:
     networks:
         - stella-shared
     environment:
-        - RECSYS_LIST=gesis_rec_precom gesis_rec_pyterrier gesis_rec_pyserini gesis_rec_whoosh
+        - RECSYS_LIST=gesis_rec_precom gesis_rec_pyterrier gesis_rec_pyserini
         - RECSYS_BASE=gesis_rec_precom
   gesis_rec_precom:
     build: https://github.com/stella-project/gesis_rec_precom.git
