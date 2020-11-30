@@ -39,12 +39,18 @@ def get_side_identifier():
 
 
 def post_session(session, site_id):
+
+    system_ranking = System.query.filter_by(id=session.system_ranking, type='RANK').first()
+    system_recommendation = System.query.filter_by(id=session.system_recommendation, type='REC').first()
+    system_ranking_name = system_ranking.name if system_ranking else None
+    system_recommendation_name = system_recommendation.name if system_recommendation else None
+
     payload = {
         'site_user': session.site_user,
         'start': session.start.strftime("%Y-%m-%d %H:%M:%S"),
         'end': session.start.strftime("%Y-%m-%d %H:%M:%S"),
-        'system_ranking': System.query.filter_by(id=session.system_ranking, type='RANK').first().name,
-        'system_recommendation': System.query.filter_by(id=session.system_recommendation, type='REC').first().name
+        'system_ranking': system_ranking_name,
+        'system_recommendation': system_recommendation_name
     }
 
     r = req.post(API + '/sites/' + str(site_id) + '/sessions',
