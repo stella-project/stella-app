@@ -2,38 +2,13 @@ import requests as req
 import json
 import random
 import datetime
-import time
 
 STELLA_APP_API = 'http://0.0.0.0:8080/stella/api/v1/'
-NUM=10000
-
-
-def str_time_prop(start, end, format, prop):
-    """Get a time at a proportion of a range of two formatted times.
-
-    start and end should be strings specifying times formated in the
-    given format (strftime-style), giving an interval [start, end].
-    prop specifies how a proportion of the interval to be taken after
-    start.  The returned time will be in the specified format.
-    source: https://stackoverflow.com/questions/553303/generate-a-random-date-between-two-other-dates
-    """
-
-    stime = time.mktime(time.strptime(start, format))
-    etime = time.mktime(time.strptime(end, format))
-
-    ptime = stime + prop * (etime - stime)
-
-    return time.strftime(format, time.localtime(ptime))
-
-
-def random_date(start, end, prop):
-    return str_time_prop(start, end, "%Y-%m-%d %H:%M:%S", prop)
-
+NUM = 10000
 
 def simulate(req_json):
     click_dict = req_json.get('body')
-    session_start = random_date("2020-01-01 00:00:00", "2020-12-31 00:00:00", random.random())
-    session_start_date = datetime.datetime.strptime(session_start, "%Y-%m-%d %H:%M:%S")
+    session_start_date = datetime.datetime.now()
     session_end_date = session_start_date + datetime.timedelta(0, random.randint(10, 3000))
     random_clicks = random.sample(range(1, len(click_dict)), random.randint(1, 3))
     random.sample(range(1, 10), random.randint(1, 9))
