@@ -8,24 +8,38 @@ services:
     ports:
         - 8080:8000
     depends_on:
+        - livivo_base
+        - livivo_rank_precom
         - gesis_rec_precom
         - gesis_rec_pyterrier
         - gesis_rec_pyserini
     environment:
+        - RANKSYS_LIST=livivo_base livivo_rank_precom
         - RECSYS_LIST=gesis_rec_precom gesis_rec_pyterrier gesis_rec_pyserini
+        - RANKSYS_BASE=livivo_base
         - RECSYS_BASE=gesis_rec_precom
+  livivo_base:
+    build: https://github.com/stella-project/livivo_rank_precom
+    container_name: livivo_base
+    volumes:
+        - ./data/:/data/
+  livivo_rank_precom:
+    build: https://github.com/stella-project/livivo_rank_precom
+    container_name: livivo_rank_precom
+    volumes:
+        - ./data/:/data/
   gesis_rec_precom:
-    build: https://github.com/stella-project/gesis_rec_precom.git
+    build: https://github.com/stella-project/gesis_rec_precom
     container_name: gesis_rec_precom
     volumes:
         - ./data/:/data/
   gesis_rec_pyterrier:
-    build: https://github.com/stella-project/gesis_rec_pyterrier.git
+    build: https://github.com/stella-project/gesis_rec_pyterrier
     container_name: gesis_rec_pyterrier
     volumes:
         - ./data/:/data/
   gesis_rec_pyserini:
-    build: https://github.com/stella-project/gesis_rec_pyserini.git
+    build: https://github.com/stella-project/gesis_rec_pyserini
     container_name: gesis_rec_pyserini
     volumes:
         - ./data/:/data/
