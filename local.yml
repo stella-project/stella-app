@@ -39,7 +39,7 @@ services:
     volumes:
         - ./data/:/data/
   gesis_rec_pyserini:
-    build: https://github.com/stella-project/gesis_rec_pyseriniq
+    build: https://github.com/stella-project/gesis_rec_pyserini.git
     container_name: gesis_rec_pyserini
     volumes:
         - ./data/:/data/
