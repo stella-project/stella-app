@@ -19,27 +19,27 @@ services:
         - RANKSYS_BASE=livivo_base
         - RECSYS_BASE=gesis_rec_precom
   livivo_base:
-    build: https://github.com/stella-project/livivo_rank_precom
+    build: https://github.com/stella-project/livivo_rank_precom.git
     container_name: livivo_base
     volumes:
         - ./data/:/data/
   livivo_rank_precom:
-    build: https://github.com/stella-project/livivo_rank_precom
+    build: https://github.com/stella-project/livivo_rank_precom.git
     container_name: livivo_rank_precom
     volumes:
         - ./data/:/data/
   gesis_rec_precom:
-    build: https://github.com/stella-project/gesis_rec_precom
+    build: https://github.com/stella-project/gesis_rec_precom.git
     container_name: gesis_rec_precom
     volumes:
         - ./data/:/data/
   gesis_rec_pyterrier:
-    build: https://github.com/stella-project/gesis_rec_pyterrier
+    build: https://github.com/stella-project/gesis_rec_pyterrier.git
     container_name: gesis_rec_pyterrier
     volumes:
         - ./data/:/data/
   gesis_rec_pyserini:
-    build: https://github.com/stella-project/gesis_rec_pyserini
+    build: https://github.com/stella-project/gesis_rec_pyseriniq
     container_name: gesis_rec_pyserini
     volumes:
         - ./data/:/data/
