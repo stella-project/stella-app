@@ -4,7 +4,8 @@ import random
 import datetime
 
 STELLA_APP_API = 'http://0.0.0.0:8080/stella/api/v1/'
-NUM = 10000
+NUM = 100
+
 
 def simulate(req_json):
     click_dict = req_json.get('body')
@@ -35,7 +36,7 @@ def simulate(req_json):
     }
 
 
-def dataset_recommendations(num=1000000, print_status_code=False):
+def dataset_recommendations(num=10, print_status_code=False):
     for _ in range(num):
         itemid = random.choice(['gesis-ssoar-1002',
                                 'gesis-ssoar-1006',
@@ -60,8 +61,39 @@ def dataset_recommendations(num=1000000, print_status_code=False):
             print(r_post.status_code)
 
 
+def rankings(num=10, print_status_code=False):
+    for _ in range(num):
+        query = random.choice(['covid-19 OR sars-cov-2',
+                               'influenza',
+                               'bioenergy',
+                               'animal AND protection',
+                               'vegan AND diet',
+                               'demenz',
+                               'depression',
+                               'climate change',
+                               'bienensterben',
+                               'hiv',
+                               'cancer',
+                               'borderline',
+                               'psychiatrie',
+                               'mikroplastik',
+                               'cannabis',
+                               'schlaf',
+                               'klimawandel AND in AND china',
+                               'corona AND virus'])
+
+        r = req.get(STELLA_APP_API + "ranking?query=" + query)
+        r_json = r.json()
+        rank_id = r_json.get('header').get('rid')
+        payload = simulate(r_json)
+        r_post = req.post(STELLA_APP_API + "ranking/" + str(rank_id) + "/feedback", data=payload)
+        if print_status_code:
+            print(r_post.status_code)
+
+
 def main():
-    dataset_recommendations(num=NUM)
+    # dataset_recommendations(num=NUM)
+    rankings(num=NUM, print_status_code=True)
 
 
 if __name__ == '__main__':
