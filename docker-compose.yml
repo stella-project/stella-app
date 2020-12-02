@@ -14,13 +14,15 @@ services:
     depends_on:
         - livivo_base
         - livivo_rank_precom
+        - livivo_rank_pyserini
+        - livivo_rank_pyterrier
         - gesis_rec_precom
         - gesis_rec_pyterrier
         - gesis_rec_pyserini
     networks:
         - stella-shared
     environment:
-        - RANKSYS_LIST=livivo_base livivo_rank_precom
+        - RANKSYS_LIST=livivo_base livivo_rank_precom livivo_rank_pyserini livivo_rank_pyterrier
         - RECSYS_LIST=gesis_rec_precom gesis_rec_pyterrier gesis_rec_pyserini
         - RANKSYS_BASE=livivo_base
         - RECSYS_BASE=gesis_rec_precom
@@ -34,6 +36,20 @@ services:
   livivo_rank_precom:
     build: https://github.com/stella-project/livivo_rank_precom.git
     container_name: livivo_rank_precom
+    volumes:
+        - ./data/:/data/
+    networks:
+        - stella-shared
+  livivo_rank_pyserini:
+    build: https://github.com/stella-project/livivo_rank_pyserini.git
+    container_name: livivo_rank_pyserini
+    volumes:
+        - ./data/:/data/
+    networks:
+        - stella-shared
+  livivo_rank_pyterrier:
+    build: https://github.com/stella-project/livivo_rank_pyterrier.git
+    container_name: livivo_rank_pyterrier
     volumes:
         - ./data/:/data/
     networks:
