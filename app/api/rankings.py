@@ -262,7 +262,7 @@ def ranking_from_db(rid):
 @api.route("/ranking", methods=["GET"])
 def ranking():
     '''
-    produce a ranking for actual session 
+    produce a ranking for actual session
 
     @return:    ranking result (dict)
                 header contains meta-data
@@ -302,7 +302,7 @@ def ranking():
     if query is None:
         return create_dict_response(status=1,
                                     ts=round(time.time()*1000))
-    
+
     # no container_name specified? -> select least served container
     if container_name is None:
         # container_name = get_least_served(conf["app"]["container_dict"])
@@ -320,10 +320,10 @@ def ranking():
         session_id = new_session(container_name)
     else:
         if Session.query.get(session_id) is None:
-            session_id = new_session(container_name, session_id)
+            session_id = new_session(container_name=container_name, sid=session_id)
 
-        recommendation_id = Session.query.get_or_404(session_id).system_recommendation
-        container_name = System.query.filter_by(id=recommendation_id).first().name
+        ranking_id = Session.query.get_or_404(session_id).system_ranking
+        container_name = System.query.filter_by(id=ranking_id).first().name
 
     ranking_exp = query_system(container_name, query, rpp, page, session_id, logger)
 
