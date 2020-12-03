@@ -139,6 +139,11 @@ def query_system(container_name, query, rpp, page, session_id, logger, type='EXP
     ts_start = time.time()
     ts = round(ts_start*1000)
 
+    # increase counter before actual request, in case of a failure
+    system = System.query.filter_by(name=container_name).first()
+    system.num_requests += 1
+    db.session.commit()
+
     if conf['app']['REST_QUERY']:
         result = rest(container_name, query, rpp, page)
     else:
@@ -161,8 +166,8 @@ def query_system(container_name, query, rpp, page, session_id, logger, type='EXP
                      rpp=rpp,
                      items=item_dict)
 
-    system = System.query.filter_by(name=container_name).first()
-    system.num_requests += 1
+    # system = System.query.filter_by(name=container_name).first()
+    # system.num_requests += 1
     db.session.add(ranking)
     db.session.commit()
 

@@ -121,6 +121,11 @@ def query_system(container_name, item_id, rpp, page, session_id, logger, type='E
     ts_start = time.time()
     ts = round(ts_start*1000)
 
+    # increase counter before actual request, in case of a failure
+    system = System.query.filter_by(name=container_name).first()
+    system.num_requests += 1
+    db.session.commit()
+
     if conf['app']['REST_QUERY']:
         if rec_type == 'DATA':
             result = rest_rec_data(container_name, item_id, rpp, page)
@@ -148,8 +153,8 @@ def query_system(container_name, item_id, rpp, page, session_id, logger, type='E
                             rpp=rpp,
                             items=item_dict)
 
-    system = System.query.filter_by(name=container_name).first()
-    system.num_requests += 1
+    # system = System.query.filter_by(name=container_name).first()
+    # system.num_requests += 1
     db.session.add(recommendation)
     db.session.commit()
 
