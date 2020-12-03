@@ -28,7 +28,7 @@ conf["app"]["container_dict_recommendation"] = {}
 for container_name in conf["app"]["container_list_recommendation"]:
     conf["app"]["container_dict_recommendation"][container_name] = {"requests": 0}
 
-conf['app']['DEBUG'] = False
+conf['app']['DEBUG'] = True
 conf['app']['DELETE_SENT_SESSION'] = True
 conf["app"]["INTERVAL_DB_CHECK"] = 3  # seconds
 conf["app"]["SESSION_EXPIRATION"] = 6  # seconds
@@ -48,7 +48,7 @@ conf["app"]["STELLA_SERVER_USERNAME"] = "GESIS"
 
 conf["app"]["INTERLEAVE"] = True
 conf['app']['REST_QUERY'] = True
-conf['app']['BULK_INDEX'] = True
+conf['app']['BULK_INDEX'] = False
 
 # logger settings
 conf["log"] = {}
