@@ -21,7 +21,7 @@ services:
         - RANKSYS_BASE=livivo_base
         - RECSYS_BASE=gesis_rec_precom
   livivo_base:
-    build: https://github.com/stella-project/livivo_rank_precom.git
+    build: https://github.com/stella-project/livivo_rank_base.git
     container_name: livivo_base
     volumes:
         - ./data/:/data/
