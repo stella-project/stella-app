@@ -271,6 +271,26 @@ def recommend_dataset():
     container_name = request.args.get('container', None)
     session_id = request.args.get('sid', None)
 
+    # if recommendations have been retrieved for a specific item before in the corresponding session, read it from the database
+    if session_id and itemid:
+        recommendation = Result.query.filter_by(session_id=session_id, q=itemid).first()
+        if recommendation:
+            if recommendation.tdi:
+                recommendation = Result.query.filter_by(id=recommendation.tdi).first()
+
+            system_id = Session.query.filter_by(id=session_id).first().system_recommendation
+            container_name = System.query.filter_by(id=system_id).first().name
+
+            response = {'header': {'sid': recommendation.session_id,
+                                   'rid': recommendation.id,
+                                   'itemid': itemid,
+                                   'page': recommendation.page,
+                                   'rpp': recommendation.rpp,
+                                   'type': 'DATA',
+                                   'container': {'exp': container_name}},
+                        'body': recommendation.items}
+            return jsonify(response)
+
     # Look for optional GET-parameters and set default values
     page = request.args.get('page', default=0, type=int)
     rpp = request.args.get('rpp', default=10, type=int)
