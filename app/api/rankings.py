@@ -340,6 +340,7 @@ def ranking():
                                         'q': query,
                                         'page': page,
                                         'rpp': rpp,
+                                        'hits': ranking_base.num_found,
                                         'container': {'base': conf['app']['container_baseline'],
                                                       'exp': container_name}},
                              'body': response}
@@ -350,6 +351,7 @@ def ranking():
                                         'q': query,
                                         'page': page,
                                         'rpp': rpp,
+                                        'hits': ranking_base.num_found,
                                         'container': {'exp': container_name}},
                              'body': response}
 

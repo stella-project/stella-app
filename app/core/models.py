@@ -28,6 +28,7 @@ class Result(db.Model):
     num_found = db.Column(db.Integer)
     page = db.Column(db.Integer)
     rpp = db.Column(db.Integer)
+    hits = db.Column(db.Integer)
     items = db.Column(db.JSON)
     tdi = db.Column(db.Integer, db.ForeignKey('results.id'))
 
@@ -44,6 +45,7 @@ class Result(db.Model):
                 'num_found': self.num_found,
                 'page': self.page,
                 'rpp': self.rpp,
+                'hits': self.hits,
                 'items': self.items,
                 'tdi': self.tdi}
 
