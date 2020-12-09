@@ -12,6 +12,8 @@ The `stella-app` will be deployed at sites that want to conduct IR and recommend
 1. Set up the `stella-server` first. It will provide the shared Docker network.
 2. Build the `stella-app` with Docker: `docker-compose up -d`
 
+**A setup guide for the entire infrastructure can be found [here](https://github.com/stella-project/stella-server/blob/master/doc/README.md).**
+
 ## Citation
 
 We provide citation information via the [CITATION file](./CITATION.cff). If you use `stella-app` in your work, please cite our repository as follows:
