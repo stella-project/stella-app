@@ -38,19 +38,20 @@ def simulate(req_json):
 
 def dataset_recommendations(num=10, print_status_code=False):
     for _ in range(num):
-        itemid = random.choice(['gesis-ssoar-1002',
-                                'gesis-ssoar-1006',
-                                'gesis-ssoar-1066',
-                                'gesis-ssoar-1008',
-                                'literaturpool-7b4d6755baca016a30a143997ce3c93f',
-                                'literaturpool-f9731e199de60f842ecedf8f4e785acb',
-                                'literaturpool-6da4169a5f952cdea21c3e2fc036ee66',
-                                'gesis-ssoar-58842',
-                                'gesis-ssoar-58844',
-                                'literaturpool-08beeb79c7d2e3d5d2edbadb9850690b',
-                                'literaturpool-1b07bf0159a530443ef9cdf37b87e1c9',
-                                'gesis-ssoar-60517',
-                                'gesis-ssoar-60518'])
+        itemid = random.choice(['gesis - ssoar - 13114',
+                                'gesis - ssoar - 25443',
+                                'gesis - ssoar - 29019',
+                                'gesis - ssoar - 27895',
+                                'gesis - ssoar - 10285',
+                                'literaturpool-18b497718faa37525bb643871626f471',
+                                'literaturpool-9bebd914e3791b47b540a633740afc74',
+                                'literaturpool-48ff515801f34041d07b030f44a2826f',
+                                'literaturpool-bc6c672208cee5f9b9859379bb27c892',
+                                'literaturpool-9d823a7227548b93d9e841143b4ef2e6',
+                                'csa-ps-201324081',
+                                'gesis-bib-61872',
+                                'cews-2-605360',
+                                'gris-publication-7o7ktgb3iqe0'])
 
         r = req.get(STELLA_APP_API + "recommendation/datasets?itemid=" + itemid)
         r_json = r.json()
@@ -92,8 +93,8 @@ def rankings(num=10, print_status_code=False):
 
 
 def main():
-    # dataset_recommendations(num=NUM)
-    rankings(num=NUM, print_status_code=True)
+    dataset_recommendations(num=NUM)
+    # rankings(num=NUM, print_status_code=True)
 
 
 if __name__ == '__main__':
