@@ -38,11 +38,11 @@ def simulate(req_json):
 
 def dataset_recommendations(num=10, print_status_code=False):
     for _ in range(num):
-        itemid = random.choice(['gesis - ssoar - 13114',
-                                'gesis - ssoar - 25443',
-                                'gesis - ssoar - 29019',
-                                'gesis - ssoar - 27895',
-                                'gesis - ssoar - 10285',
+        itemid = random.choice(['gesis-ssoar-13114',
+                                'gesis-ssoar-25443',
+                                'gesis-ssoar-29019',
+                                'gesis-ssoar-27895',
+                                'gesis-ssoar-10285',
                                 'literaturpool-18b497718faa37525bb643871626f471',
                                 'literaturpool-9bebd914e3791b47b540a633740afc74',
                                 'literaturpool-48ff515801f34041d07b030f44a2826f',
