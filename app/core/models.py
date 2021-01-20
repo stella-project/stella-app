@@ -68,3 +68,5 @@ class System(db.Model):
     type = db.Column(db.String(64), index=True)
     results = db.relationship('Result', backref='system', lazy='dynamic')
     num_requests = db.Column(db.Integer)
+    system_type = db.Column(db.String(64), index=True)
+    num_requests_no_head = db.Column(db.Integer)
