@@ -141,7 +141,10 @@ def query_system(container_name, query, rpp, page, session_id, logger, type='EXP
 
     # increase counter before actual request, in case of a failure
     system = System.query.filter_by(name=container_name).first()
-    system.num_requests += 1
+    if query in conf['app']['head_queries']:
+        system.num_requests += 1
+    else:
+        system.num_requests_no_head += 1
     db.session.commit()
 
     if conf['app']['REST_QUERY']:
@@ -310,15 +313,35 @@ def ranking():
 
     # no container_name specified? -> select least served container
     if container_name is None:
-        # container_name = get_least_served(conf["app"]["container_dict"])
-        container_name = System.query.filter(System.name != conf['app']['container_baseline']).filter(System.name.notin_(conf["app"]["container_list_recommendation"])).order_by(System.num_requests).first().name
-        container_rec_name = System.query.filter(System.name != conf['app']['container_baseline']).filter(System.name.notin_(conf["app"]["container_list"])).order_by(System.num_requests).first().name
+
+        if query in conf['app']['head_queries']:
+            # container_name = get_least_served(conf["app"]["container_dict"])
+            container_name = System.query.filter(
+                System.name != conf['app']['container_baseline']).filter(
+                System.name.notin_(conf["app"]["container_list_recommendation"] +
+                                   conf["app"]["container_precom_list_recommendation"])).order_by(
+                System.num_requests).first().name
+            # This code is actually deprecated, since we do not have any use case for sessions with both rankings and recommendations
+            # container_rec_name = System.query.filter(System.name != conf['app']['container_baseline']).filter(
+            #     System.name.notin_(conf["app"]["container_list"])).order_by(
+            #     System.num_requests).first().name
+
+        else:
+            container_name = System.query.filter(
+                System.name != conf['app']['container_baseline']).filter(
+                System.name.notin_(conf["app"]["container_list_recommendation"] +
+                                   conf["app"]["container_precom_list"] +
+                                   conf["app"]["container_precom_list_recommendation"])).order_by(
+                System.num_requests_no_head).first().name
+
+
+
     # container_name does not exist in config? -> Nothing to do
     # i think this check is not necessary anymore. the system names in the database are extracted from
     # the config file when the application starts
-    if not container_name in conf["app"]["container_dict"]:
-        return create_dict_response(status=1,
-                                    ts=round(time.time()*1000))
+    # if not container_name in conf["app"]["container_dict"]:
+    #     return create_dict_response(status=1,
+    #                                 ts=round(time.time()*1000))
 
     if session_id is None:
         # make new session and get session_id as sid
@@ -332,8 +355,8 @@ def ranking():
 
     ranking_exp = query_system(container_name, query, rpp, page, session_id, logger)
 
+    ranking_base = query_system(conf['app']['container_baseline'], query, rpp, page, session_id, logger, type='BASE')
     if conf['app']['INTERLEAVE']:
-        ranking_base = query_system(conf['app']['container_baseline'], query, rpp, page, session_id, logger, type='BASE')
         response = interleave(ranking_exp, ranking_base)
         response_complete = {'header': {'sid': ranking_exp.session_id,
                                         'rid': ranking_exp.tdi,
