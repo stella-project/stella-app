@@ -9,7 +9,7 @@ conf["app"] = {}
 if os.environ.get("RANKSYS_LIST"):
     conf["app"]["container_list"] = [ranksys for ranksys in os.environ.get("RANKSYS_LIST").split(" ")]
 else:
-    conf["app"]["container_list"] = ["livivo_base", "livivo_rank_precom", "livivo_rank_pyserini", "livivo_rank_pyterrier"]  # optionally hard-code a list with experimental ranking systems (cf. recsys)
+    conf["app"]["container_list"] = ["livivo_base", "livivo_rank_pyserini", "livivo_rank_pyterrier"]  # optionally hard-code a list with experimental ranking systems (cf. recsys)
 
 if os.environ.get("RANKSYS_PRECOM_LIST"):
     conf["app"]["container_precom_list"] = [ranksys for ranksys in os.environ.get("RANKSYS_PRECOM_LIST").split(" ")]
@@ -22,7 +22,7 @@ conf["app"]["container_baseline"] = os.environ.get("RANKSYS_BASE") or "livivo_ba
 if os.environ.get("RECSYS_LIST"):
     conf["app"]["container_list_recommendation"] = [recsys for recsys in os.environ.get("RECSYS_LIST").split(" ")]
 else:
-    conf["app"]["container_list_recommendation"] = ["gesis_rec_pyserini", "gesis_rec_pyterrier", "gesis_rec_precom"]
+    conf["app"]["container_list_recommendation"] = ["gesis_rec_pyserini", "gesis_rec_pyterrier"]
 
 if os.environ.get("RECSYS_PRECOM_LIST"):
     conf["app"]["container_precom_list_recommendation"] = [recsys for recsys in os.environ.get("RECSYS_PRECOM_LIST").split(" ")]
@@ -30,8 +30,6 @@ else:
     conf["app"]["container_precom_list_recommendation"] = ["gesis_rec_precom"]
 
 conf["app"]["container_recommendation_baseline"] = os.environ.get("RECSYS_BASE") or "gesis_rec_pyserini"
-
-
 
 # create container_dict from list values (easier)
 conf["app"]["container_dict"] = {}
