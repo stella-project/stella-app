@@ -43,17 +43,21 @@ for container_name in conf["app"]["container_list_recommendation"]:
     conf["app"]["container_dict_recommendation"][container_name] = {"requests": 0}
 
 conf['app']['DEBUG'] = False
-conf['app']['DELETE_SENT_SESSION'] = True
-conf["app"]["INTERVAL_DB_CHECK"] = 3  # seconds
-conf["app"]["SESSION_EXPIRATION"] = 6  # seconds
+conf['app']['DELETE_SENT_SESSION'] = os.environ.get("DELETE_SENT_SESSION") or True
+conf["app"]["INTERVAL_DB_CHECK"] = os.environ.get("INTERVAL_DB_CHECK") or 3  # seconds
+conf["app"]["SESSION_EXPIRATION"] = os.environ.get("SESSION_EXPIRATION") or 6  # seconds
 
-conf["app"]["STELLA_SERVER_API"] = "http://nginx/stella/api/v1"
+conf["app"]["STELLA_SERVER_API"] = os.environ.get("STELLA_SERVER_API") or "http://nginx/stella/api/v1"
 # conf["app"]["STELLA_SERVER_API"] = "http://localhost/stella/api/v1"
 
+conf["app"]["STELLA_SERVER_USER"] = os.environ.get("STELLA_SERVER_USER") or "gesis@stella.org"
+conf["app"]["STELLA_SERVER_PASS"] = os.environ.get("STELLA_SERVER_PASS") or "pass"
+conf["app"]["STELLA_SERVER_USERNAME"] = os.environ.get("STELLA_SERVER_USERNAME") or "GESIS"
+
 # GESIS
-conf["app"]["STELLA_SERVER_USER"] = "gesis@stella.org"
-conf["app"]["STELLA_SERVER_PASS"] = "pass"
-conf["app"]["STELLA_SERVER_USERNAME"] = "GESIS"
+# conf["app"]["STELLA_SERVER_USER"] = "gesis@stella.org"
+# conf["app"]["STELLA_SERVER_PASS"] = "pass"
+# conf["app"]["STELLA_SERVER_USERNAME"] = "GESIS"
 
 # LIVIVO
 # conf["app"]["STELLA_SERVER_USER"] = "livivo@stella.org"
@@ -62,7 +66,7 @@ conf["app"]["STELLA_SERVER_USERNAME"] = "GESIS"
 
 conf["app"]["INTERLEAVE"] = True
 conf['app']['REST_QUERY'] = True
-conf['app']['BULK_INDEX'] = False
+conf['app']['BULK_INDEX'] = True
 
 # logger settings
 conf["log"] = {}
