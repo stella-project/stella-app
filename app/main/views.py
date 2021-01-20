@@ -14,7 +14,7 @@ def prep_list(container_list):
 
 @main.route("/")
 def home():
-    container_list = conf["app"]["container_list"] + conf["app"]["container_list_recommendation"]
+    container_list = conf["app"]["container_list"] + conf["app"]["container_list_recommendation"] + conf["app"]["container_precom_list"] + conf["app"]["container_precom_list_recommendation"]
     return render_template("table.html",
                            data=prep_list(container_list=container_list),
                            title='List of running containers')
