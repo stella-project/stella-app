@@ -71,12 +71,31 @@ def create_app(config_name):
         db.create_all()
 
         # add ranking systems to database
-        ranksys: List[System] = [System(name=sysname, type='RANK', num_requests=0) for sysname in conf['app']['container_list']]
+        ranksys: List[System] = [System(name=sysname,
+                                        type='RANK',
+                                        system_type='LIVE',
+                                        num_requests=0,
+                                        num_requests_no_head=0) for sysname in conf['app']['container_list']] + \
+                                [System(name=sysname,
+                                        type='RANK',
+                                        system_type='PRECOM',
+                                        num_requests=0,
+                                        num_requests_no_head=0) for sysname in conf['app']['container_precom_list']]
+
         db.session.add_all(ranksys)
         db.session.commit()
 
         # add recommendation systems to database
-        ranksys: List[System] = [System(name=sysname, type='REC', num_requests=0) for sysname in conf['app']['container_list_recommendation']]
+        ranksys: List[System] = [System(name=sysname,
+                                        type='REC',
+                                        system_type='LIVE',
+                                        num_requests=0,
+                                        num_requests_no_head=0) for sysname in conf['app']['container_list_recommendation']] + \
+                                [System(name=sysname,
+                                        type='REC',
+                                        system_type='PRECOM',
+                                        num_requests=0,
+                                        num_requests_no_head=0) for sysname in conf['app']['container_precom_list_recommendation']]
         db.session.add_all(ranksys)
         db.session.commit()
 
