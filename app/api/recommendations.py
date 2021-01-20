@@ -123,7 +123,10 @@ def query_system(container_name, item_id, rpp, page, session_id, logger, type='E
 
     # increase counter before actual request, in case of a failure
     system = System.query.filter_by(name=container_name).first()
-    system.num_requests += 1
+    if item_id in conf['app']['head_items']:
+        system.num_requests += 1
+    else:
+        system.num_requests_no_head += 1
     db.session.commit()
 
     if conf['app']['REST_QUERY']:
@@ -307,13 +310,28 @@ def recommend_dataset():
 
     # no container_name specified? -> select least served container
     if container_name is None:
-        # container_name = get_least_served(conf["app"]["container_dict"])
-        container_name = System.query.filter(System.name != conf['app']['container_recommendation_baseline']).filter(System.name.notin_(conf["app"]["container_list"])).order_by(System.num_requests).first().name
-        container_rank = System.query.filter(System.name != conf['app']['container_recommendation_baseline']).filter(System.name.notin_(conf["app"]["container_list_recommendation"])).order_by(System.num_requests).first()
-        if container_rank is not None:
-            container_rank_name = container_rank.name
+
+        if itemid in conf['app']['head_items']:
+            # container_name = get_least_served(conf["app"]["container_dict"])
+            container_name = System.query.filter(
+                System.name != conf['app']['container_recommendation_baseline']).filter(
+                System.name.notin_(conf["app"]["container_list"] +
+                                   conf["app"]["container_precom_list"])).order_by(System.num_requests).first().name
+
+            # The following code is not required since we do not have any use case for sessions with rankings and recommendations right now.
+            # container_rank = System.query.filter(System.name != conf['app']['container_recommendation_baseline']).filter(System.name.notin_(conf["app"]["container_list_recommendation"])).order_by(System.num_requests).first()
+            # if container_rank is not None:
+            #     container_rank_name = container_rank.name
+            # else:
+            #     container_rank_name = None
+
         else:
-            container_rank_name = None
+            container_name = System.query.filter(
+                System.name != conf['app']['container_recommendation_baseline']).filter(
+                System.name.notin_(conf["app"]["container_list"] +
+                                   conf["app"]["container_precom_list"]+
+                                   conf["app"]["container_precom_list_recommendation"])).order_by(
+                System.num_requests_no_head).first().name
 
     if session_id is None:
         # make new session and get session_id as sid
@@ -394,7 +412,7 @@ def recommend():
                                    'itemid': itemid,
                                    'page': recommendation.page,
                                    'rpp': recommendation.rpp,
-                                   'type': 'DATA',
+                                   'type': 'PUB',
                                    'container': {'exp': container_name}},
                         'body': recommendation.items}
             return jsonify(response)
@@ -411,15 +429,29 @@ def recommend():
     # no container_name specified? -> select least served container
     if container_name is None:
         # container_name = get_least_served(conf["app"]["container_dict"])
-        container_name = System.query.filter(System.name != conf['app']['container_recommendation_baseline']).filter(System.name.notin_(conf["app"]["container_list"])).order_by(System.num_requests).first().name
-        container_rank_name = System.query.filter(System.name != conf['app']['container_recommendation_baseline']).filter(System.name.notin_(conf["app"]["container_list_recommendation"])).order_by(System.num_requests).first().name
+        if itemid in conf['app']['head_items']:
+            container_name = System.query.filter(
+                System.name != conf['app']['container_recommendation_baseline']).filter(
+                System.name.notin_(conf["app"]["container_list"]) +
+                conf["app"]["container_precom_list"]).order_by(
+                System.num_requests).first().name
+        else:
+            container_name = System.query.filter(
+                System.name != conf['app']['container_recommendation_baseline']).filter(
+                System.name.notin_(conf["app"]["container_list"] +
+                                   conf["app"]["container_precom_list"] +
+                                   conf["app"]["container_precom_list_recommendation"])).order_by(
+                System.num_requests).first().name
+
+            # We don't have any use case for sessions with rankings and recommendations right now.
+            # container_rank_name = System.query.filter(System.name != conf['app']['container_recommendation_baseline']).filter(System.name.notin_(conf["app"]["container_list_recommendation"])).order_by(System.num_requests).first().name
 
     if session_id is None:
         # make new session and get session_id as sid
-        session_id = new_session(container_rank_name, container_name)
+        session_id = new_session(container_rec_name=container_name)
     else:
         if Session.query.get(session_id) is None:
-            session_id = new_session(container_rank_name, container_name, session_id)
+            session_id = new_session(container_rec_name=container_name, sid=session_id)
 
         recommendation_id = Session.query.get_or_404(session_id).system_recommendation
         container_name = System.query.filter_by(id=recommendation_id).first().name
