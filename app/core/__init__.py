@@ -21,7 +21,7 @@ client = docker.DockerClient(base_url='unix://var/run/docker.sock')
 
 def index():
     ''' run indexing methods for all available containers '''
-    container_list = conf["app"]["container_list"] + conf["app"]["container_list_recommendation"]
+    container_list = conf["app"]["container_list"] + conf["app"]["container_list_recommendation"] + conf["app"]["container_precom_list"] + conf["app"]["container_precom_list_recommendation"]
 
     time.sleep(SECS)
 
