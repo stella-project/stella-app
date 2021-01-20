@@ -48,9 +48,17 @@ conf["app"]["STELLA_SERVER_USERNAME"] = "GESIS"
 
 conf["app"]["INTERLEAVE"] = True
 conf['app']['REST_QUERY'] = True
-conf['app']['BULK_INDEX'] = True
+conf['app']['BULK_INDEX'] = False
 
 # logger settings
 conf["log"] = {}
 conf["log"]["log_path"] = "log"
 conf["log"]["log_file"] = "logging.log"
+
+f_in = open('./head/items/gesis.txt', 'r', encoding='utf-8-sig')
+conf['app']['head_items'] = [line.strip('\n') for line in f_in.readlines()]
+f_in = open('./head/queries/livivo.txt', 'r', encoding='utf-8-sig')
+conf['app']['head_queries'] = [line.strip('\n') for line in f_in.readlines()]
+
+
+
