@@ -329,53 +329,58 @@ def recommend_dataset():
             container_name = System.query.filter(
                 System.name != conf['app']['container_recommendation_baseline']).filter(
                 System.name.notin_(conf["app"]["container_list"] +
-                                   conf["app"]["container_precom_list"]+
+                                   conf["app"]["container_precom_list"] +
                                    conf["app"]["container_precom_list_recommendation"])).order_by(
                 System.num_requests_no_head).first().name
 
-    if session_id is None:
-        # make new session and get session_id as sid
-        session_id = new_session(container_rec_name=container_name)
-    else:
-        if Session.query.get(session_id) is None:
-            session_id = new_session(container_rec_name=container_name, sid=session_id)
+    try:
+        if session_id is None:
+            # make new session and get session_id as sid
+            session_id = new_session(container_rec_name=container_name)
+        else:
+            if Session.query.get(session_id) is None:
+                session_id = new_session(container_rec_name=container_name, sid=session_id)
 
-        recommendation_id = Session.query.get_or_404(session_id).system_recommendation
-        container_name = System.query.filter_by(id=recommendation_id).first().name
+            recommendation_id = Session.query.get_or_404(session_id).system_recommendation
+            container_name = System.query.filter_by(id=recommendation_id).first().name
 
-    recommendation_exp = query_system(container_name, itemid, rpp, page, session_id, logger)
+        recommendation_exp = query_system(container_name, itemid, rpp, page, session_id, logger)
 
-    if conf['app']['INTERLEAVE']:
-        recommendation_base = query_system(conf['app']['container_recommendation_baseline'], itemid, rpp, page, session_id, logger, type='BASE')
-        response = interleave(recommendation_exp, recommendation_base)
+        if conf['app']['INTERLEAVE']:
+            recommendation_base = query_system(conf['app']['container_recommendation_baseline'], itemid, rpp, page, session_id, logger, type='BASE')
+            response = interleave(recommendation_exp, recommendation_base)
 
-        response_complete = {'header': {'sid': recommendation_exp.session_id,
-                                        'rid': recommendation_exp.tdi,
-                                        'itemid': itemid,
-                                        'page': page,
-                                        'rpp': rpp,
-                                        'type': 'DATA',
-                                        'container': {'base': conf['app']['container_recommendation_baseline'],
-                                                      'exp': container_name}},
-                             'body': response}
-    else:
-        response = single_recommendation(recommendation_exp)
+            response_complete = {'header': {'sid': recommendation_exp.session_id,
+                                            'rid': recommendation_exp.tdi,
+                                            'itemid': itemid,
+                                            'page': page,
+                                            'rpp': rpp,
+                                            'type': 'DATA',
+                                            'container': {'base': conf['app']['container_recommendation_baseline'],
+                                                          'exp': container_name}},
+                                 'body': response}
+        else:
+            response = single_recommendation(recommendation_exp)
 
-        response_complete = {'header': {'sid': recommendation_exp.session_id,
-                                        'rid': recommendation_exp.id,
-                                        'itemid': itemid,
-                                        'page': page,
-                                        'rpp': rpp,
-                                        'type': 'DATA',
-                                        'container': {'exp': container_name}},
-                             'body': response}
+            response_complete = {'header': {'sid': recommendation_exp.session_id,
+                                            'rid': recommendation_exp.id,
+                                            'itemid': itemid,
+                                            'page': page,
+                                            'rpp': rpp,
+                                            'type': 'DATA',
+                                            'container': {'exp': container_name}},
+                                 'body': response}
 
-    # response_complete = {'header': {'session': recommendation_exp.session_id,
-    #                                 'recommendation': recommendation_exp.id},
-    #                      'body': response}
+        # response_complete = {'header': {'session': recommendation_exp.session_id,
+        #                                 'recommendation': recommendation_exp.id},
+        #                      'body': response}
 
-    # return jsonify(response)
-    return jsonify(response_complete)
+        # return jsonify(response)
+        return jsonify(response_complete)
+
+    except Exception as e:
+        print(e)
+        return create_dict_response(status=1, ts=round(time.time() * 1000))
 
 
 @api.route("/recommendation/publications/<int:rid>", methods=["GET"])
