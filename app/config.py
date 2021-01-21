@@ -45,7 +45,8 @@ conf['app']['DELETE_SENT_SESSION'] = os.environ.get("DELETE_SENT_SESSION") or Tr
 conf["app"]["INTERVAL_DB_CHECK"] = os.environ.get("INTERVAL_DB_CHECK") or 3  # seconds
 conf["app"]["SESSION_EXPIRATION"] = os.environ.get("SESSION_EXPIRATION") or 6  # seconds
 
-conf["app"]["STELLA_SERVER_API"] = os.environ.get("STELLA_SERVER_API") or "http://nginx/stella/api/v1"
+server_address = os.environ.get("STELLA_SERVER_ADDRESS") or "nginx"
+conf["app"]["STELLA_SERVER_API"] = ' '.join(['http://', server_address, '/stella/api/v1'])
 # conf["app"]["STELLA_SERVER_API"] = "http://localhost/stella/api/v1"
 
 conf["app"]["STELLA_SERVER_USER"] = os.environ.get("STELLA_SERVER_USER") or "gesis@stella.org"
@@ -62,9 +63,9 @@ conf["app"]["STELLA_SERVER_USERNAME"] = os.environ.get("STELLA_SERVER_USERNAME")
 # conf["app"]["STELLA_SERVER_PASS"] = "pass"
 # conf["app"]["STELLA_SERVER_USERNAME"] = "LIVIVO"
 
-conf["app"]["INTERLEAVE"] = True
+conf["app"]["INTERLEAVE"] = os.environ.get("INTERLEAVE") or True
 conf['app']['REST_QUERY'] = True
-conf['app']['BULK_INDEX'] = True
+conf['app']['BULK_INDEX'] = os.environ.get("BULK_INDEX") or True
 
 # logger settings
 conf["log"] = {}
