@@ -22,10 +22,21 @@ services:
     networks:
         - stella-shared
     environment:
-        - RANKSYS_LIST=livivo_base livivo_rank_precom livivo_rank_pyserini livivo_rank_pyterrier
-        - RECSYS_LIST=gesis_rec_precom gesis_rec_pyterrier gesis_rec_pyserini
+        - RANKSYS_LIST=livivo_base livivo_rank_pyserini livivo_rank_pyterrier
+        - RECSYS_LIST=gesis_rec_pyterrier gesis_rec_pyserini
+        - RANKSYS_PRECOM_LIST=livivo_rank_precom
+        - RECSYS_PRECOM_LIST=gesis_rec_precom
         - RANKSYS_BASE=livivo_base
-        - RECSYS_BASE=gesis_rec_precom
+        - RECSYS_BASE=gesis_rec_pyserini
+        - STELLA_SERVER_ADDRESS=nginx
+        - STELLA_SERVER_USER=gesis@stella.org
+        - STELLA_SERVER_PASS=pass
+        - STELLA_SERVER_USERNAME=GESIS
+        - INTERLEAVE=True
+        - BULK_INDEX=True
+        - DELETE_SENT_SESSION=True
+        - INTERVAL_DB_CHECK=3
+        - SESSION_EXPIRATION=6
   livivo_base:
     build: https://github.com/stella-project/livivo_rank_base.git#main
     container_name: livivo_base
