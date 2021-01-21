@@ -12,10 +12,16 @@ services:
         - livivo_rank_precom
         - livivo_rank_pyserini
         - livivo_rank_pyterrier
+        - gesis_rec_precom
+        - gesis_rec_pyterrier
+        - gesis_rec_pyserini
     environment:
         - RANKSYS_LIST=livivo_base livivo_rank_pyserini livivo_rank_pyterrier
         - RANKSYS_PRECOM_LIST=livivo_rank_precom
         - RANKSYS_BASE=livivo_base
+        - RECSYS_LIST=gesis_rec_pyterrier gesis_rec_pyserini
+        - RECSYS_PRECOM_LIST=gesis_rec_precom
+        - RECSYS_BASE=gesis_rec_pyserini
         - STELLA_SERVER_ADDRESS=nginx
         - STELLA_SERVER_USER=gesis@stella.org
         - STELLA_SERVER_PASS=pass
@@ -43,5 +49,20 @@ services:
   livivo_rank_pyterrier:
     build: https://github.com/stella-project/livivo_rank_pyterrier.git#master
     container_name: livivo_rank_pyterrier
+    volumes:
+        - ./data/:/data/
+  gesis_rec_precom:
+    build: https://github.com/stella-project/gesis_rec_precom.git#master
+    container_name: gesis_rec_precom
+    volumes:
+        - ./data/:/data/
+  gesis_rec_pyterrier:
+    build: https://github.com/stella-project/gesis_rec_pyterrier.git#master
+    container_name: gesis_rec_pyterrier
+    volumes:
+        - ./data/:/data/
+  gesis_rec_pyserini:
+    build: https://github.com/stella-project/gesis_rec_pyserini.git#master
+    container_name: gesis_rec_pyserini
     volumes:
         - ./data/:/data/
