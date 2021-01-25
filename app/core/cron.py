@@ -6,6 +6,7 @@ from .models import db, Session, Result, Feedback, System
 from apscheduler.schedulers.background import BackgroundScheduler
 import requests as req
 from datetime import datetime, timedelta
+from pytz import timezone
 
 API = conf['app']['STELLA_SERVER_API']
 USER = conf['app']['STELLA_SERVER_USER']
@@ -15,7 +16,8 @@ USERNAME = conf['app']['STELLA_SERVER_USERNAME']
 
 def update_expired_sessions(sessions_not_exited):
     for session in sessions_not_exited:
-        delta = datetime.now() - session.start
+        tz = timezone('Europe/Berlin')
+        delta = datetime.now(tz).replace(tzinfo=None) - session.start
         if delta.seconds > conf['app']['SESSION_EXPIRATION']:
             session.exit = True
             db.session.add(session)
