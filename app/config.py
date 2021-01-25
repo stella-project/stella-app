@@ -46,7 +46,7 @@ conf["app"]["INTERVAL_DB_CHECK"] = int(os.environ.get("INTERVAL_DB_CHECK")) if o
 conf["app"]["SESSION_EXPIRATION"] = int(os.environ.get("SESSION_EXPIRATION")) if os.environ.get("SESSION_EXPIRATION") else 6  # seconds
 
 server_address = os.environ.get("STELLA_SERVER_ADDRESS") or "nginx"
-conf["app"]["STELLA_SERVER_API"] = ' '.join(['http://', server_address, '/stella/api/v1'])
+conf["app"]["STELLA_SERVER_API"] = ''.join(['http://', server_address, '/stella/api/v1'])
 # conf["app"]["STELLA_SERVER_API"] = "http://localhost/stella/api/v1"
 
 conf["app"]["STELLA_SERVER_USER"] = os.environ.get("STELLA_SERVER_USER") or "gesis@stella.org"
