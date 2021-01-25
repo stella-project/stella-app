@@ -41,9 +41,9 @@ for container_name in conf["app"]["container_list_recommendation"]:
     conf["app"]["container_dict_recommendation"][container_name] = {"requests": 0}
 
 conf['app']['DEBUG'] = False
-conf['app']['DELETE_SENT_SESSION'] = os.environ.get("DELETE_SENT_SESSION") or True
-conf["app"]["INTERVAL_DB_CHECK"] = os.environ.get("INTERVAL_DB_CHECK") or 3  # seconds
-conf["app"]["SESSION_EXPIRATION"] = os.environ.get("SESSION_EXPIRATION") or 6  # seconds
+conf['app']['DELETE_SENT_SESSION'] = True if os.environ.get("DELETE_SENT_SESSION") == 'True' else False
+conf["app"]["INTERVAL_DB_CHECK"] = int(os.environ.get("INTERVAL_DB_CHECK")) if os.environ.get("INTERVAL_DB_CHECK") else 3  # seconds
+conf["app"]["SESSION_EXPIRATION"] = int(os.environ.get("SESSION_EXPIRATION")) if os.environ.get("SESSION_EXPIRATION") else 6  # seconds
 
 server_address = os.environ.get("STELLA_SERVER_ADDRESS") or "nginx"
 conf["app"]["STELLA_SERVER_API"] = ' '.join(['http://', server_address, '/stella/api/v1'])
@@ -63,9 +63,9 @@ conf["app"]["STELLA_SERVER_USERNAME"] = os.environ.get("STELLA_SERVER_USERNAME")
 # conf["app"]["STELLA_SERVER_PASS"] = "pass"
 # conf["app"]["STELLA_SERVER_USERNAME"] = "LIVIVO"
 
-conf["app"]["INTERLEAVE"] = os.environ.get("INTERLEAVE") or True
+conf["app"]["INTERLEAVE"] = True if os.environ.get("INTERLEAVE") == 'True' else False
 conf['app']['REST_QUERY'] = True
-conf['app']['BULK_INDEX'] = os.environ.get("BULK_INDEX") or True
+conf['app']['BULK_INDEX'] = True if os.environ.get("BULK_INDEX") == 'True' else False
 
 # logger settings
 conf["log"] = {}
