@@ -1,3 +1,4 @@
+from flask import request
 from . import api
 from core.models import db, Session
 
@@ -17,3 +18,13 @@ def exit_session(sid):
     db.session.commit()
 
     return '', 204
+
+
+@api.route('/sessions/<int:sid>/user', methods=['POST'])
+def post_user(sid):
+    session = Session.query.get_or_404(sid)
+    session.site_user = request.values.get('site_user', None)
+    db.session.add(session)
+    db.session.commit()
+
+    return ''.join(['POST user', str(session.site_user), 'to session', str(sid)]), 201
