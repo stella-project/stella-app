@@ -29,7 +29,7 @@ services:
         - RANKSYS_BASE=livivo_base
         - RECSYS_BASE=gesis_rec_pyserini
         - STELLA_SERVER_ADDRESS=nginx
-        - STELLA_SERVER_USER=gesis@stella.org
+        - STELLA_SERVER_USER=gesis@stella-project.org
         - STELLA_SERVER_PASS=pass
         - STELLA_SERVER_USERNAME=GESIS
         - INTERLEAVE=True
