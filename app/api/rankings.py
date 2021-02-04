@@ -57,6 +57,7 @@ def interleave(ranking_exp, ranking_base):
                      q_date=ranking_exp.q_date,
                      q_time=ranking_exp.q_time,
                      num_found=ranking_exp.num_found,
+                     hits=ranking_base.num_found,
                      page=ranking_exp.page,
                      rpp=ranking_exp.rpp,
                      items=item_dict)
@@ -374,7 +375,7 @@ def ranking():
                                         'q': query,
                                         'page': page,
                                         'rpp': rpp,
-                                        'hits': ranking_base.num_found,
+                                        'hits': ranking_exp.num_found,
                                         'container': {'exp': container_name}},
                              'body': response}
 
