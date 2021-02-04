@@ -282,10 +282,13 @@ def ranking():
     query = request.args.get('query', None)
     container_name = request.args.get('container', None)
     session_id = request.args.get('sid', None)
+    # Look for optional GET-parameters and set default values
+    page = request.args.get('page', default=0, type=int)
+    rpp = request.args.get('rpp', default=20, type=int)
 
     # if rankings have been retrieved for a specific item before in the corresponding session, read it from the database
     if session_id and query:
-        ranking = Result.query.filter_by(session_id=session_id, q=query).first()
+        ranking = Result.query.filter_by(session_id=session_id, q=query, page=page).first()
         if ranking:
             if ranking.tdi:
                 ranking = Result.query.filter_by(id=ranking.tdi).first()
@@ -301,10 +304,6 @@ def ranking():
                                    'container': {'exp': container_name}},
                         'body': ranking.items}
             return jsonify(response)
-
-    # Look for optional GET-parameters and set default values
-    page = request.args.get('page', default=0, type=int)
-    rpp = request.args.get('rpp', default=20, type=int)
 
     # no query ? -> Nothing to do
     if query is None:
