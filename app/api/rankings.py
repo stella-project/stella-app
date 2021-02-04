@@ -301,6 +301,7 @@ def ranking():
                                    'q': query,
                                    'page': ranking.page,
                                    'rpp': ranking.rpp,
+                                   'hits': ranking.hits,
                                    'container': {'exp': container_name}},
                         'body': ranking.items}
             return jsonify(response)
