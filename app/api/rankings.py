@@ -289,7 +289,7 @@ def ranking():
 
     # if rankings have been retrieved for a specific item before in the corresponding session, read it from the database
     if session_id and query:
-        ranking = Result.query.filter_by(session_id=session_id, q=query, page=page).first()
+        ranking = Result.query.filter_by(session_id=session_id, q=query, page=page, rpp=rpp).first()
         if ranking:
             if ranking.tdi:
                 ranking = Result.query.filter_by(id=ranking.tdi).first()
