@@ -12,8 +12,10 @@ from core.models import db, System, Session, Result, Feedback
 from config import conf
 from utils import create_dict_response
 from core.interleave import tdi, tdi_rec
+from pytz import timezone
 
 client = docker.DockerClient(base_url='unix://var/run/docker.sock')
+tz = timezone('Europe/Berlin')
 
 
 def new_session(container_rec_name=None, container_name=None, sid=None):
@@ -32,7 +34,7 @@ def new_session(container_rec_name=None, container_name=None, sid=None):
         sid = uuid4().hex
 
     session = Session(id=sid,
-                      start=datetime.now(),
+                      start=datetime.now(tz).replace(tzinfo=None),
                       system_ranking=System.query.filter_by(name=container_name).first().id if container_name is not None else None,
                       system_recommendation=System.query.filter_by(name=container_rec_name).first().id if container_rec_name is not None else None,
                       site_user='unknown',
@@ -117,7 +119,7 @@ def query_system(container_name, item_id, rpp, page, session_id, logger, type='E
         for session_id returns recommendation result of rec_type
     '''
     logger.debug(f'produce recommendation with container: "{container_name}"...')
-    q_date = datetime.now().replace(microsecond=0)
+    q_date = datetime.now(tz).replace(tzinfo=None, microsecond=0)
     ts_start = time.time()
     ts = round(ts_start*1000)
 

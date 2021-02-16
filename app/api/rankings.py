@@ -13,8 +13,10 @@ from core.models import db, Session, System, Result, Feedback
 from core.interleave import tdi
 from config import conf
 from utils import create_dict_response
+from pytz import timezone
 
 client = docker.DockerClient(base_url='unix://var/run/docker.sock')
+tz = timezone('Europe/Berlin')
 
 
 def single_ranking(ranking):
@@ -135,7 +137,7 @@ def query_system(container_name, query, rpp, page, session_id, logger, type='EXP
 
     logger.debug(f'produce ranking with container: "{container_name}"...')
 
-    q_date = datetime.now().replace(microsecond=0)
+    q_date = datetime.now(tz).replace(tzinfo=None, microsecond=0)
 
     ts_start = time.time()
     ts = round(ts_start*1000)
@@ -192,7 +194,7 @@ def new_session(container_name=None, container_rec_name=None, sid=None):
         sid = uuid4().hex
 
     session = Session(id=sid,
-                      start=datetime.now(),
+                      start=datetime.now(tz).replace(tzinfo=None),
                       system_ranking=System.query.filter_by(name=container_name).first().id if container_name is not None else None,
                       system_recommendation=System.query.filter_by(name=container_rec_name).first().id if container_rec_name is not None else None,
                       site_user='unknown',
