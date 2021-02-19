@@ -33,7 +33,7 @@ def update_expired_sessions(sessions_not_exited):
                 db.session.add(session)
                 db.session.commit()
             else:
-                if delta > 60 * 60 * 24 * 3:  # session longer than three days will be deleted TODO: add to yml-file
+                if delta.seconds > 60 * 60 * 24 * 3:  # session longer than three days will be deleted TODO: add to yml-file
                     feedbacks = Feedback.query.filter_by(session_id=session.id).all()
                     for feedback in feedbacks:
                         db.session.delete(feedback)
