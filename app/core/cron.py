@@ -38,6 +38,8 @@ def update_expired_sessions(sessions_not_exited):
                     for feedback in feedbacks:
                         db.session.delete(feedback)
                         db.session.commit()
+                    db.session.delete(session)
+                    db.session.commit()
 
 
 
