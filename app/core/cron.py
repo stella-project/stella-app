@@ -105,6 +105,7 @@ def post_result(result, feedback_id_server):
         'q': result.q,
         'q_date': result.q_date,
         'q_time': result.q_time,
+        'system_id': result.system_id,
         'num_found': result.num_found,
         'page': result.page,
         'rpp': result.rpp,
