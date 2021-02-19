@@ -24,7 +24,7 @@ def update_expired_sessions(sessions_not_exited):
             if len(feedbacks) == 0:
                 complete = False
             for feedback in feedbacks:
-                results = Result.query.filter_by(session_id=feedback.id).all()
+                results = Result.query.filter_by(feedback_id=feedback.id).all()
                 if len(results) == 0:
                     complete = False
 
