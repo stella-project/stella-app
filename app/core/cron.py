@@ -69,7 +69,7 @@ def post_session(session, site_id):
     payload = {
         'site_user': session.site_user,
         'start': session.start.strftime("%Y-%m-%d %H:%M:%S"),
-        'end': session.start.strftime("%Y-%m-%d %H:%M:%S"),
+        'end': (session.start + timedelta(0, conf['app']['SESSION_EXPIRATION'])).strftime("%Y-%m-%d %H:%M:%S"),
         'system_ranking': system_ranking_name,
         'system_recommendation': system_recommendation_name
     }
