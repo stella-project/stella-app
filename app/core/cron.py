@@ -101,11 +101,17 @@ def post_feedback(feedback, session_id_server):
 
 
 def post_result(result, feedback_id_server):
+    system = System.query.filter_by(id=result.system_id).first()
+    system_name = system.name
+    r = req.get(API + '/system/id/' + system_name)
+    r_dict = json.loads(r.text)
+    system_id_server = r_dict.get('system_id')
+
     payload = {
         'q': result.q,
         'q_date': result.q_date,
         'q_time': result.q_time,
-        'system_id': result.system_id,
+        'system_id': system_id_server,
         'num_found': result.num_found,
         'page': result.page,
         'rpp': result.rpp,
