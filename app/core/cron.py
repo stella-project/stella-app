@@ -19,9 +19,26 @@ def update_expired_sessions(sessions_not_exited):
         tz = timezone('Europe/Berlin')
         delta = datetime.now(tz).replace(tzinfo=None) - session.start
         if delta.seconds > conf['app']['SESSION_EXPIRATION']:
-            session.exit = True
-            db.session.add(session)
-            db.session.commit()
+            complete = True
+            feedbacks = Feedback.query.filter_by(session_id=session.id).all()
+            if len(feedbacks) == 0:
+                complete = False
+            for feedback in feedbacks:
+                results = Result.query.filter_by(session_id=feedback.id).all()
+                if len(results) == 0:
+                    complete = False
+
+            if complete:
+                session.exit = True
+                db.session.add(session)
+                db.session.commit()
+            else:
+                if delta > 60 * 60 * 24 * 3:  # session longer than three days will be deleted TODO: add to yml-file
+                    feedbacks = Feedback.query.filter_by(session_id=session.id).all()
+                    for feedback in feedbacks:
+                        db.session.delete(feedback)
+                        db.session.commit()
+
 
 
 def update_token():
