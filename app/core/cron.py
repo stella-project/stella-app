@@ -103,7 +103,7 @@ def post_feedback(feedback, session_id_server):
 def post_result(result, feedback_id_server):
     system = System.query.filter_by(id=result.system_id).first()
     system_name = system.name
-    r = req.get(API + '/system/id/' + system_name)
+    r = req.get(API + '/system/id/' + system_name, auth=(conf["app"].get("STELLA_SERVER_TOKEN"), ''))
     r_dict = json.loads(r.text)
     system_id_server = r_dict.get('system_id')
 
