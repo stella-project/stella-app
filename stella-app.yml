@@ -8,19 +8,10 @@ services:
     ports:
         - 8080:8000
     depends_on:
-        - livivo_base
-        - livivo_rank_precom
-        - livivo_rank_pyserini
-        - livivo_rank_pyterrier
         - gesis_rec_precom
-        - gesis_rec_pyterrier
         - gesis_rec_pyserini
-        - livivo_experimental_1
     environment:
-        - RANKSYS_LIST=livivo_base livivo_rank_pyserini livivo_rank_pyterrier livivo_experimental_1
-        - RANKSYS_PRECOM_LIST=livivo_rank_precom
-        - RANKSYS_BASE=livivo_base
-        - RECSYS_LIST=gesis_rec_pyterrier gesis_rec_pyserini
+        - RECSYS_LIST=gesis_rec_pyserini
         - RECSYS_PRECOM_LIST=gesis_rec_precom
         - RECSYS_BASE=gesis_rec_pyserini
         - STELLA_SERVER_ADDRESS=https://lilas.stella-project.org
@@ -32,43 +23,13 @@ services:
         - DELETE_SENT_SESSION=True
         - INTERVAL_DB_CHECK=3
         - SESSION_EXPIRATION=6
-  livivo_base:
-    build: https://github.com/stella-project/livivo_rank_base.git#main
-    container_name: livivo_base
-    volumes:
-        - ./data/:/data/
-  livivo_rank_precom:
-    build: https://github.com/stella-project/livivo_rank_precom.git#master
-    container_name: livivo_rank_precom
-    volumes:
-        - ./data/:/data/
-  livivo_rank_pyserini:
-    build: https://github.com/stella-project/livivo_rank_pyserini.git#master
-    container_name: livivo_rank_pyserini
-    volumes:
-        - ./data/:/data/
-  livivo_rank_pyterrier:
-    build: https://github.com/stella-project/livivo_rank_pyterrier.git#master
-    container_name: livivo_rank_pyterrier
-    volumes:
-        - ./data/:/data/
   gesis_rec_precom:
     build: https://github.com/stella-project/gesis_rec_precom.git#master
     container_name: gesis_rec_precom
     volumes:
         - ./data/:/data/
-  gesis_rec_pyterrier:
-    build: https://github.com/stella-project/gesis_rec_pyterrier.git#master
-    container_name: gesis_rec_pyterrier
-    volumes:
-        - ./data/:/data/
   gesis_rec_pyserini:
     build: https://github.com/stella-project/gesis_rec_pyserini.git#master
     container_name: gesis_rec_pyserini
-    volumes:
-        - ./data/:/data/
-  livivo_experimental_1:
-    build: https://github.com/ljgarcia/stella-lj-participant-test.git#master
-    container_name: livivo_experimental_1
     volumes:
         - ./data/:/data/
