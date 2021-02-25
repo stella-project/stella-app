@@ -18,7 +18,7 @@ class Session(db.Model):
 class Result(db.Model):
     __tablename__ = 'results'
     id = db.Column(db.Integer, primary_key=True)
-    session_id = db.Column(db.Integer, db.ForeignKey('sessions.id'))
+    session_id = db.Column(db.String(64), db.ForeignKey('sessions.id'))
     system_id = db.Column(db.Integer, db.ForeignKey('systems.id'))
     feedback_id = db.Column(db.Integer, db.ForeignKey('feedbacks.id'))
     type = db.Column(db.String(64), index=True)
@@ -55,7 +55,7 @@ class Feedback(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     start = db.Column(db.DateTime, nullable=True)
     end = db.Column(db.DateTime, nullable=True)
-    session_id = db.Column(db.Integer, db.ForeignKey('sessions.id'))
+    session_id = db.Column(db.String(64), db.ForeignKey('sessions.id'))
     interleave = db.Column(db.Boolean)
     results = db.relationship('Result', backref='feedback', lazy='dynamic')
     clicks = db.Column(db.JSON)

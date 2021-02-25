@@ -7,7 +7,10 @@ services:
         - ./app/log:/app/log
     ports:
         - 8080:8000
+    links:
+      - db:db
     depends_on:
+        - db
         - gesis_rec_precom
         - gesis_rec_pyserini
         - gesis_rec_pyterrier
@@ -31,6 +34,14 @@ services:
         - DELETE_SENT_SESSION=True
         - INTERVAL_DB_CHECK=3
         - SESSION_EXPIRATION=6
+  db:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
   gesis_rec_precom:
     build: https://github.com/stella-project/gesis_rec_precom.git#master
     container_name: gesis_rec_precom

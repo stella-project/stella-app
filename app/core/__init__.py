@@ -64,7 +64,18 @@ def create_app(config_name):
 
     app = Flask(__name__, template_folder='../templates')
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(Path(basedir).parent, 'data-dev.sqlite')
+    # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(Path(basedir).parent, 'data-dev.sqlite')
+
+    app.config['DEBUG'] = False
+    app.config['POSTGRES_USER'] = 'postgres'
+    app.config['POSTGRES_PW'] = 'postgres'
+    app.config['POSTGRES_URL'] = 'db:5432'
+    app.config['POSTGRES_DB'] = 'postgres'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://{user}:{pw}@{url}/{db}'.format(user='postgres',
+                                                                           pw='postgres',
+                                                                           url='db:5432',
+                                                                           db='postgres')
+
     db.init_app(app)
     with app.app_context():
         db.drop_all()
