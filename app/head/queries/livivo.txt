@@ -7,7 +7,6 @@ interleukin-33
 glyphosate
 oncogene
 bioenergy
-carcinogenes
 microplastics
 nanomaterial
 zoster
@@ -49,17 +48,12 @@ brustkrebs
 delir
 depression
 pesticide residues
-jumping gene
-bienensterben
 hpv vaccination
-schlaganfallpatienten AND zeitfenster
 tlif AND cage
 covid AND 19
-quantitative AND studie AND pflege
 animal protection
 organspende
 vegan diet
-crispr cas
 herzinfarkt
 colony collapse disorder
 food allergy
@@ -67,7 +61,6 @@ anatomie
 hospital hygiene
 case AND management
 climate change
-hpv-impfung
 stress
 organic farming
 nuclear disaster
@@ -75,14 +68,11 @@ organ donation
 adipositas
 parkinson
 covid
-resilienz
 schlaganfall
 physiotherapie
 hiv
 telemedizin
-praxisanleitung
 autismus
-gesundheit AND ungleichheit
 cancer
 copd
 osteopathie
@@ -90,25 +80,16 @@ prometheus
 burnout
 adhs
 schmerz
-dekubitusprophylaxe
 multiple AND sklerose
-glyphosat
-klimawandel
 ergotherapie
-reaktorkatastrophe
 histologie
 borderline
 basale AND stimulation
 krebs
-betriebliches AND gesundheitsmanagement
-neuroanatomie
 innere AND medizin
 neurologie
-salutogenese
 coronavirus
-nahrungsmittelintoleranz
 notaufnahme
-aromatherapie
 krankenhaushygiene
 midwifery
 herz
@@ -119,982 +100,901 @@ onkologie
 zoonose
 psychiatrie
 aphasie
-mikroplastik
-midwife
 test
 transitions AND end AND of AND life
 vegan
 kommunikation
-radiologie
 last AND year AND of AND life
-pflegevisite
+radiologie
 pathologie
 motivation
 palliative AND care
-gesundheitskompetenz
-pulvinaria
 cannabis
-schlaf
 pharmakologie
+schlaf
 trauma
 schizophrenia
-soziale AND schicht AND adipositas
 thromboseprophylaxe
 gesundheitskompetenz AND health AND literacy
 sterbehilfe
-mitarbeiterbindung
-karzinogen
-tierschutz
-bioenergie
 beatmung
 alzheimer
 mex
 diabetes AND mellitus
 angst
-taschenatlas AND physiologie
 epilepsie
 dialyse
 medizin
 sturz
-ambient AND assisted AND living AND nursing
 thrombose
-praxisanleiter
+ambient AND assisted AND living AND nursing
 ambient AND assisted AND living AND caring
-john AND smith
 chirurgie
-elektronische AND patientenakte
-achtsamkeit
-stroke
-hygiene
+inkontinenz
 stillen
-entlassmanagement
-pflegeausbildung
-pflegenotstand
+psychologie
 neonatologie
+dysphagie
+masern
 schwangerschaft
 musiktherapie
-jurnal AND kesehatan AND komunitas
 medizinische AND statistik
-yoga
 leukemia
+yoga
 sucht
 arthrose
 bobath
 ethik
 kardiologie
-herold AND innere AND medizin
-pflegeprozess
 altenpflege
 klimawandel AND in AND china
 corona AND virus
 krankenhaus
 palliativ
 rheuma
-handelsliberalisierung
-apoplex
-superheilmittel AND vitamin AND c
+notfallmedizin
 covid19
-schmerzen
 health AND literacy
 vitamin AND d
-gewalt AND in AND der AND pflege
+schmerzen
 immunologie
-benkert AND hippius
 physiologie AND des AND menschen
 polytrauma
-mrsa
 neurodermitis
+mrsa
 springendes AND gen
-suzuki AND coupling
 bgm
+suzuki AND coupling
 intensivmedizin
 pflegewissenschaft
-mikrobiom
 asthma
-pflegemanagement
 osteoporose
-herold
 anorexia AND nervosa
+herold
 reanimation
 ekg
-arbeitszufriedenheit
 neurochirurgie
 intensivpflege
 patientensicherheit
 geriatrie
 depressionen
 thieme
-vernakalant
 herzstillstand
 sport
-akademisierung AND pflege
-pflege AND heute
-inklusion
 ambulante AND pflege
 out-of-hospital AND birth
-mikrobiologie
-mitarbeitermotivation
-bezugspflege
 psychotherapie
-11-dehydrocorticosterone
-softdrink
+mikrobiologie
 patricia AND benner
+nursing
 mobbing
 dissertation
 herzchirurgie
 aphasie AND therapie
 bluthochdruck
-out-of-hospital birth
 rehabilitation
 statistik
 rettungsdienst
-antibiotika
 nutrition
-dbive-42 AND be AND fbef-dbi-5
-esperanto
-blut
+antibiotika
 obstipation
-work AND life AND balance
 public AND health
+work AND life AND balance
 primary AND nursing
-expertenstandard
 zahnmedizin
-augenheilkunde
+zucker
 bandscheibenvorfall
+augenheilkunde
 social media
-virtual AND reality
-chemie
 die AND schwester AND der AND pfleger
-onkologische AND pflege
-kunsttherapie
-problemorientiertes AND lernen
-nachhaltigkeit
-schichtarbeit
+stryer
+virtual AND reality
 masern AND impfen
-tadalafil
-gesundheitliche AND ungleichheit
 icd AND 10
+tadalafil
 hno
-hebamme
 ptbs
-spiegeltherapie
-wachkoma
 empowerment
-fatigue
 hpv
-projektmanagement
+fatigue
 demographischer AND wandel
-endspurt
+occupational AND therapy
 geburt
+kinder
 burnout AND pflege
 gewalt
-kinder
-occupational AND therapy
 migration
-psychische AND erkrankungen
 bladder
-katzung
 welsch
-labormedizin
 shared AND decision AND making
-pflegeberatung
+evidence AND based AND nursing
 das AND krankenhaus
-pflegeplanung
 asperger
-heilpraktiker
-magersucht
 welsch AND histologie
 urologie
-morbus AND parkinson
 vitamin AND c
+morbus AND parkinson
 morbus AND crohn
-histologie AND welsch
-virologie
 klinische AND chemie
-lernen
-sterbebegleitung
+virologie
 prothetik
-udca
-placebo
-ekel
+lernen
 echokardiographie
+placebo
 drg
-gesundheitsverhalten
-mammakarzinom
 pain
-amputation
+mammakarzinom
 psychiatrische AND pflege
-patientenedukation
+amputation
 ambient AND assisted AND living AND and AND care
-pflegeforschung
-gesundheitsmanagement
+studie
 dermatologie
-psychoonkologie
 trisomie AND 21
-notfallversorgung
-intensivtagebuch
-generalistische AND pflegeausbildung
-coping
 ecmo
 hashimoto
-prosthetic AND joint AND infection AND riskfactors
+coping
+sepsis
 spss
-soziale AND ungleichheit
+prosthetic AND joint AND infection AND riskfactors
 bonding
+manipulation
 karies
 ains
-manipulation
-schmerzmanagement
-jamali AND narisi
+prophylaxe
+intensivstation
 hypertonie
-heart
 supervision
 suizid
 peep AND trial
-die AND hebamme
-postpartale AND depression
-crps
-compliance
 nurse
-pschyrembel
-down AND syndrom
-stottern
-pkms
-fallbuch AND innere AND medizin
-fotoatlas AND neuroanatomie
-entwicklungspsychologie
-pflegekammer
-partizipation
+compliance
+crps
+postpartale AND depression
+endometriose
 tinnitus
 patientenzufriedenheit
-endometriose
-safewards
-stephan AND g AND allmendinger
-hypnobirthing
 kinderkrankenpflege
-kultursensible AND pflege
-einsamkeit
-generation AND z
+akupunktur
 bindung
-oberschenkelhalsbruch
-praxisanleitung AND pflege
+generation AND z
 versorgungsforschung
 i AND care
-blutgasanalyse
 strahlentherapie
-colitis AND ulcerosa
 aids
+colitis AND ulcerosa
+wundversorgung
 back AND pain
 impfen
 ebola
-wundversorgung
 pandemie
-postnatal AND depression
 schmerztherapie
+postnatal AND depression
 lancet
-aromapflege
 multiple AND sclerosis
 icf
-mitarbeiterzufriedenheit
-fasd
-gestationsdiabetes
-stoma
-anamnese
-risikomanagement
-biochemie AND des AND menschen
+unfallchirurgie
 chronische AND schmerzen
+biochemie AND des AND menschen
+anamnese
+stoma
+myeloic AND leukemia
 palliativmedizin
-intubation
-dienstplan
 prostatakarzinom
-impfung
-rosuvastatin
-transkulturelle AND pflege
+intubation
+immunsystem
 manuelle AND therapie
-postnatal depression
-personalentwicklung
 intensiv
-medizintechnik
+rosuvastatin
+impfung
+cirs
+postnatal depression
 flossing
 low AND back AND pain AND physiotherapy
-qualitative AND forschung
-epidemiologie
 alkohol
+emdr
 psoriasis
 leber
-hirntod
-sprachtherapie
-pflegediagnosen
+epidemiologie
+qualitative AND forschung
+integrierte AND versorgung
 pubmed
+validation
 allgemeinmedizin
-pflegepersonaluntergrenzen
-digitalisierung AND pflege
-psychische AND gesundheit
-fieber
-skoliose
-beratung
-selbstwirksamkeit
+meditation
 burn AND out
+beratung
+psychische AND gesundheit
 triage
-1256-dibenzanthracene
-kinder AND psychisch AND kranker AND eltern
-prostatakrebs
-onboarding
-medizinische AND psychologie AND und AND soziologie
-tdcs
+skoliose
+demenz AND patients
 mrt
-kreuzbandriss
+tdcs
 antonovsky
-striebel
-endotracheales AND absaugen
 bonding AND stillen
-intelligenzminderung
-schulgesundheitspflege
+controlled AND study |randomized AND trial AND simvastatin
+striebel
 medizinrecht
-humoralmedizin
-innere AND medizin AND herold
-krankenhausmanagement
-akademisierung AND der AND pflege
-schluss AND mit AND sodbrennen
 therapeutisches AND klettern
+gesundheitssystem
 embryologie
-dienstplangestaltung
 dsm AND 5
 medline
 sleep
-einarbeitung
 travoprost
-lbh589 AND klein
-wundmanagement
 gesundheitswesen
 herzschrittmacher
 ards
 amyotrophe AND lateralsklerose
-scham
-delir AND intensivstation
-cbd
-intervallfasten
-zivilisationskrankheit
-selbstmanagement
-change AND management
-physik
-beipackzettel
-kaiserschnitt
 autism
-breast AND care AND nurse
 schwangerschaftsabbruch
+change AND management
+breast AND care AND nurse
 verhaltenstherapie
+wahrnehmung
 rechtsmedizin
 rauchen
 parodontologie
-psychoedukation
-kurzlehrbuch AND pathologie
-neurofeedback
+springer
+crispr
 wunde
 recovery
-hygiene AND im AND patientenhaushalt
 prosthetic AND joint AND infection AND diagnose AND method
-crispr
-faszien
-springer
-duale AND reihe
-e-health
-emotionsregulation
+neurofeedback
 peplau
-pnf
-low AND back AND pain
-transgender
-werkstoffkunde
+e-health
 craniosacral
+transgender
+low AND back AND pain
+pnf
 qualitative AND sozialforschung
 advance AND care AND planning
-prokrastination
-schmerzwahrnehmung
 asthma AND bronchiale
-one AND minute AND wonder
-nudging
-geburtshilfe
-mayring
 skills AND lab
+nudging
 ehealth
-atemstimulierende AND einreibung
 tracheostoma
-kommunikation AND pflege
 ethik AND in AND der AND medizin
-decubitus
+kommunikation AND pflege
 ibuprofen
-telemonitoring
-soziale AND ungleichheit AND und AND psychische AND gesundheit
-/etc/passwd
-chronischer AND schmerz
-social AND media
-pflegetheorien
 osteopathy
+telemonitoring
+social AND media
+chronischer AND schmerz
 medikamente
-http//www.google.com
 systematic AND review AND protocol
-pelargonium
 schulter
-diabetis
 sobotta
-palliativpflege
-hippotherapie
-doktorarbeit
-soziale AND isolation
-palliativ AND care
 lagerung
-fallbuch AND chirurgie
-notfall
 behandlung AND depression
+notfall
+palliativ AND care
+pflege AND ausbildung
+soziale AND isolation
+allergie
+physiologie AND wiesner
+wochenbett
+demenz AND pflege
+arbeitsmedizin
 biologie
-kulturheidelbeeren
 orem
 ctg
-demenz AND pflege
-wochenbett
-work-life-balance
-allergie
-selbstverletzendes AND verhalten
-physiologie AND wiesner
-arbeitsmedizin
-pflegeberufegesetz
-histamindihydrochlorid
-ceplene
 obesity
-humangenetik
-biologische AND psychologie
 peg
-tracheotomie
-geistige AND behinderung
+humangenetik
 koronare AND herzkrankheit
+geistige AND behinderung
+biologische AND psychologie
+tracheotomie
 sars
-professionalisierung AND pflege
-radiology
-pflegetheorie
 school AND nurse
-mvz
-chorea AND huntington
+radiology
 osce
-darmkrebs
+chorea AND huntington
 endometriosis AND prevalence
+generation AND y
+wissenschaftliches AND arbeiten
 instagram
 ambient AND assisted AND living
-generation AND y
-psychosomatik
-notfallkoffer
 soziale AND arbeit
 ayurveda
-personalmanagement
-epistaxis AND hypertonie
-wissenschaftliches AND arbeiten
-parodontitis
+psychosomatik
 physiotherapy
-qualitative AND studie
 heart AND failure
-schwieriger AND atemweg
+parodontitis
 eisenmangel
+qualitative AND studie
 sonographie
 next AND studie
-notfallpflege
-gesundheitspsychologie
-wochenbettdepression
-late AND talker
-humor
-pathologie AND kurzlehrbuch
-narzissmus
-stationsleitung
-mukositis
+gesundheitswissenschaften
 medizinische AND mikrobiologie
-intermittent AND fasting
-kopfschmerzen
-systemische AND beratung
+humor
 therapie AND tools
-quality of life
-labordiagnostik
+late AND talker
+systemische AND beratung
+kopfschmerzen
+intermittent AND fasting
 ambient AND assisted AND living AND and AND nursing
+labordiagnostik
 vascular AND surgery
-promotion
 aphasia
-kultur AND von AND euphorbia AND pulcherrima
-psychose
-hospiz
 arzneimittel
-windeldermatitis
-transkulturelle AND kompetenz
-weaning
-krankenpflege
-fibromyalgie
-triggerpunkte
-hpv AND impfung
-systemische AND therapie
+promotion
+psychose
+delirium
 care
-ebn
-nierentransplantation
-schrotschusskrankheit
-kurzlehrbuch AND anatomie
+weaning
+hpv AND impfung
+krankenpflege
+systemische AND therapie
 leberzirrhose
-impfpflicht
-osteoporose AND physiotherapie
-schichtdienst
-interkulturelle AND kompetenz
-beckenendlage
-prevention
-schmerzensgeld
 musik
+beckenendlage
+nierentransplantation
+prevention
+osteoporose AND physiotherapie
+ebn
 kindesmisshandlung
 harninkontinenz
-livivo
-reproduktionsmedizin
-ethik AND pflege
-fallbuch
-nejm
-pathophysiologie
-gehirn
 behinderung
-biotechnologie
-als
+pathophysiologie
+ethik AND pflege
+gehirn
 massage
-akademisierung
-haufe
 genetik
+tavi
+haufe
 deutsche AND medizinische AND wochenschrift
-casemanagement
-pharmakologie AND und AND toxikologie
-mhealth
-controlling
 hebammen
-who
-tuberkulose
-zvk
-palliative AND pflege
-krankenhausfinanzierung
-mobilisation
-medizinische AND soziologie
+pharmakologie AND und AND toxikologie
+controlling
+mhealth
+mastitis
 verbrennungen
+tuberkulose
+who
 telemedizin AND studie
-endspurt AND biochemie
-mucoviszidose
-tumor
-innere AND medizin AND duale AND reihe
+palliative AND pflege
+medizinische AND soziologie
+mobilisation
 das AND humangenomprojekt
-migration AND pflege
-dialyse AND komplikationen
-isolierung AND stigmatisierung
-125-dihydroxycholecalciferol
 peripherer AND nerv
-osteopathie AND leber
-emotionen
-obstipation AND schwangerschaft
-schulz AND von AND thun
-soziologie
-der AND nervenarzt
-handlungskompetenz AND praxisanleiter
-deeskalation
+insulin
+dialyse AND komplikationen
+tumor
 anorexie
-generalistik
+obstipation AND schwangerschaft
 icu
-rheumatoide AND arthritis
-mitarbeiterbindung AND pflege
-herausforderndes AND verhalten
 nervenarzt
-kinderkardiologie
-management
-postoperatives AND delir
-basics AND neurochirurgie
-gesundheitsapps
-arteriosklerose
-veganismus
-hospital
+schulz AND von AND thun
+der AND nervenarzt
+myeloid AND leukemia
+soziologie
+rheumatoide AND arthritis
 medizinische AND psychologie
 laryngektomie
+soziale AND phobie
 milch
-der AND unfallchirurg
-physiologie AND speckmann
+arteriosklerose
 carl AND rogers
-gesundheitskommunikation
+physiologie AND speckmann
+der AND unfallchirurg
+fas
 tcm
+op
 usmle
 selbsthilfe
-vernakalant AND pregnancy
-einarbeitungskonzept
 coaching
-fas
-op
 trepel
-videosprechstunde
-sprechapraxie
-ausbildung
+patient AND safety
 aromatherapy
 emotionale AND intelligenz
-employer AND branding
-patient AND safety
-c.meyer
-coronavirus AND nursing
-anatomy
-haut AND nah
-motivational AND interviewing
-postoperativ
-neuroanatomie AND trepel
-fleischkonsum
+fixierung
+ausbildung
 adipositas AND kinder
-nephrologie
-psychische AND belastung
-audiometrie
-taschenatlas AND physiologie AND wiesner
-lymphdrainage
+prosthetic AND joint AND infection AND survival AND rate
 dysphagia
-myokardinfarkt
 morphine AND palliative
-zeitarbeit
-milestone AND transition
+anatomy
+coronavirus AND nursing
+motivational AND interviewing
+psychische AND belastung
+tourette
+audiometrie
+nephrologie
+myokardinfarkt
+postoperativ
 telemedicine
-koffein
-dammschutz
-spiraldynamik
 isolation
-kurzzeitpflege
 infektiologie
-mesh
-kurzlehrbuch AND innere AND medizin
 bedsharing OR familienbett
 muskeldystrophie
-simulation
-ressourcenaktivierung
-homeoffice
+pflegeheim
+mesh
+diabetes AND mellitus AND typ AND 2
 borreliose
-kommunikation AND in AND der AND pflege
-fotoatlas AND anatomie
-personalbindung
-burnout AND in AND der AND pflege
-nutri AND score
-tms
-aspirin
-drosten
 delir AND intensivstation AND screening
-amnog
-wohlbefinden
+tms
+kommunikation AND in AND der AND pflege
+drosten
+aspirin
 partizipative AND entscheidungsfindung
-lehrbuch AND der AND verhaltenstherapie
-google
-ulcus AND cruris
+nutri AND score
+wohlbefinden
 kinder AND und AND jugendpsychiatrie
-knie
+kompetenz
 darm
 heilberufe
-quality AND of AND life
-medizinische AND versorgungszentren
+kopfschmerz
 polyneuropathie
+kognitive AND neurowissenschaften
+magnet AND hospital
+ulcus AND cruris
 stammzellen
-kompetenz
-nature
-physiologie AND silbernagl
-chronische AND erkrankungen
 kinderchirurgie
-demenz AND 'a
-ethikkomitee AND kinder
-adhd
-lehrbuch AND der AND physiologie
-guolin AND qigong
-backpain
+christian AND drosten
 physik AND klima
-pythium
-wiesner AND physiologie
-schmerzerfassung
+nature
+lehrbuch AND der AND physiologie
+prosthetic AND joint AND infection AND operation
+chronische AND erkrankungen
 transition
-vorhofflimmern
-legasthenie
-op AND management
-kooperation
-digitalisierung AND gesundheitswesen
-sbar
+delir AND and AND nurs*
+adhd
+demenz AND 'a
 forensische AND psychiatrie
-cmd
-datenschutz
-e-learning
-progressive AND muskelentspannung
-kompressionsverband
-fragebogen
-spinale AND muskelatrophie
-dysarthrie
+chronische AND wunden
 gastroenterologie
 nanda
-dekubitus AND schmerzensgeld
-soziale AND schichtunterschiede AND adipositas
-bienen
-dioxin
-betriebliches AND eingliederungsmanagement
-morbus AND crohn AND therapy
-intensivkurs AND psychiatrie AND und AND psychotherapie
-studien
-hausgeburt
-bundesgesundheitsblatt
-magnetkrankenhaus
+sbar
+oxybutynin
+e-learning
+op AND management
+vorhofflimmern
+spinale AND muskelatrophie
+kooperation
 alter
-mex AND klinik
-adipositas AND soziale AND schicht
-ausfallmanagement
-fallbesprechung
-pflegeroboter
-empathie
+dioxin
+bundesgesundheitsblatt
+studien
+demenz AND krankenhaus
 das AND gesundheitswesen
 f&w
-lunge
-didaktik
-pflegeethik
-herzinfakt
 soja
-vegetarismus
 gender
-contergan
-kompressionstherapie
-grundlagen AND der AND ergotherapie
-vitalzeichen
+sensorische AND integration
+organtransplantation
+krankheitslehre
+lunge
+gonarthrose
 ms
-uptodate
+cardiology
+mts
+harrison
+bildgebende AND verfahren
 prostata
 mbsr
-endspurt AND physiologie
-cardiology
-pcr
+uptodate
 cystic AND fibrosis
-harrison
-pflegekompetenz
-mts
-bildgebende AND verfahren
-zwang
-medienkompetenz
+pcr
 neuroradiologie
-kinderzahnheilkunde
-tagespflege
-lazarus
-fasten
-abschwellung
-i AND care AND pflege
-frage AND und AND antwort
 sectio
-knie AND tep
+i AND care AND pflege
 geschichte AND der AND medizin
-basale AND stimmulation
+fasten
 pde-5
-kapata AND arkeologi
-brustkrebs AND schmerz
-benzodiazepine
-lax AND vox
-kurzlehrbuch AND physiologie
-pflegepersonal
-pest
-physiotherapie AND bei AND multipler AND sklerose
-ambient AND assisted AND living AND and AND caring
+zwang
+frage AND und AND antwort
+prosthetic AND joint AND infection AND surgery
+lazarus
 endokrinologie
-validation AND demenz
-haut
-khk
-gewaltfreie AND kommunikation
 blood
+benzodiazepine
+pest
 nidcap
-buteyko
-blasensprung AND transport
-phantomschmerz
-geschlechterrolle AND erziehung
+ambient AND assisted AND living AND and AND caring
 health
+brustkrebs AND schmerz
 neurology
-onkologie AND pflege
-medizincontrolling
-ti
+validation AND demenz
 barthel AND index
 tierversuche
+ti
 locked AND in AND syndrom
 familiale AND pflege
-gruppendynamik
-ehec AND rektum AND analkanal AND thrombose AND digestion
-psychomotorik
-das AND icu AND buch
 intertrigo
-palliative AND sedierung
-albinismus
+das AND icu AND buch
+jama
+therapy
 advanced AND nursing AND practice
-pharmind
+palliative AND sedierung
+a
 ase
 resilience
-wissenstransfer
-therapy
-sozialraumanalyse
-jama
-a
-kurkuma
-viola AND wittrockiana AND hybriden
 manchester AND triage AND system
-frozen AND shoulder
-praxisbegleitung
-humor AND in AND der AND pflege
-zahnerhaltung
-tiertherapie
 personal
-osteoporose AND diphosphonate AND femur AND ovarektomie
-wissensmanagement
-neurotraining
-stigmatisierung
-krankenversicherung
-gruppentherapie
-training
-cochrane
-lehrergesundheit
+frozen AND shoulder
 gerontopsychiatrie
-lungenkrebs
-praxis AND der AND schlafmedizin
-altersarmut
-atmen
-medizinethik
-demenzdorf
-hanf
-kooperatives AND lernen
-sars AND cov AND 2
-arzneimitteltherapiesicherheit
-lehrbuch AND histologie
-invasive AND pflanzen
-patient
-taschenlehrbuch AND histologie
-leukemia AND drug AND therapy
-trink AND dich AND vital AND und AND gesund
-magnesium
-antibiotic* AND machin* AND learn*
-anatomie AND des AND harnsystems
-qo
-chondropatia AND patellae
-hypnose
-quantiferon
-uv AND strahlung AND nutzpflanzen
-springendes gen
-karow
-gesundheit AND digital
-prosthetic AND joint AND infection AND surgical
-sensorimotor AND dyslexia
-fettstoffwechsel
-bauchlage
-herold AND innere
-anatomie AND ausbildung
-berufliche AND rehabilitation
-muttermilch
-lockdwon OR shutdown OR deutschland OR germany
-cannabidiol
-krisenintervention
-duale AND reihe AND biochemie
-integrative AND validation
-leistenhernie
-haccp
-fatique
-icd-10
-zeolith
-breastfeeding
-alzheimer AND demenz
-team
-kinderheilkunde
-spina AND bifida
-umwelt AND gebaeude AND environmentally AND friendly AND building
-neuropsychologie
-ursonorm
-zusammenhang AND sozialer AND schichtunterschiede AND und AND adipositas
-nursing AND care
-evaluation
-infection
-konfliktmanagement
-integrierte AND versorgung
-magnet AND hospital
-telemedizin AND diabetes
-bulimie
-thiemes AND pflege
-dysphagie
-organtransplantation
-insulin
-buurtzorg
-pflege AND ausbildung
-arbeitszeitmodelle
-duale AND reihe AND anatomie
-gewalt AND pflege
-wahrnehmung
-evidence AND based AND nursing
-pflegestudium
-vap
-trepel AND neuroanatomie
-sepsis
-diabetes AND mellitus AND typ AND 2
-kollegiale AND beratung
-fixierung
-digitalisierung
-unfallchirurgie
-inkontinenz
-delir AND and AND nurs*
-eeg
-onkogen
-pflegeheim
-krankheitslehre
-psychologie
-atemtherapie
-endspurt AND anatomie
-sensorische AND integration
-demenz AND krankenhaus
-kopfschmerz
-intensivstation
-up2date
-stryer AND biochemie
-mehlige AND apfelblattlaus
-stryer
-prosthetic AND joint AND infection AND survival AND rate
-gonarthrose
-kognitive AND neurowissenschaften
-prosthetic AND joint AND infection AND surgery
-myeloic AND leukemia
-bellis AND perennis
-fetales AND alkoholsyndrom
-demenz AND patients
-schulstation
-masern
-sturzprophylaxe
-gesundheitswissenschaften
-oxybutynin
-chronische AND wunden
-pneumonie
-kurzlehrbuch AND pharmakologie
-demografischer AND wandel
-notfallmedizin
-recycling AND zerkleinerung AND reifen AND pyrolyse
-akupunktur
-prosthetic AND joint AND infection AND operation
-nursing
-parvovirus AND b19
-biografiearbeit
-studie
-mundpflege
-christian AND drosten
-nutrigenomik
-tavi
-palliativversorgung
-immunsystem
-migraine
-controlled AND study |randomized AND trial AND simvastatin
-entlassungsmanagement
+gruppentherapie
 niv
-pneumologie
-mastitis
-pflegedokumentation
-myeloid AND leukemia
-digitalisierung AND krankenhaus
-fallbuch AND innere
-soziale AND phobie
-kma
-abcde AND schema
-resilienz AND pflege
-zucker
-validation
-schematherapie
-delirium
-meditation
-prometheus AND innere AND organe
-emdr
-gesundheitssystem
-prophylaxe
-cirs
-bobath AND konzept
-tourette
-qualitative AND inhaltsanalyse
-pneumonieprophylaxe
+migraine
+krankenversicherung
+training
+lungenkrebs
+cochrane
+hanf
+berufliche AND rehabilitation
+karow
+magnesium
+quantiferon
+sensorimotor AND dyslexia
+qo
+prosthetic AND joint AND infection AND surgical
+sars AND cov AND 2
+lehrbuch AND histologie
+muttermilch
+hypnose
+gesundheit AND digital
+patient
+antibiotic* AND machin* AND learn*
+invasive AND pflanzen
+kooperatives AND lernen
+leukemia AND drug AND therapy
+anatomie AND ausbildung
+fettstoffwechsel
+lockdwon OR shutdown OR deutschland OR germany
+haccp
+infection
+neuropsychologie
+nursing AND care
+kinderheilkunde
+evaluation
+breastfeeding
+integrative AND validation
+cannabidiol
+icd-10
+team
+alzheimer AND demenz
+krisenintervention
+spina AND bifida
+fatique
+naturheilkunde
+atmung
+verbrennung
+cochlea AND implantat
+demenz AND studie
+infection rate
+hypothermie
+euthanasie
+transfusionsmedizin
+lipedema
+chirurg
+harnblasenkarzinom
+animal AND assisted AND therapy
+patientenzufriedenheit AND mammaplastik
+forschungsmethoden
+intrinsische AND motivation
+therapie
+controlled AND study
+paracetamol
+drogen
+viszeralchirurgie
+arbeitszufriedenheit AND pflege
+digitalisierung AND gesundheit
+gesundheitsversorgung
+implementierung
+alcohol
+stuttering
+antibiotika*
+beech AND growth
+balanced AND scorecard
+dementia AND hospital
+vorzeitiger AND blasensprung
+dekubitus AND prophylaxe
+smartphone
+padua
+rct
+autogenes AND training
+drinking AND water AND supply AND analysis
+klimakterium
+low AND carb
+internistische AND intensivmedizin
+ace2
+joachim AND conrad
+vegan*
+clinical AND reasoning
+gerontologie
+dmp
+biochemie AND horn
+ptsd
+vitamin AND d3
+green AND hospital
+experiment AND psychologie
+bewegungstherapie
+unterricht AND pflege
+spinal AND cord AND injury
+neuroenhancement
+larsen
+myeloid AND leukemia AND therapy
+multimodale AND schmerztherapie
+kiggs
+der AND chirurg
+die AND schwester
+phytophthora
+ponv
+workplace AND health AND promotion
+krankenhaus AND rating AND report AND 2019
+biogas
+ku
+allergy
+pregnancy
+speech AND therapy
+nonverbale AND kommunikation
+vitamin AND b12
+alkoholkonsum
+muskeldystrophie AND duchenne
+home AND office
+stress AND pflege
+nuklearmedizin
+leadership
+melanom
+oxytocin
+ct
+wunden
+coxarthrose
+mental AND health
+emotion
+osteoporosis
+malnutrition
+klinische AND studien
+cancer AND conference
+health AND economics
+epicondylitis
+cholesterin
+bewegung
+grippe
+medicine
+rheumatologie
+trauer
+modelle AND von AND gesundheit AND und AND krankheit
+pflege AND demenz
+niere
+ultraschall
+sterben
+kognitive AND verhaltenstherapie
+neglect
+dbt
+manchester AND triage
+health AND promotion
+marketing
+fehlzeiten AND report
+glaukom
+icd
+elektrotherapie
+florence AND nightingale
+generationen
+dennis AND nano
+physical AND activity
+regionale AND lebensmittel
+kanski
+beratung AND in AND der AND pflege
+interprofessionelle AND zusammenarbeit
+neurophysiologie
+tapp
+vascular AND closure AND device
+animal AND protection AND rats
+arbeit AND und AND gesundheit
+badura
+harrison AND internal AND medicine
+duchenne AND muskeldystrophie
+aromatherapie AND demenz
+geschichte AND der AND pflege
+speckmann
+aal
+doping
+wundheilung
+savant
+aroma
+psychiatrische AND praxis
+molecular AND biology AND of AND the AND cell
+karzinom
+neurologische AND pathophysiologie
+new AND england AND journal AND of AND medicine
+visite
+hepatitis
+tmprss2
+der AND schmerz
+liebe AND sex
+methodik AND klinischer AND studien
+ota
+geburtseinleitung
+bipolar
+portfolio
+bewusstsein
+delegation
+levetiracetam
+stigma
+gesetzliche AND krankenversicherung
+fleisch
+demenz AND musik
+kinder- AND und AND jugendpsychiatrie
+benner
+sf-36
+e AND health
+dokumentation
+professionelle AND pflege
+hippotherapy
+maslow
+hippokrates
+vitamin AND k2
+gicht
+assessment
+screening
+stroke AND unit
+praxis AND der AND intensivmedizin
+das AND gesundheitssystem AND in AND deutschland
+phenprocoumon
+zufriedenheit
+gentechnik
+calcium
+endoskopie
+kommunikation AND im AND op
+medizingeschichte
+demenz AND kommunikation
+virus
+digital AND health
+neurobiologie
+psyche
+melatonin
+familie
+kontraktur
+animal AND protection AND immunology
+intensive AND care AND icu +critical AND care
+lupus
+demenz AND aromatherapie
+prosthetic AND joint AND infection AND and AND outcome
+mensch
+dental AND implants
+lagerung AND dekubitus
+diversity AND management
+organische AND chemie
+oct
+harms AND physik
+fazialisparese
+amdp
+diabetes AND mellitus AND typ AND 1
+koma
+sarkoidose
+klinische AND psychologie
+wunde AND schmerzen
+klinische AND psychologie AND und AND psychotherapie
+ritalin
+musiktherapie AND demenz
+pneumonia
+sars-cov-2 OR coronavirus
+music AND therapy
+disease AND management
+luftverschmutzung AND china
+gewalt AND geburt
+neuroscience
+gentherapie
+amelogenesis AND imperfecta
+hilfsmittel
+selye
+sozial AND adipositas
+atlas AND der AND anatomie
+mamma AND ca
+psychoanalyse
+virginia AND henderson
+atemnot AND syndrom AND kind
+antibody
+kommunikation AND intensivstation
+mortality
+dyspnoe
+end AND of AND life AND care
+quantitative AND forschung
+dementia AND care AND mapping
+kaffee
+janeway AND immunologie
+omega AND 3
+wasser
+therapie AND psychischer AND erkrankungen
+grounded AND theory
+transplantation
+spike AND receptor
+magenkarzinom
+breast AND cancer AND patients
+postnatale AND depression
+endometriosis
+nurs*
+fodmap
+diversity
+neurorehabilitation
+caspofungin
+measles
+community AND health AND nursing
+kultur
+gastritis
+dopamin
+menstruation
+botox
+pet
+ressourcen
+demenz AND im AND krankenhaus
+kommunikation AND im AND krankenhaus
+gastroesophageal AND reflux AND disease
+epi AND no
+leichenschau
+pharma
+morbus AND wilson
+pflegeversicherung
+psychodrama
+animal AND protection AND cells
+pflegende
+communication
+animal AND protection AND genetics
+human AND factors
+physio
+community AND health AND nurse
+birth
+demenz AND dementia
+happiness
+embodiment
+colorectal AND cancer
+zeeck
+insulinresistenz
+differentialdiagnose
+horn AND biochemie
+simulation AND in AND der AND medizin
+anorexia
+arbeitsschutz
+fibromyalgia
+bachelor
+dsm AND v
+school AND nurses
+klinische AND pharmakologie
+reflexion
+binge AND eating
+telerehabilitation
+brain
+schichtarbeit AND gesundheit
+protein
+ethik AND in AND der AND pflege
+echokardiografie
+journal AND of AND wound AND care
+vestibulopathy
+mirror AND therapy
+john AND snow
+pta
+mobbing AND am AND arbeitsplatz
+emg
+tnm AND klassifikation
+kernberg
+nuclear disaster AND 'a
+osteopathic AND migraine
+gold
+endodontie
+lupus AND erythematodes
+lung AND cancer
+herz AND kreislauf
+covid-19 |sars-cov-2 AND coronavirus
+osteoarthritis
