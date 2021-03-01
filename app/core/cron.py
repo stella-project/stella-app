@@ -34,6 +34,12 @@ def update_expired_sessions(sessions_not_exited):
                 db.session.commit()
             else:
                 if delta.seconds > 60 * 60 * 24 * 3:  # session longer than three days will be deleted TODO: add to yml-file
+                    # 1. get all results that are NOT interleaved results
+                    results_not_tdi = Result.query.filter(Result.id != Result.tdi, Result.session_id == session.id).all()
+                    for result in results_not_tdi:
+                        db.session.delete(result)
+                        db.session.commit()
+                    # 2. get all remaining results that ARE interleaved results
                     results = Result.query.filter_by(session_id=session.id).all()
                     for result in results:
                         db.session.delete(result)          
@@ -136,6 +142,12 @@ def post_result(result, feedback_id_server):
 
 
 def delete_exited_session(session):
+    # 1. get all results that are NOT interleaved results
+    results_not_tdi = Result.query.filter(Result.id != Result.tdi, Result.session_id == session.id).all()
+    for result in results_not_tdi:
+        db.session.delete(result)
+        db.session.commit()
+    # 2. get all remaining results that ARE interleaved results
     results = Result.query.filter_by(session_id=session.id).all()
     for result in results:
         db.session.delete(result)
