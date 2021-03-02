@@ -1,0 +1,52 @@
+version: '3'
+services:
+  app:
+    build: ./app
+    volumes:
+        - /var/run/docker.sock/:/var/run/docker.sock
+        - ./app/log:/app/log
+    ports:
+        - 8080:8000
+    links:
+        - db:db
+    depends_on:
+        - db
+        - gesis_rec_precom
+        - gesis_rec_pyterrier
+        - gesis_rec_pyserini
+    environment:
+        - RECSYS_LIST=gesis_rec_pyterrier gesis_rec_pyserini
+        - RECSYS_PRECOM_LIST=gesis_rec_precom
+        - RECSYS_BASE=gesis_rec_pyserini
+        - STELLA_SERVER_ADDRESS=https://lilas.stella-project.org
+        - STELLA_SERVER_USER=gesis@stella-project.org
+        - STELLA_SERVER_PASS=pass
+        - STELLA_SERVER_USERNAME=GESIS
+        - INTERLEAVE=True
+        - BULK_INDEX=True
+        - DELETE_SENT_SESSION=True
+        - INTERVAL_DB_CHECK=3
+        - SESSION_EXPIRATION=6
+  db:
+    image: postgres
+    ports:
+        - 5432:5432
+    environment:
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=postgres
+        - POSTGRES_DB=postgres
+  gesis_rec_precom:
+    build: https://github.com/stella-project/gesis_rec_precom.git#master
+    container_name: gesis_rec_precom
+    volumes:
+        - ./data/:/data/
+  gesis_rec_pyterrier:
+    build: https://github.com/stella-project/gesis_rec_pyterrier.git#master
+    container_name: gesis_rec_pyterrier
+    volumes:
+        - ./data/:/data/
+  gesis_rec_pyserini:
+    build: https://github.com/stella-project/gesis_rec_pyserini.git#master
+    container_name: gesis_rec_pyserini
+    volumes:
+        - ./data/:/data/
