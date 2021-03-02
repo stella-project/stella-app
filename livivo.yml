@@ -11,18 +11,18 @@ services:
         - db:db
     depends_on:
         - db
-        - livivo_base
+        - livivo_rank_pyterrier
         - livivo_rank_precom
         - livivo_rank_pyserini
-        - livivo_rank_pyterrier
+        - livivo_base
     environment:
-        - RANKSYS_LIST=livivo_base livivo_rank_pyserini livivo_rank_pyterrier
+        - RANKSYS_LIST=livivo_rank_pyterrier livivo_rank_pyserini livivo_base
         - RANKSYS_PRECOM_LIST=livivo_rank_precom
         - RANKSYS_BASE=livivo_base
         - STELLA_SERVER_ADDRESS=https://lilas.stella-project.org
-        - STELLA_SERVER_USER=livivo@stella-project.org
+        - STELLA_SERVER_USER=gesis@stella-project.org
         - STELLA_SERVER_PASS=pass
-        - STELLA_SERVER_USERNAME=LIVIVO
+        - STELLA_SERVER_USERNAME=GESIS
         - INTERLEAVE=True
         - BULK_INDEX=True
         - DELETE_SENT_SESSION=True
@@ -36,23 +36,23 @@ services:
         - POSTGRES_USER=postgres
         - POSTGRES_PASSWORD=postgres
         - POSTGRES_DB=postgres
-  livivo_base:
-    build: https://github.com/stella-project/livivo_rank_base.git
-    container_name: livivo_base
+  livivo_rank_pyterrier:
+    build: https://github.com/stella-project/livivo_rank_pyterrier.git#master
+    container_name: livivo_rank_pyterrier
     volumes:
         - ./data/:/data/
   livivo_rank_precom:
-    build: https://github.com/stella-project/livivo_rank_precom.git
+    build: https://github.com/stella-project/livivo_rank_precom.git#master
     container_name: livivo_rank_precom
     volumes:
         - ./data/:/data/
   livivo_rank_pyserini:
-    build: https://github.com/stella-project/livivo_rank_pyserini.git
+    build: https://github.com/stella-project/livivo_rank_pyserini.git#master
     container_name: livivo_rank_pyserini
     volumes:
         - ./data/:/data/
-  livivo_rank_pyterrier:
-    build: https://github.com/stella-project/livivo_rank_pyterrier.git
-    container_name: livivo_rank_pyterrier
+  livivo_base:
+    build: https://github.com/stella-project/livivo_rank_base.git#main
+    container_name: livivo_base
     volumes:
         - ./data/:/data/
