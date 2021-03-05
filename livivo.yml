@@ -14,8 +14,10 @@ services:
         - livivo_base
         - lemuren_ELK
         - TEKMAS
+        - livivo_rank_pyserini
+        - livivo_rank_pyterrier
     environment:
-        - RANKSYS_LIST=livivo_base
+        - RANKSYS_LIST=livivo_base livivo_rank_pyserini livivo_rank_pyterrier
         - RANKSYS_PRECOM_LIST=lemuren_ELK TEKMAS
         - RANKSYS_BASE=livivo_base
         - STELLA_SERVER_ADDRESS=https://lilas.stella-project.org
@@ -48,5 +50,15 @@ services:
   TEKMAS:
     build: https://github.com/stella-project/TEKMAS_precom.git#main
     container_name: TEKMAS
+    volumes:
+        - ./data/:/data/
+  livivo_rank_pyserini:
+    build: https://github.com/stella-project/livivo_rank_pyserini.git#master
+    container_name: livivo_rank_pyserini
+    volumes:
+        - ./data/:/data/
+  livivo_rank_pyterrier:
+    build: https://github.com/stella-project/livivo_rank_pyterrier.git#master
+    container_name: livivo_rank_pyterrier
     volumes:
         - ./data/:/data/
