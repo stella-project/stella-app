@@ -14,9 +14,10 @@ services:
         - livivo_base
         - lemuren_elk
         - tekmas
+        - save_fami
     environment:
         - RANKSYS_LIST=livivo_base
-        - RANKSYS_PRECOM_LIST=lemuren_elk tekmas
+        - RANKSYS_PRECOM_LIST=lemuren_elk tekmas save_fami
         - RANKSYS_BASE=livivo_base
         - STELLA_SERVER_ADDRESS=https://lilas.stella-project.org
         - STELLA_SERVER_USER=gesis@stella-project.org
@@ -48,5 +49,10 @@ services:
   tekmas:
     build: https://github.com/stella-project/tekmas_precom.git#main
     container_name: tekmas
+    volumes:
+        - ./data/:/data/
+  save_fami:
+    build: https://github.com/stella-project/save_fami_precom.git#main
+    container_name: save_fami
     volumes:
         - ./data/:/data/
