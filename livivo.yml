@@ -12,8 +12,11 @@ services:
     depends_on:
         - db
         - livivo_base
+        - lemuren_ELK
+        - TEKMAS
     environment:
         - RANKSYS_LIST=livivo_base
+        - RANKSYS_PRECOM_LIST=lemuren_ELK TEKMAS
         - RANKSYS_BASE=livivo_base
         - STELLA_SERVER_ADDRESS=https://lilas.stella-project.org
         - STELLA_SERVER_USER=gesis@stella-project.org
@@ -35,5 +38,15 @@ services:
   livivo_base:
     build: https://github.com/stella-project/livivo_rank_base.git#main
     container_name: livivo_base
+    volumes:
+        - ./data/:/data/
+  lemuren_ELK:
+    build: https://github.com/stella-project/lemuren_ELK_precom.git#main
+    container_name: lemuren_ELK
+    volumes:
+        - ./data/:/data/
+  TEKMAS:
+    build: https://github.com/stella-project/TEKMAS_precom.git#main
+    container_name: TEKMAS
     volumes:
         - ./data/:/data/
