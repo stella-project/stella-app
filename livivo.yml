@@ -12,10 +12,8 @@ services:
     depends_on:
         - db
         - livivo_base
-        - TEKTMAS
     environment:
         - RANKSYS_LIST=livivo_base
-        - RANKSYS_PRECOM_LIST=TEKTMAS
         - RANKSYS_BASE=livivo_base
         - STELLA_SERVER_ADDRESS=https://lilas.stella-project.org
         - STELLA_SERVER_USER=gesis@stella-project.org
@@ -37,10 +35,5 @@ services:
   livivo_base:
     build: https://github.com/stella-project/livivo_rank_base.git#main
     container_name: livivo_base
-    volumes:
-        - ./data/:/data/
-  TEKTMAS:
-    build: https://github.com/stella-project/TEKTMAS_precom.git#main
-    container_name: TEKTMAS
     volumes:
         - ./data/:/data/
