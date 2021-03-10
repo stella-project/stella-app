@@ -40,13 +40,16 @@ services:
     container_name: gesis_rec_precom
     volumes:
         - ./data/:/data/
+        - ./index/gesis_rec_precom:/index/
   gesis_rec_pyserini:
     build: https://github.com/stella-project/gesis_rec_pyserini.git#master
     container_name: gesis_rec_pyserini
     volumes:
         - ./data/:/data/
+        - ./index/gesis_rec_pyserini:/index/
   gesis_rec_pyterrier:
     build: https://github.com/stella-project/gesis_rec_pyterrier.git#master
     container_name: gesis_rec_pyterrier
     volumes:
         - ./data/:/data/
+        - ./index/gesis_rec_pyterrier:/index/
