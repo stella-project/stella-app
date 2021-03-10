@@ -41,18 +41,22 @@ services:
     container_name: livivo_base
     volumes:
         - ./data/:/data/
+        - ./index/livivo_base:/index/
   lemuren_elk:
     build: https://github.com/stella-project/lemuren_elk_precom.git#main
     container_name: lemuren_elk
     volumes:
         - ./data/:/data/
+        - ./index/lemuren_elk:/index/
   tekmas:
     build: https://github.com/stella-project/tekmas_precom.git#main
     container_name: tekmas
     volumes:
         - ./data/:/data/
+        - ./index/tekmas:/index/
   save_fami:
     build: https://github.com/stella-project/save_fami_precom.git#main
     container_name: save_fami
     volumes:
         - ./data/:/data/
+        - ./index/save_fami:/index/
