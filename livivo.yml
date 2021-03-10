@@ -15,8 +15,9 @@ services:
         - lemuren_elk
         - tekmas
         - save_fami
+        - livivo_rank_pyserini
     environment:
-        - RANKSYS_LIST=livivo_base
+        - RANKSYS_LIST=livivo_base livivo_rank_pyserini
         - RANKSYS_PRECOM_LIST=lemuren_elk tekmas save_fami
         - RANKSYS_BASE=livivo_base
         - STELLA_SERVER_ADDRESS=https://lilas.stella-project.org
@@ -60,3 +61,9 @@ services:
     volumes:
         - ./data/:/data/
         - ./index/save_fami:/index/
+  livivo_rank_pyserini:
+    build: https://github.com/stella-project/livivo_rank_pyserini.git#master
+    container_name: livivo_rank_pyserini
+    volumes:
+        - ./data/:/data/
+        - ./index/livivo_rank_pyserini:/index/
