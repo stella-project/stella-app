@@ -14,9 +14,10 @@ services:
         - gesis_rec_precom
         - gesis_rec_pyserini
         - gesis_rec_pyterrier
+        - tekma_n
     environment:
         - RECSYS_LIST=gesis_rec_pyserini gesis_rec_pyterrier
-        - RECSYS_PRECOM_LIST=gesis_rec_precom
+        - RECSYS_PRECOM_LIST=gesis_rec_precom tekma_n
         - RECSYS_BASE=gesis_rec_pyserini
         - STELLA_SERVER_ADDRESS=https://lilas.stella-project.org
         - STELLA_SERVER_USER=gesis@stella-project.org
@@ -53,3 +54,9 @@ services:
     volumes:
         - ./data/:/data/
         - ./index/gesis_rec_pyterrier:/index/
+  tekma_n:
+    build: https://github.com/stella-project/tekma_n_precom.git#main
+    container_name: tekma_n
+    volumes:
+        - ./data/:/data/
+        - ./index/tekma_n:/index/
