@@ -11,13 +11,12 @@ services:
         - db:db
     depends_on:
         - db
-        - gesis_rec_precom
         - gesis_rec_pyserini
         - gesis_rec_pyterrier
         - tekma_n
     environment:
         - RECSYS_LIST=gesis_rec_pyserini gesis_rec_pyterrier
-        - RECSYS_PRECOM_LIST=gesis_rec_precom tekma_n
+        - RECSYS_PRECOM_LIST=tekma_n
         - RECSYS_BASE=gesis_rec_pyserini
         - STELLA_SERVER_ADDRESS=https://lilas.stella-project.org
         - STELLA_SERVER_USER=gesis@stella-project.org
@@ -36,12 +35,6 @@ services:
         - POSTGRES_USER=postgres
         - POSTGRES_PASSWORD=postgres
         - POSTGRES_DB=postgres
-  gesis_rec_precom:
-    build: https://github.com/stella-project/gesis_rec_precom.git#master
-    container_name: gesis_rec_precom
-    volumes:
-        - ./data/:/data/
-        - ./index/gesis_rec_precom:/index/
   gesis_rec_pyserini:
     build: https://github.com/stella-project/gesis_rec_pyserini.git#master
     container_name: gesis_rec_pyserini
