@@ -16,8 +16,9 @@ services:
         - save_fami
         - tekmas
         - lemuren_elk
+        - lemuren_elk_docker
     environment:
-        - RANKSYS_LIST=livivo_base livivo_rank_pyserini
+        - RANKSYS_LIST=livivo_base livivo_rank_pyserini lemuren_elk_docker
         - RANKSYS_PRECOM_LIST=save_fami tekmas lemuren_elk
         - RANKSYS_BASE=livivo_base
         - STELLA_SERVER_ADDRESS=https://lilas.stella-project.org
@@ -67,3 +68,9 @@ services:
     volumes:
         - ./data/:/data/
         - ./index/lemuren_elk:/index/
+  lemuren_elk_docker:
+    build: https://github.com/AH-Tran/stella-micro-lemuren-elastic.git#main
+    container_name: lemuren_elk_docker
+    volumes:
+        - ./data/:/data/
+        - ./index/lemuren_elk_docker:/index/
