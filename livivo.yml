@@ -13,14 +13,10 @@ services:
         - db
         - livivo_base
         - livivo_rank_pyserini
-        - save_fami
-        - tekmas
-        - lemuren_elk
-        - lemuren_elk_docker
         - lemuren_elastic_only
+        - lemuren_elastic_preprocessing
     environment:
-        - RANKSYS_LIST=livivo_base livivo_rank_pyserini lemuren_elk_docker lemuren_elastic_only
-        - RANKSYS_PRECOM_LIST=save_fami tekmas lemuren_elk
+        - RANKSYS_LIST=livivo_base livivo_rank_pyserini lemuren_elastic_only lemuren_elastic_preprocessing
         - RANKSYS_BASE=livivo_base
         - STELLA_SERVER_ADDRESS=https://lilas.stella-project.org
         - STELLA_SERVER_USER=gesis@stella-project.org
@@ -51,33 +47,15 @@ services:
     volumes:
         - ./data/:/data/
         - ./index/livivo_rank_pyserini:/index/
-  save_fami:
-    build: https://github.com/stella-project/save_fami_precom.git#main
-    container_name: save_fami
-    volumes:
-        - ./data/:/data/
-        - ./index/save_fami:/index/
-  tekmas:
-    build: https://github.com/stella-project/tekmas_precom.git#main
-    container_name: tekmas
-    volumes:
-        - ./data/:/data/
-        - ./index/tekmas:/index/
-  lemuren_elk:
-    build: https://github.com/stella-project/lemuren_elk_precom.git#main
-    container_name: lemuren_elk
-    volumes:
-        - ./data/:/data/
-        - ./index/lemuren_elk:/index/
-  lemuren_elk_docker:
-    build: https://github.com/AH-Tran/stella-micro-lemuren-elastic.git#main
-    container_name: lemuren_elk_docker
-    volumes:
-        - ./data/:/data/
-        - ./index/lemuren_elk_docker:/index/
   lemuren_elastic_only:
     build: https://github.com/dis22-lilas/lemuren_elastic_only.git#main
     container_name: lemuren_elastic_only
     volumes:
         - ./data/:/data/
         - ./index/lemuren_elastic_only:/index/
+  lemuren_elastic_preprocessing:
+    build: https://github.com/dis22-lilas/elastic_lemuren_preprocessing.git#main
+    container_name: lemuren_elastic_preprocessing
+    volumes:
+        - ./data/:/data/
+        - ./index/lemuren_elastic_preprocessing:/index/
