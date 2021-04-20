@@ -15,8 +15,12 @@ services:
         - livivo_rank_pyserini
         - lemuren_elastic_only
         - lemuren_elastic_preprocessing
+        - lemuren_elk
+        - tekmas
+        - save_fami
     environment:
         - RANKSYS_LIST=livivo_base livivo_rank_pyserini lemuren_elastic_only lemuren_elastic_preprocessing
+        - RANKSYS_PRECOM_LIST=lemuren_elk tekmas save_fami
         - RANKSYS_BASE=livivo_base
         - STELLA_SERVER_ADDRESS=https://lilas.stella-project.org
         - STELLA_SERVER_USER=gesis@stella-project.org
@@ -59,3 +63,21 @@ services:
     volumes:
         - ./data/:/data/
         - ./index/lemuren_elastic_preprocessing:/index/
+  lemuren_elk:
+    build: https://github.com/stella-project/lemuren_elk_precom.git#main
+    container_name: lemuren_elk
+    volumes:
+        - ./data/:/data/
+        - ./index/lemuren_elk:/index/
+  tekmas:
+    build: https://github.com/stella-project/tekmas_precom.git#main
+    container_name: tekmas
+    volumes:
+        - ./data/:/data/
+        - ./index/tekmas:/index/
+  save_fami:
+    build: https://github.com/stella-project/save_fami_precom.git#main
+    container_name: save_fami
+    volumes:
+        - ./data/:/data/
+        - ./index/save_fami:/index/
