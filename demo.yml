@@ -71,3 +71,34 @@ services:
     container_name: gesis_rec_pyserini
     volumes:
         - ./data/:/data/
+  web:
+    restart: always
+    build: https://github.com/stella-project/stella-server.git#:web
+    ports:
+      - 8000:8000
+    command: bash -c "python setup_db.py &&
+             python manage.py db init &&
+             python manage.py db migrate &&
+             python manage.py db upgrade &&
+             /usr/local/bin/gunicorn -w 2 --timeout 60 -b :8000 stella-server:app"
+
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PW=postgres
+      - POSTGRES_DB=postgres
+      - SECRET_KEY=change-me
+      - AUTOMATOR_GH_KEY=
+      - ADMIN_MAIL=admin@stella-project.org
+      - ADMIN_PASS=pass
+      - GESIS_MAIL=gesis@stella-project.org
+      - GESIS_PASS=pass
+      - LIVIVO_MAIL=livivo@stella-project.org
+      - LIVIVO_PASS=pass
+      - PARTA_MAIL=participant_a@stella-project.org
+      - PARTA_PASS=pass
+      - PARTB_MAIL=participant_b@stella-project.org
+      - PARTB_PASS=pass
+    links:
+      - db:db
+    depends_on:
+      - db
