@@ -16,8 +16,8 @@ services:
         - gesis_rec_precom
         - gesis_rec_pyserini
     environment:
-        - RANKSYS_LIST=livivo_rank_pyserini livivo_rank_pyterrier
-        - RECSYS_LIST=gesis_rec_pyterrier gesis_rec_pyserini
+        - RANKSYS_LIST=livivo_rank_pyserini
+        - RECSYS_LIST=gesis_rec_pyserini
         - RANKSYS_PRECOM_LIST=livivo_rank_precom
         - RECSYS_PRECOM_LIST=gesis_rec_precom
         - RANKSYS_BASE=livivo_rank_pyserini
