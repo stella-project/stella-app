@@ -13,9 +13,7 @@ services:
         - db
         - livivo_rank_precom
         - livivo_rank_pyserini
-        - livivo_rank_pyterrier
         - gesis_rec_precom
-        - gesis_rec_pyterrier
         - gesis_rec_pyserini
     environment:
         - RANKSYS_LIST=livivo_rank_pyserini livivo_rank_pyterrier
@@ -29,10 +27,10 @@ services:
         - STELLA_SERVER_PASS=pass
         - STELLA_SERVER_USERNAME=GESIS
         - INTERLEAVE=True
-        - BULK_INDEX=True
+        - BULK_INDEX=False
         - DELETE_SENT_SESSION=True
         - INTERVAL_DB_CHECK=3
-        - SESSION_EXPIRATION=6
+        - SESSION_EXP8000IRATION=6
   db:
     image: postgres
     ports:
@@ -51,19 +49,9 @@ services:
     container_name: livivo_rank_pyserini
     volumes:
         - ./data/:/data/
-  livivo_rank_pyterrier:
-    build: https://github.com/stella-project/livivo_rank_pyterrier.git#master
-    container_name: livivo_rank_pyterrier
-    volumes:
-        - ./data/:/data/
   gesis_rec_precom:
     build: https://github.com/stella-project/gesis_rec_precom.git#master
     container_name: gesis_rec_precom
-    volumes:
-        - ./data/:/data/
-  gesis_rec_pyterrier:
-    build: https://github.com/stella-project/gesis_rec_pyterrier.git#master
-    container_name: gesis_rec_pyterrier
     volumes:
         - ./data/:/data/
   gesis_rec_pyserini:
@@ -76,13 +64,9 @@ services:
     build: https://github.com/stella-project/stella-server.git#:web
     ports:
       - 8000:8000
-    command: bash -c "python setup_db.py &&
-             python manage.py db init &&
-             python manage.py db migrate &&
-             python manage.py db upgrade &&
-             /usr/local/bin/gunicorn -w 2 --timeout 60 -b :8000 stella-server:app"
-
+    command: bash -c "python stella-server.py"
     environment:
+      - FLASK_CONFIG=demo
       - POSTGRES_USER=postgres
       - POSTGRES_PW=postgres
       - POSTGRES_DB=postgres
@@ -99,6 +83,17 @@ services:
       - PARTB_MAIL=participant_b@stella-project.org
       - PARTB_PASS=pass
     links:
-      - db:db
+      - db-server:db-server
     depends_on:
-      - db
+      - db-server
+  db-server:
+    image: postgres
+    expose:
+      - 5430
+    ports:
+      - 5430:5430
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    command: -p 5430
