@@ -22,15 +22,15 @@ services:
         - RECSYS_PRECOM_LIST=gesis_rec_precom
         - RANKSYS_BASE=livivo_rank_pyserini
         - RECSYS_BASE=gesis_rec_pyserini
-        - STELLA_SERVER_ADDRESS=nginx
+        - STELLA_SERVER_ADDRESS=web
         - STELLA_SERVER_USER=gesis@stella-project.org
         - STELLA_SERVER_PASS=pass
         - STELLA_SERVER_USERNAME=GESIS
         - INTERLEAVE=True
-        - BULK_INDEX=False
+        - BULK_INDEX=True
         - DELETE_SENT_SESSION=True
         - INTERVAL_DB_CHECK=3
-        - SESSION_EXP8000IRATION=6
+        - SESSION_EXPIRATION=6
   db:
     image: postgres
     ports:
