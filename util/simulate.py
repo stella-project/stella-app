@@ -72,18 +72,17 @@ def rankings(num=10, print_status_code=False):
                                'demenz',
                                'depression',
                                'climate change',
-                               'bienensterben',
                                'hiv',
                                'cancer',
                                'borderline',
                                'psychiatrie',
-                               'mikroplastik',
                                'cannabis',
                                'schlaf',
                                'klimawandel AND in AND china',
                                'corona AND virus'])
 
         r = req.get(STELLA_APP_API + "ranking?query=" + query)
+        print(query)
         r_json = r.json()
         rank_id = r_json.get('header').get('rid')
         payload = simulate(r_json)
@@ -93,8 +92,8 @@ def rankings(num=10, print_status_code=False):
 
 
 def main():
-    dataset_recommendations(num=NUM)
-    # rankings(num=NUM, print_status_code=True)
+    # dataset_recommendations(num=NUM)
+    rankings(num=NUM, print_status_code=True)
 
 
 if __name__ == '__main__':
