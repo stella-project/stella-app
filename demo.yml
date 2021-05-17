@@ -7,8 +7,8 @@ services:
         - ./app/log:/app/log
     ports:
         - 8080:8000
-    links:
-        - db:db
+#    links:
+#        - db:db
     depends_on:
         - db
         - livivo_rank_precom
@@ -22,10 +22,11 @@ services:
         - RECSYS_PRECOM_LIST=gesis_rec_precom
         - RANKSYS_BASE=livivo_rank_pyserini
         - RECSYS_BASE=gesis_rec_pyserini
-        - STELLA_SERVER_ADDRESS=http://172.25.0.8:8000
-        - STELLA_SERVER_USER=gesis@stella-project.org
+        # - STELLA_SERVER_ADDRESS=http://172.25.0.8:8000
+        - STELLA_SERVER_ADDRESS=http://web:8000
+        - STELLA_SERVER_USER=livivo@stella-project.org
         - STELLA_SERVER_PASS=pass
-        - STELLA_SERVER_USERNAME=GESIS
+        - STELLA_SERVER_USERNAME=LIVIVO
         - INTERLEAVE=True
         - BULK_INDEX=True
         - DELETE_SENT_SESSION=True
@@ -39,6 +40,7 @@ services:
         - POSTGRES_USER=postgres
         - POSTGRES_PASSWORD=postgres
         - POSTGRES_DB=postgres
+
   livivo_rank_precom:
     build: https://github.com/stella-project/livivo_rank_precom.git#master
     container_name: livivo_rank_precom
@@ -82,8 +84,8 @@ services:
       - PARTA_PASS=pass
       - PARTB_MAIL=participant_b@stella-project.org
       - PARTB_PASS=pass
-    links:
-      - db_server:db_server
+#    links:
+#      - db_server:db_server
     depends_on:
       - db_server
   db_server:
