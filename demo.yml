@@ -22,16 +22,15 @@ services:
         - RECSYS_PRECOM_LIST=gesis_rec_precom
         - RANKSYS_BASE=livivo_rank_pyserini
         - RECSYS_BASE=gesis_rec_pyserini
-        # - STELLA_SERVER_ADDRESS=http://172.25.0.8:8000
         - STELLA_SERVER_ADDRESS=http://web:8000
         - STELLA_SERVER_USER=livivo@stella-project.org
         - STELLA_SERVER_PASS=pass
         - STELLA_SERVER_USERNAME=LIVIVO
         - INTERLEAVE=True
         - BULK_INDEX=True
-        - DELETE_SENT_SESSION=True
+        - DELETE_SENT_SESSION=False
         - INTERVAL_DB_CHECK=3
-        - SESSION_EXPIRATION=6
+        - SESSION_EXPIRATION=240
   db:
     image: postgres
     ports:
