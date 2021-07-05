@@ -7,25 +7,26 @@ services:
         - ./app/log:/app/log
     ports:
         - 8080:8000
-#    links:
-#        - db:db
     depends_on:
         - db
-        - livivo_rank_precom
-        - livivo_rank_pyserini
+        - gesis_rank_precom_base
+        - gesis_rank_precom
+        - gesis_rank_pyserini_base
+        - gesis_rank_pyserini
         - gesis_rec_precom
         - gesis_rec_pyserini
+
     environment:
-        - RANKSYS_LIST=livivo_rank_pyserini
+        - RANKSYS_LIST=gesis_rank_pyserini
         - RECSYS_LIST=gesis_rec_pyserini
-        - RANKSYS_PRECOM_LIST=livivo_rank_precom
+        - RANKSYS_PRECOM_LIST=gesis_rank_precom_base gesis_rank_precom
         - RECSYS_PRECOM_LIST=gesis_rec_precom
-        - RANKSYS_BASE=livivo_rank_pyserini
+        - RANKSYS_BASE=gesis_rank_pyserini_base
         - RECSYS_BASE=gesis_rec_pyserini
         - STELLA_SERVER_ADDRESS=http://web:8000
-        - STELLA_SERVER_USER=livivo@stella-project.org
+        - STELLA_SERVER_USER=gesis@stella-project.org
         - STELLA_SERVER_PASS=pass
-        - STELLA_SERVER_USERNAME=LIVIVO
+        - STELLA_SERVER_USERNAME=GESIS
         - INTERLEAVE=True
         - BULK_INDEX=True
         - DELETE_SENT_SESSION=False
@@ -40,16 +41,26 @@ services:
         - POSTGRES_PASSWORD=postgres
         - POSTGRES_DB=postgres
 
-  livivo_rank_precom:
-    build: https://github.com/stella-project/livivo_rank_precom.git#master
-    container_name: livivo_rank_precom
+  gesis_rank_precom_base:
+    build: https://github.com/stella-project/gesis_rank_precom_base.git#main
+    container_name: gesis_rank_precom_base
     volumes:
         - ./data/:/data/
-  livivo_rank_pyserini:
-    build: https://github.com/stella-project/livivo_rank_pyserini.git#master
-    container_name: livivo_rank_pyserini
+  gesis_rank_precom:
+    build: https://github.com/stella-project/gesis_rank_precom.git#main
+    container_name: gesis_rank_precom
     volumes:
         - ./data/:/data/
+  gesis_rank_pyserini:
+    build: https://github.com/stella-project/gesis_rank_pyserini.git#main
+    container_name: gesis_rank_pyserini
+    volumes:
+        - ./data/:/data/
+  gesis_rank_pyserini_base:
+    build: https://github.com/stella-project/gesis_rank_pyserini_base.git#main
+    container_name: gesis_rank_pyserini_base
+    volumes:
+      - ./data/:/data/
   gesis_rec_precom:
     build: https://github.com/stella-project/gesis_rec_precom.git#master
     container_name: gesis_rec_precom
@@ -59,7 +70,7 @@ services:
     build: https://github.com/stella-project/gesis_rec_pyserini.git#master
     container_name: gesis_rec_pyserini
     volumes:
-        - ./data/:/data/
+      - ./data/:/data/
   web:
     restart: always
     build: https://github.com/stella-project/stella-server.git#:web
