@@ -5,3 +5,4 @@ apscheduler
 flask-sqlalchemy
 requests
 pytz
+psycopg2
