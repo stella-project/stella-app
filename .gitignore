@@ -5,3 +5,5 @@ venv/
 app/log/
 data/gesis-search/*
 data/livivo/*
+.ipynb_checkpoints
+
