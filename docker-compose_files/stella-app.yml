@@ -1,27 +1,30 @@
 version: '3'
 services:
   app:
-    build: ./app
+    build: ../app
     volumes:
         - /var/run/docker.sock/:/var/run/docker.sock
-        - ./app/log:/app/log
+        - ../app/log:/app/log
     ports:
         - 8080:8000
     links:
         - db:db
     depends_on:
         - db
+        - gesis_rec_precom
+        - gesis_rec_pyserini
+        - gesis_rec_pyterrier
         - livivo_base
-        - livivo_rank_pyserini
-        - lemuren_elastic_only
-        - lemuren_elastic_preprocessing
         - lemuren_elk
         - tekmas
         - save_fami
     environment:
-        - RANKSYS_LIST=livivo_base livivo_rank_pyserini lemuren_elastic_only lemuren_elastic_preprocessing
+        - RANKSYS_LIST=livivo_base
         - RANKSYS_PRECOM_LIST=lemuren_elk tekmas save_fami
         - RANKSYS_BASE=livivo_base
+        - RECSYS_LIST=gesis_rec_pyserini gesis_rec_pyterrier
+        - RECSYS_PRECOM_LIST=gesis_rec_precom
+        - RECSYS_BASE=gesis_rec_pyserini
         - STELLA_SERVER_ADDRESS=https://lilas.stella-project.org
         - STELLA_SERVER_USER=gesis@stella-project.org
         - STELLA_SERVER_PASS=pass
@@ -39,45 +42,45 @@ services:
         - POSTGRES_USER=postgres
         - POSTGRES_PASSWORD=postgres
         - POSTGRES_DB=postgres
+  gesis_rec_precom:
+    build: https://github.com/stella-project/gesis_rec_precom.git#master
+    container_name: gesis_rec_precom
+    volumes:
+        - ../data/:/data/
+        - ../index/gesis_rec_precom:/index/
+  gesis_rec_pyserini:
+    build: https://github.com/stella-project/gesis_rec_pyserini.git#master
+    container_name: gesis_rec_pyserini
+    volumes:
+        - ../data/:/data/
+        - ../index/gesis_rec_pyserini:/index/
+  gesis_rec_pyterrier:
+    build: https://github.com/stella-project/gesis_rec_pyterrier.git#master
+    container_name: gesis_rec_pyterrier
+    volumes:
+        - ../data/:/data/
+        - ../index/gesis_rec_pyterrier:/index/
   livivo_base:
     build: https://github.com/stella-project/livivo_rank_base.git#main
     container_name: livivo_base
     volumes:
-        - ./data/:/data/
-        - ./index/livivo_base:/index/
-  livivo_rank_pyserini:
-    build: https://github.com/stella-project/livivo_rank_pyserini.git#master
-    container_name: livivo_rank_pyserini
-    volumes:
-        - ./data/:/data/
-        - ./index/livivo_rank_pyserini:/index/
-  lemuren_elastic_only:
-    build: https://github.com/dis22-lilas/lemuren_elastic_only.git#main
-    container_name: lemuren_elastic_only
-    volumes:
-        - ./data/:/data/
-        - ./index/lemuren_elastic_only:/index/
-  lemuren_elastic_preprocessing:
-    build: https://github.com/dis22-lilas/elastic_lemuren_preprocessing.git#main
-    container_name: lemuren_elastic_preprocessing
-    volumes:
-        - ./data/:/data/
-        - ./index/lemuren_elastic_preprocessing:/index/
+        - ../data/:/data/
+        - ../index/livivo_base:/index/
   lemuren_elk:
     build: https://github.com/stella-project/lemuren_elk_precom.git#main
     container_name: lemuren_elk
     volumes:
-        - ./data/:/data/
-        - ./index/lemuren_elk:/index/
+        - ../data/:/data/
+        - ../index/lemuren_elk:/index/
   tekmas:
     build: https://github.com/stella-project/tekmas_precom.git#main
     container_name: tekmas
     volumes:
-        - ./data/:/data/
-        - ./index/tekmas:/index/
+        - ../data/:/data/
+        - ../index/tekmas:/index/
   save_fami:
     build: https://github.com/stella-project/save_fami_precom.git#main
     container_name: save_fami
     volumes:
-        - ./data/:/data/
-        - ./index/save_fami:/index/
+        - ../data/:/data/
+        - ../index/save_fami:/index/

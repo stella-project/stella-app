@@ -1,10 +1,10 @@
 version: '3'
 services:
   app:
-    build: ./app
+    build: ../app
     volumes:
         - /var/run/docker.sock/:/var/run/docker.sock
-        - ./app/log:/app/log
+        - ../app/log:/app/log
     ports:
         - 8080:8000
     links:
@@ -39,17 +39,17 @@ services:
     build: https://github.com/stella-project/gesis_rec_pyserini.git#master
     container_name: gesis_rec_pyserini
     volumes:
-        - ./data/:/data/
-        - ./index/gesis_rec_pyserini:/index/
+        - ../data/:/data/
+        - ../index/gesis_rec_pyserini:/index/
   gesis_rec_pyterrier:
     build: https://github.com/stella-project/gesis_rec_pyterrier.git#master
     container_name: gesis_rec_pyterrier
     volumes:
-        - ./data/:/data/
-        - ./index/gesis_rec_pyterrier:/index/
+        - ../data/:/data/
+        - ../index/gesis_rec_pyterrier:/index/
   tekma_n:
     build: https://github.com/stella-project/tekma_n_precom.git#main
     container_name: tekma_n
     volumes:
-        - ./data/:/data/
-        - ./index/tekma_n:/index/
+        - ../data/:/data/
+        - ../index/tekma_n:/index/

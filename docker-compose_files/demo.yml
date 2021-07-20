@@ -1,10 +1,10 @@
 version: '3'
 services:
   app:
-    build: ./app
+    build: ../app
     volumes:
         - /var/run/docker.sock/:/var/run/docker.sock
-        - ./app/log:/app/log
+        - ../app/log:/app/log
     ports:
         - 8080:8000
     depends_on:
@@ -17,9 +17,9 @@ services:
         - gesis_rec_pyserini
 
     environment:
-        - RANKSYS_LIST=gesis_rank_pyserini
-        - RECSYS_LIST=gesis_rec_pyserini
-        - RANKSYS_PRECOM_LIST=gesis_rank_precom_base gesis_rank_precom
+        - RANKSYS_LIST=gesis_rank_pyserini gesis_rank_pyserini_base
+        - RECSYS_LIST=gesis_rec_pyserini gesis_rec_pyserini
+        - RANKSYS_PRECOM_LIST=gesis_rank_precom
         - RECSYS_PRECOM_LIST=gesis_rec_precom
         - RANKSYS_BASE=gesis_rank_pyserini_base
         - RECSYS_BASE=gesis_rec_pyserini
@@ -45,32 +45,38 @@ services:
     build: https://github.com/stella-project/gesis_rank_precom_base.git#main
     container_name: gesis_rank_precom_base
     volumes:
-        - ./data/:/data/
+        - ../data/:/data/
+        - ../index/gesis_rank_precom_base:/index/
   gesis_rank_precom:
     build: https://github.com/stella-project/gesis_rank_precom.git#main
     container_name: gesis_rank_precom
     volumes:
-        - ./data/:/data/
+        - ../data/:/data/
+        - ../index/gesis_rank_precom:/index/
   gesis_rank_pyserini:
     build: https://github.com/stella-project/gesis_rank_pyserini.git#main
     container_name: gesis_rank_pyserini
     volumes:
-        - ./data/:/data/
+        - ../data/:/data/
+        - ../index/gesis_rank_pyserini:/index/
   gesis_rank_pyserini_base:
     build: https://github.com/stella-project/gesis_rank_pyserini_base.git#main
     container_name: gesis_rank_pyserini_base
     volumes:
-      - ./data/:/data/
+      - ../data/:/data/
+      - ../index/gesis_rank_pyserini_base:/index/
   gesis_rec_precom:
     build: https://github.com/stella-project/gesis_rec_precom.git#master
     container_name: gesis_rec_precom
     volumes:
-        - ./data/:/data/
+        - ../data/:/data/
+        - ../index/gesis_rec_precom:/index/
   gesis_rec_pyserini:
     build: https://github.com/stella-project/gesis_rec_pyserini.git#master
     container_name: gesis_rec_pyserini
     volumes:
-      - ./data/:/data/
+      - ../data/:/data/
+      - ../index/gesis_rec_pyserini:/index/
   web:
     restart: always
     build: https://github.com/stella-project/stella-server.git#:web
@@ -94,8 +100,6 @@ services:
       - PARTA_PASS=pass
       - PARTB_MAIL=participant_b@stella-project.org
       - PARTB_PASS=pass
-#    links:
-#      - db_server:db_server
     depends_on:
       - db_server
   db_server:

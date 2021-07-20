@@ -5,10 +5,10 @@ networks:
       name: stella-server_default
 services:
   app:
-    build: ./app
+    build: ../app
     volumes:
         - /var/run/docker.sock/:/var/run/docker.sock
-        - ./app/log:/app/log
+        - ../app/log:/app/log
     ports:
         - 8080:8000
     depends_on:
@@ -41,48 +41,48 @@ services:
     build: https://github.com/stella-project/livivo_rank_base.git#main
     container_name: livivo_base
     volumes:
-        - ./data/:/data/
+        - ../data/:/data/
     networks:
         - stella-shared
   livivo_rank_precom:
     build: https://github.com/stella-project/livivo_rank_precom.git#master
     container_name: livivo_rank_precom
     volumes:
-        - ./data/:/data/
+        - ../data/:/data/
     networks:
         - stella-shared
   livivo_rank_pyserini:
     build: https://github.com/stella-project/livivo_rank_pyserini.git#master
     container_name: livivo_rank_pyserini
     volumes:
-        - ./data/:/data/
+        - ../data/:/data/
     networks:
         - stella-shared
   livivo_rank_pyterrier:
     build: https://github.com/stella-project/livivo_rank_pyterrier.git#master
     container_name: livivo_rank_pyterrier
     volumes:
-        - ./data/:/data/
+        - ../data/:/data/
     networks:
         - stella-shared
   gesis_rec_precom:
     build: https://github.com/stella-project/gesis_rec_precom.git#master
     container_name: gesis_rec_precom
     volumes:
-        - ./data/:/data/
+        - ../data/:/data/
     networks:
         - stella-shared
   gesis_rec_pyterrier:
     build: https://github.com/stella-project/gesis_rec_pyterrier.git#master
     container_name: gesis_rec_pyterrier
     volumes:
-        - ./data/:/data/
+        - ../data/:/data/
     networks:
         - stella-shared
   gesis_rec_pyserini:
     build: https://github.com/stella-project/gesis_rec_pyserini.git#master
     container_name: gesis_rec_pyserini
     volumes:
-        - ./data/:/data/
+        - ../data/:/data/
     networks:
         - stella-shared
