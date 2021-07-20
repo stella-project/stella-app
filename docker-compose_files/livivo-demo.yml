@@ -1,0 +1,105 @@
+version: '3'
+services:
+  app:
+    build: ../app
+    volumes:
+      - /var/run/docker.sock/:/var/run/docker.sock
+      - ../app/log:/app/log
+    ports:
+      - 8080:8000
+    depends_on:
+      - db
+      - livivo_rank_base
+      - livivo_rank_precom
+      - livivo_rank_pyserini
+      - livivo_rec_pyserini
+    environment:
+        - RANKSYS_LIST=livivo_rank_pyserini livivo_rank_base
+        - RECSYS_LIST=livivo_rec_pyserini
+        - RANKSYS_PRECOM_LIST=livivo_rank_precom
+        - RECSYS_PRECOM_LIST=
+        - RANKSYS_BASE=livivo_rank_base
+        - RECSYS_BASE=
+        - STELLA_SERVER_ADDRESS=http://web:8000
+        - STELLA_SERVER_USER=livivo@stella-project.org
+        - STELLA_SERVER_PASS=pass
+        - STELLA_SERVER_USERNAME=LIVIVO
+        - INTERLEAVE=True
+        - BULK_INDEX=True
+        - DELETE_SENT_SESSION=False
+        - INTERVAL_DB_CHECK=3
+        - SESSION_EXPIRATION=240
+  db:
+    image: postgres
+    ports:
+        - 5432:5432
+    environment:
+        - POSTGRES_USER=postgres
+        - POSTGRES_PASSWORD=postgres
+        - POSTGRES_DB=postgres
+
+  livivo_rank_base:
+    build: https://github.com/stella-project/livivo_rank_base.git#main
+    container_name: livivo_rank_base
+    volumes:
+      - ../data/:/data/
+      - ../index/livivo_rank_base:/index/
+
+  livivo_rank_precom:
+    build: https://github.com/stella-project/livivo_rank_precom.git#master
+    container_name: livivo_rank_precom
+    volumes:
+      - ../data/:/data/
+      - ../index/livivo_rank_precom:/index/
+
+  livivo_rank_pyserini:
+    build: https://github.com/stella-project/livivo_rank_pyserini.git#master
+    container_name: livivo_rank_pyserini
+    volumes:
+      - ../data/:/data/
+      - ../index/livivo_rank_pyserini:/index/
+
+  livivo_rec_pyserini:
+    build: https://github.com/stella-project/livivo_rec_pyserini.git#main
+    container_name: livivo_rec_pyserini
+    volumes:
+      - ../data/:/data/
+      - ../index/livivo_rec_pyserini:/index/
+
+  web:
+    restart: always
+    build: https://github.com/stella-project/stella-server.git#:web
+    ports:
+      - 8000:8000
+    command: bash -c "python stella-server.py"
+    environment:
+      - FLASK_CONFIG=demo
+      - POSTGRES_USER=postgres
+      - POSTGRES_PW=postgres
+      - POSTGRES_DB=postgres
+      - SECRET_KEY=change-me
+      - AUTOMATOR_GH_KEY=
+      - ADMIN_MAIL=admin@stella-project.org
+      - ADMIN_PASS=pass
+      - GESIS_MAIL=gesis@stella-project.org
+      - GESIS_PASS=pass
+      - LIVIVO_MAIL=livivo@stella-project.org
+      - LIVIVO_PASS=pass
+      - PARTA_MAIL=participant_a@stella-project.org
+      - PARTA_PASS=pass
+      - PARTB_MAIL=participant_b@stella-project.org
+      - PARTB_PASS=pass
+    depends_on:
+      - db_server
+
+  db_server:
+    image: postgres
+    expose:
+      - 5430
+    ports:
+      - 5430:5430
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    command: -p 5430
