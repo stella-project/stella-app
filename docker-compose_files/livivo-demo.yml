@@ -14,6 +14,7 @@ services:
       - livivo_rank_pyserini
       - livivo_rec_pyserini
       - livivo_rec_pyterrier
+
     environment:
         - RANKSYS_LIST=livivo_rank_pyserini livivo_rank_base
         - RECSYS_LIST=livivo_rec_pyserini livivo_rec_pyterrier
@@ -67,6 +68,12 @@ services:
       - ../data/:/data/
       - ../index/livivo_rec_pyserini:/index/
 
+  livivo_rec_pyterrier:
+    build: https://github.com/stella-project/livivo_rec_pyterrier.git#main
+    container_name: livivo_rec_pyterrier
+    volumes:
+      - ../data/:/data/
+      - ../index/livivo_rec_pyterrier:/index/
   web:
     restart: always
     build: https://github.com/stella-project/stella-server.git#:web
