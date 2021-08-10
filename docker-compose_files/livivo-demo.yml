@@ -14,12 +14,13 @@ services:
       - livivo_rank_pyserini
       - livivo_rec_pyserini
       - livivo_rec_pyterrier
+      - livivo_rec_precom
 
     environment:
         - RANKSYS_LIST=livivo_rank_pyserini livivo_rank_base
         - RECSYS_LIST=livivo_rec_pyserini livivo_rec_pyterrier
         - RANKSYS_PRECOM_LIST=livivo_rank_precom
-        - RECSYS_PRECOM_LIST=
+        - RECSYS_PRECOM_LIST=livivo_rec_precom
         - RANKSYS_BASE=livivo_rank_base
         - RECSYS_BASE=livivo_rec_pyserini
         - STELLA_SERVER_ADDRESS=http://web:8000
@@ -74,6 +75,12 @@ services:
     volumes:
       - ../data/:/data/
       - ../index/livivo_rec_pyterrier:/index/
+  livivo_rec_precom:
+    build: https://github.com/stella-project/livivo_rec_precom.git#main
+    container_name: livivo_rec_precom
+    volumes:
+      - ../data/:/data/
+      - ../index/livivo_rec_precom:/index/
   web:
     restart: always
     build: https://github.com/stella-project/stella-server.git#:web

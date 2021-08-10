@@ -3,7 +3,7 @@ __pycache__/
 data-dev.sqlite
 venv/
 app/log/
-data/gesis-search/*
+../gesis_rec_pyserini/data/gesis-search/*
 data/livivo/*
 .ipynb_checkpoints
 
