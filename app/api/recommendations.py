@@ -191,6 +191,7 @@ def interleave(recommendation_exp, recommendation_base, rec_type='DATA'):
                             q_date=recommendation_exp.q_date,
                             q_time=recommendation_exp.q_time,
                             num_found=recommendation_exp.num_found,
+                            hits=recommendation_base.num_found,
                             page=recommendation_exp.page,
                             rpp=recommendation_exp.rpp,
                             items=item_dict)
@@ -296,6 +297,7 @@ def recommend_dataset():
                                    'itemid': itemid,
                                    'page': recommendation.page,
                                    'rpp': recommendation.rpp,
+                                   'hits': recommendation.hits,
                                    'type': 'DATA',
                                    'container': {'exp': container_name}},
                         'body': recommendation.items}
@@ -357,6 +359,7 @@ def recommend_dataset():
                                             'itemid': itemid,
                                             'page': page,
                                             'rpp': rpp,
+                                            'hits': recommendation_base.num_found,
                                             'type': 'DATA',
                                             'container': {'base': conf['app']['container_recommendation_baseline'],
                                                           'exp': container_name}},
@@ -369,6 +372,7 @@ def recommend_dataset():
                                             'itemid': itemid,
                                             'page': page,
                                             'rpp': rpp,
+                                            'hits': recommendation_exp.num_found,
                                             'type': 'DATA',
                                             'container': {'exp': container_name}},
                                  'body': response}
