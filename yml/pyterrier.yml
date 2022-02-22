@@ -11,11 +11,10 @@ services:
       - db
       - pyterrier_bm25
       - pyterrier_pl2
-      - pyterrier_dlm
       - pyterrier_tf
 
     environment:
-        - RANKSYS_LIST=pyterrier_bm25 pyterrier_pl2 pyterrier_dlm pyterrier_tf
+        - RANKSYS_LIST=pyterrier_bm25 pyterrier_pl2 pyterrier_tf
         - RECSYS_LIST= 
         - RANKSYS_PRECOM_LIST=pyterrier_tf
         - RECSYS_PRECOM_LIST= 
@@ -43,7 +42,7 @@ services:
     build: https://github.com/breuert/stella-micro-pyterrier.git#master
     container_name: pyterrier_bm25
     volumes:
-      - ../index/pyterrier_bm25:/index/
+      - ../index/:/index/
     environment:
       - WMODEL=BM25
 
@@ -51,23 +50,15 @@ services:
     build: https://github.com/breuert/stella-micro-pyterrier.git#master
     container_name: pyterrier_pl2
     volumes:
-      - ../index/pyterrier_pl2:/index/
+      - ../index/:/index/
     environment:
       - WMODEL=PL2
-
-  pyterrier_dlm:
-    build: https://github.com/breuert/stella-micro-pyterrier.git#master
-    container_name: pyterrier_dlm
-    volumes:
-      - ../index/pyterrier_dlm:/index/
-    environment:
-      - WMODEL=DLM
 
   pyterrier_tf:
     build: https://github.com/breuert/stella-micro-pyterrier.git#master
     container_name: pyterrier_tf
     volumes:
-      - ../index/pyterrier_tf:/index/
+      - ../index/:/index/
     environment:
       - WMODEL=Tf
 
