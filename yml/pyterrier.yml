@@ -39,7 +39,7 @@ services:
         - POSTGRES_DB=postgres
 
   pyterrier_bm25:
-    build: https://github.com/breuert/stella-micro-pyterrier.git#master
+    build: https://github.com/stella-project/stella-micro-pyterrier.git#master
     container_name: pyterrier_bm25
     volumes:
       - ../index/:/index/
@@ -47,7 +47,7 @@ services:
       - WMODEL=BM25
 
   pyterrier_pl2:
-    build: https://github.com/breuert/stella-micro-pyterrier.git#master
+    build: https://github.com/stella-project/stella-micro-pyterrier.git#master
     container_name: pyterrier_pl2
     volumes:
       - ../index/:/index/
@@ -55,7 +55,7 @@ services:
       - WMODEL=PL2
 
   pyterrier_tf:
-    build: https://github.com/breuert/stella-micro-pyterrier.git#master
+    build: https://github.com/stella-project/stella-micro-pyterrier.git#master
     container_name: pyterrier_tf
     volumes:
       - ../index/:/index/
