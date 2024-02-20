@@ -1,8 +1,0 @@
-flask
-urllib3
-docker
-apscheduler
-flask-sqlalchemy
-requests
-pytz
-psycopg2
