@@ -13,54 +13,64 @@ from flask.cli import with_appcontext
 
 def init_db():
     """Use this function to setup a database with set of pre-registered users."""
-    db.drop_all()
     db.create_all()
 
-    # add ranking systems to database
-    ranksys: List[System] = [
-        System(
-            name=sysname,
-            type="RANK",
-            system_type="LIVE",
-            num_requests=0,
-            num_requests_no_head=0,
-        )
-        for sysname in current_app.config["RANKING_CONTAINER_NAMES"]
-    ] + [
-        System(
-            name=sysname,
-            type="RANK",
-            system_type="PRECOM",
-            num_requests=0,
-            num_requests_no_head=0,
-        )
-        for sysname in current_app.config["RANKING_PRECOMPUTED_CONTAINER_NAMES"]
-    ]
 
-    db.session.add_all(ranksys)
+def seed_db():
+    """Use this function to setup a database with set of pre-registered users."""
+    # TODO: Make this more verbose and configurable
+    # add ranking systems to database
+    systems = []
+    for system_name in current_app.config["RANKING_CONTAINER_NAMES"]:
+        systems.append(
+            System(
+                name=system_name,
+                type="RANK",
+                system_type="LIVE",
+                num_requests=0,
+                num_requests_no_head=0,
+            )
+        )
+
+    for system_name in current_app.config["RANKING_PRECOMPUTED_CONTAINER_NAMES"]:
+        systems.append(
+            System(
+                name=system_name,
+                type="RANK",
+                system_type="PRECOM",
+                num_requests=0,
+                num_requests_no_head=0,
+            )
+        )
+
+    db.session.add_all(systems)
     db.session.commit()
 
     # add recommendation systems to database
-    ranksys: List[System] = [
-        System(
-            name=sysname,
-            type="REC",
-            system_type="LIVE",
-            num_requests=0,
-            num_requests_no_head=0,
+    systems = []
+    for system_name in current_app.config["RECOMMENDER_CONTAINER_NAMES"]:
+        systems.append(
+            System(
+                name=system_name,
+                type="REC",
+                system_type="LIVE",
+                num_requests=0,
+                num_requests_no_head=0,
+            )
         )
-        for sysname in current_app.config["RECOMMENDER_CONTAINER_NAMES"]
-    ] + [
-        System(
-            name=sysname,
-            type="REC",
-            system_type="PRECOM",
-            num_requests=0,
-            num_requests_no_head=0,
+
+    for sysname in current_app.config["RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES"]:
+        systems.append(
+            System(
+                name=sysname,
+                type="REC",
+                system_type="PRECOM",
+                num_requests=0,
+                num_requests_no_head=0,
+            )
         )
-        for sysname in current_app.config["RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES"]
-    ]
-    db.session.add_all(ranksys)
+
+    db.session.add_all(systems)
     db.session.commit()
 
 
@@ -89,10 +99,16 @@ def index_systems():
             t.start()
 
 
-@click.command("seed-db")
+@click.command("init-db")
 @with_appcontext
 def init_db_command():
     init_db()
+
+
+@click.command("seed-db")
+@with_appcontext
+def seed_db_command():
+    seed_db()
 
 
 @click.command("index-systems")

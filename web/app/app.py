@@ -4,7 +4,7 @@ import sys
 
 from app.api import api as api_blueprint
 from app.main import main as main_blueprint
-from app.commands import init_db_command, index_systems
+from app.commands import init_db_command, seed_db_command, index_systems
 from app.extensions import bootstrap, db, migrate
 from config import config
 from flask import Flask
@@ -66,4 +66,5 @@ def register_blueprints(app):
 def register_commands(app):
     """Register Click commands."""
     app.cli.add_command(init_db_command)
+    app.cli.add_command(seed_db_command)
     app.cli.add_command(index_systems)

@@ -3,10 +3,10 @@ name: stella-app
 
 services:
   stella-app:
-    build: ../web
+    build: ./web
     volumes:
         - /var/run/docker.sock:/var/run/docker.sock
-        - ../data:/data
+        - ./data:/data
     expose:
       - "8000"
     ports:
@@ -61,10 +61,10 @@ services:
     build: https://github.com/stella-project/gesis_rec_precom.git#master
     container_name: gesis_rec_precom
     volumes:
-        - ../data/:/data/
+        - ./data/:/data/
 
   gesis_rec_pyterrier:
     build: https://github.com/stella-project/gesis_rec_pyterrier.git#master
     container_name: gesis_rec_pyterrier
     volumes:
-        - ../data/:/data/
+        - ./data/:/data/
