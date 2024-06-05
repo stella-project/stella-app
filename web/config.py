@@ -57,8 +57,8 @@ class Config:
         RANKING_CONTAINER_DICT[container_name] = {"requests": 0}
 
     RECOMMENDER_CONTAINER_DICT = {}
-    for container_name in RANKING_CONTAINER_NAMES:
-        RECOMMENDER_CONTAINER_NAMES[container_name] = {"requests": 0}
+    for container_name in RECOMMENDER_CONTAINER_NAMES:
+        RECOMMENDER_CONTAINER_DICT[container_name] = {"requests": 0}
 
     # Load head items
     f_in = open("data/head/items/gesis.txt", "r", encoding="utf-8-sig")
