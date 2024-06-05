@@ -61,11 +61,19 @@ class Config:
         RECOMMENDER_CONTAINER_DICT[container_name] = {"requests": 0}
 
     # Load head items
-    f_in = open("data/head/items/gesis.txt", "r", encoding="utf-8-sig")
-    HEAD_ITEMS = [line.strip("\n") for line in f_in.readlines()]
+    try:
+        f_in = open("data/head/items/gesis.txt", "r", encoding="utf-8-sig")
+        HEAD_ITEMS = [line.strip("\n") for line in f_in.readlines()]
+    except FileNotFoundError:
+        HEAD_ITEMS = []
+        print("No head items found")
 
-    f_in = open("data/head/queries/livivo.txt", "r", encoding="utf-8-sig")
-    HEAD_QUERIES = [line.strip("\n") for line in f_in.readlines()]
+    try:
+        f_in = open("data/head/queries/livivo.txt", "r", encoding="utf-8-sig")
+        HEAD_QUERIES = [line.strip("\n") for line in f_in.readlines()]
+    except FileNotFoundError:
+        HEAD_QUERIES = []
+        print("No head queries found")
 
 
 class DevelopmentConfig(Config):
