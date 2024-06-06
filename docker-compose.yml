@@ -1,4 +1,3 @@
-version: '3'
 name: stella-app
 
 services:
@@ -22,9 +21,10 @@ services:
         - SESSION_EXPIRATION=6
 
       # Systems
-        - RECSYS_LIST=gesis_rec_pyterrier
-        - RECSYS_PRECOM_LIST=gesis_rec_precom
-        - RECSYS_BASE=gesis_rec_precom
+        - RECSYS_LIST=gesis_rec_pyterrier gesis_rec_pyserini
+        - RECSYS_BASE=gesis_rec_pyterrier
+        - RANKSYS_LIST=livivo_rank_pyterrier livivo_rank_pyserini
+        - RANKSYS_BASE=livivo_rank_pyterrier
       
       # Stella Server
         - STELLA_SERVER_ADDRESS=nginx
@@ -42,8 +42,6 @@ services:
       - stella-app-db:db
     depends_on:
       - stella-app-db
-      - gesis_rec_precom
-      - gesis_rec_pyterrier
 
 
   stella-app-db:
@@ -57,14 +55,26 @@ services:
     command: -p 5430
 
 
-  gesis_rec_precom:
-    build: https://github.com/stella-project/gesis_rec_precom.git#master
-    container_name: gesis_rec_precom
+  livivo_rank_pyserini:
+    build: https://github.com/stella-project/livivo_rank_pyserini.git#master
+    container_name: livivo_rank_pyserini
+    volumes:
+        - ./data/:/data/
+
+  livivo_rank_pyterrier:
+    build: https://github.com/stella-project/livivo_rank_pyterrier.git#master
+    container_name: livivo_rank_pyterrier
     volumes:
         - ./data/:/data/
 
   gesis_rec_pyterrier:
     build: https://github.com/stella-project/gesis_rec_pyterrier.git#master
     container_name: gesis_rec_pyterrier
+    volumes:
+        - ./data/:/data/
+
+  gesis_rec_pyserini:
+    build: https://github.com/stella-project/gesis_rec_pyserini.git#master
+    container_name: gesis_rec_pyserini
     volumes:
         - ./data/:/data/
