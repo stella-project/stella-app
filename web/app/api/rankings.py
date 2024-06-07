@@ -381,8 +381,8 @@ def ranking():
                 .filter(System.name != current_app.config["RANKING_BASELINE_CONTAINER"])
                 .filter(
                     System.name.notin_(
-                        # current_app.config["container_list_recommendation"]
-                        +current_app.config["RANKING_PRECOMPUTED_CONTAINER_NAMES"]
+                        current_app.config["RECOMMENDER_CONTAINER_NAMES"]
+                        + current_app.config["RANKING_PRECOMPUTED_CONTAINER_NAMES"]
                         + current_app.config["RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES"]
                     )
                 )
