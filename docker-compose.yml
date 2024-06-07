@@ -1,7 +1,7 @@
 name: stella-app
 
 services:
-  stella-app:
+  web:
     build: ./web
     volumes:
         - /var/run/docker.sock:/var/run/docker.sock
@@ -23,8 +23,8 @@ services:
       # Systems
         - RECSYS_LIST=gesis_rec_pyterrier gesis_rec_pyserini
         - RECSYS_BASE=gesis_rec_pyterrier
-        - RANKSYS_LIST=livivo_rank_pyterrier livivo_rank_pyserini
-        - RANKSYS_BASE=livivo_rank_pyterrier
+        - RANKSYS_LIST=gesis_rank_pyserini_base gesis_rank_pyserini
+        - RANKSYS_BASE=gesis_rank_pyserini_base
       
       # Stella Server
         - STELLA_SERVER_ADDRESS=nginx
@@ -39,12 +39,12 @@ services:
         - POSTGRES_URL=db:5430
     command: gunicorn -w 2 --timeout 60 -b :8000 'app.app:create_app()'
     links:
-      - stella-app-db:db
+      - db:db
     depends_on:
-      - stella-app-db
+      - db
 
 
-  stella-app-db:
+  db:
     image: postgres
     ports:
       - 5430:5430
@@ -55,15 +55,15 @@ services:
     command: -p 5430
 
 
-  livivo_rank_pyserini:
-    build: https://github.com/stella-project/livivo_rank_pyserini.git#master
-    container_name: livivo_rank_pyserini
+  gesis_rank_pyserini_base:
+    build: https://github.com/stella-project/gesis_rank_pyserini_base.git#main
+    container_name: gesis_rank_pyserini_base
     volumes:
         - ./data/:/data/
 
-  livivo_rank_pyterrier:
-    build: https://github.com/stella-project/livivo_rank_pyterrier.git#master
-    container_name: livivo_rank_pyterrier
+  gesis_rank_pyserini:
+    build: https://github.com/stella-project/gesis_rank_pyserini.git#main
+    container_name: gesis_rank_pyserini
     volumes:
         - ./data/:/data/
 
