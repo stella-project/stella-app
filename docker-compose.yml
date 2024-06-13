@@ -27,10 +27,10 @@ services:
         - RANKSYS_BASE=gesis_rank_pyserini_base
       
       # Stella Server
-        - STELLA_SERVER_ADDRESS=nginx
-        - STELLA_SERVER_USER=gesis@stella-project.org
+        - STELLA_SERVER_ADDRESS=http://host.docker.internal:8000
+        - STELLA_SERVER_USER=site@stella-project.org
         - STELLA_SERVER_PASS=pass
-        - STELLA_SERVER_USERNAME=GESIS
+        - STELLA_SERVER_USERNAME=LIVIVO
             
       # Database
         - POSTGRES_USER=postgres
