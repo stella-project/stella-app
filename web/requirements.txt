@@ -68,7 +68,7 @@ six==1.16.0
 SQLAlchemy==2.0.27
 stack-data==0.6.3
 tenacity==8.2.3
-tornado==6.4
+tornado==6.4.1
 traitlets==5.14.1
 typing_extensions==4.9.0
 tzdata==2024.1
