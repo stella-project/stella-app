@@ -1,16 +1,12 @@
 # STELLA Application
 
-The `stella-app` will be deployed at sites that want to conduct IR and recommender experiments and have them evaluated with real-world user interactions. The `stella-app` is a multi-container application composed of several experimental micro-services that are built with the [`stella-micro-template`](https://github.com/stella-project/stella-micro-template). It provides experimental rankings and recommendations and receives feedback data that will we posted to the central [`stella-server`](https://github.com/stella-project/stella-server).
+The `stella-app` will be deployed at sites that want to conduct IR and recommender experiments and have them evaluated with real-world user interactions. The `stella-app` is a multi-container application composed of several experimental micro-services that are built with the [`stella-micro-template`](https://github.com/stella-project/stella-micro-template). It provides experimental rankings and recommendations and receives feedback data that will be posted to the central [`stella-server`](https://github.com/stella-project/stella-server).
 
 ## Setup
 
-#### Independent of `stella-server`
-1. Build the `stella-app` with Docker: `docker-compose -f local.yml up -d`
-
-
 #### With [`stella-server`](https://github.com/stella-project/stella-server)
 1. Set up the `stella-server` first. It will provide the shared Docker network.
-2. Build the `stella-app` with Docker: `docker-compose up -d`
+2. Build the `stella-app` with Docker: `docker compose up -d`
 
 **A setup guide for the entire infrastructure can be found [here](https://github.com/stella-project/stella-server/blob/master/doc/README.md).**
 
