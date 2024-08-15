@@ -1,0 +1,80 @@
+name: stella-app
+
+services:
+  web:
+    build: ./web
+    volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+        - ./data:/data
+    expose:
+      - "8000"
+    ports:
+        - "8080:8000"
+    environment:
+      # Config
+        - FLASK_APP=app/app
+        - FLASK_CONFIG=postgres
+        - INTERLEAVE=True
+        - BULK_INDEX=False
+        - DELETE_SENT_SESSION=True
+        - INTERVAL_DB_CHECK=3
+        - SESSION_EXPIRATION=6
+
+      # Systems
+        - RECSYS_LIST=gesis_rec_pyterrier gesis_rec_pyserini
+        - RECSYS_BASE=gesis_rec_pyterrier
+        - RANKSYS_LIST=gesis_rank_pyserini_base gesis_rank_pyserini
+        - RANKSYS_BASE=gesis_rank_pyserini_base
+      
+      # Stella Server
+        - STELLA_SERVER_ADDRESS=http://host.docker.internal:8000
+        - STELLA_SERVER_USER=site@stella-project.org
+        - STELLA_SERVER_PASS=pass
+        - STELLA_SERVER_USERNAME=LIVIVO
+            
+      # Database
+        - POSTGRES_USER=postgres
+        - POSTGRES_PW=change-me
+        - POSTGRES_DB=postgres
+        - POSTGRES_URL=db:5430
+    command: gunicorn -w 2 --timeout 60 -b :8000 'app.app:create_app()'
+    links:
+      - db:db
+    depends_on:
+      - db
+
+
+  db:
+    image: postgres
+    ports:
+      - 5430:5430
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=change-me
+      - POSTGRES_DB=postgres
+    command: -p 5430
+
+
+  gesis_rank_pyserini_base:
+    build: https://github.com/stella-project/gesis_rank_pyserini_base.git#main
+    container_name: gesis_rank_pyserini_base
+    volumes:
+        - ./data/:/data/
+
+  gesis_rank_pyserini:
+    build: https://github.com/stella-project/gesis_rank_pyserini.git#main
+    container_name: gesis_rank_pyserini
+    volumes:
+        - ./data/:/data/
+
+  gesis_rec_pyterrier:
+    build: https://github.com/stella-project/gesis_rec_pyterrier.git#master
+    container_name: gesis_rec_pyterrier
+    volumes:
+        - ./data/:/data/
+
+  gesis_rec_pyserini:
+    build: https://github.com/stella-project/gesis_rec_pyserini.git#master
+    container_name: gesis_rec_pyserini
+    volumes:
+        - ./data/:/data/
