@@ -162,3 +162,5 @@ data/*
 # except log dir
 !data/log/
 
+# ignore local sqlite database
+web/data-dev.sqlite
