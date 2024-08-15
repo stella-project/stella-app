@@ -5,9 +5,10 @@ import sys
 from app.api import api as api_blueprint
 from app.main import main as main_blueprint
 from app.commands import init_db_command, seed_db_command, index_systems
-from app.extensions import bootstrap, db, migrate
+from app.extensions import bootstrap, db, migrate, scheduler
 from config import config
 from flask import Flask
+import sys, socket
 
 
 def create_app():
@@ -54,6 +55,15 @@ def register_extensions(app):
     db.init_app(app)
     migrate.init_app(app, db)
     bootstrap.init_app(app)
+
+    from app.services.cron_service import check_db_sessions
+
+    print("Scheduler init app")
+    scheduler.init_app(app)
+    logging.getLogger("apscheduler").setLevel(logging.INFO)
+    print("Scheduler start")
+    scheduler.start()
+    return app
 
 
 def register_blueprints(app):

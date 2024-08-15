@@ -4,9 +4,9 @@ from datetime import datetime, timedelta
 
 import requests as req
 from app.models import Feedback, Result, Session, System, db
-from apscheduler.schedulers.background import BackgroundScheduler
 from flask import current_app
 from pytz import timezone
+from app.extensions import scheduler
 
 
 def update_expired_sessions(sessions_not_exited):
@@ -59,7 +59,9 @@ def update_token():
             current_app.config["STELLA_SERVER_PASS"],
         ),
     )
+    print(r)
     r_json = json.loads(r.text)
+    print(r_json)
     delta_exp = r_json.get("expiration")
     # get new token five min (300 s) before expiration
     current_app.config["TOKEN_EXPIRATION"] = datetime.now() + timedelta(
@@ -250,8 +252,17 @@ def post_sessions(sessions_exited):
             delete_exited_session(session)
 
 
-def check_db_sessions(app_context):
-    with app_context:
+@scheduler.task(
+    "interval",
+    id="job_sync",
+    seconds=10,
+    max_instances=1,
+)
+def check_db_sessions():
+    print("Scheduler enters task.")
+    with scheduler.app.app_context():
+        current_app.logger.info("Scheduler enters task.")
+
         sessions_not_exited = Session.query.filter_by(exit=False, sent=False).all()
         current_app.logger.info(time.strftime("%A, %d. %B %Y %I:%M:%S %p"))
         current_app.logger.info(
@@ -279,12 +290,12 @@ def check_db_sessions(app_context):
             post_sessions(sessions_exited)
 
 
-def cron(app_context):
-    current_app.config["TOKEN_EXPIRATION"] = datetime.now()
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(
-        func=lambda: check_db_sessions(app_context),
-        trigger="interval",
-        seconds=current_app.config["INTERVAL_DB_CHECK"],
-    )
-    return scheduler
+# def cron():
+#     current_app.config["TOKEN_EXPIRATION"] = datetime.now()
+#     scheduler = BackgroundScheduler()
+#     scheduler.add_job(
+#         func=lambda: check_db_sessions(app_context),
+#         trigger="interval",
+#         seconds=current_app.config["INTERVAL_DB_CHECK"],
+#     )
+#     return scheduler

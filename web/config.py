@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -21,10 +22,13 @@ class Config:
     REST_QUERY = True
     BULK_INDEX = True if os.environ.get("BULK_INDEX") == "True" else False
     SESSION_EXPIRATION = os.environ.get("SESSION_EXPIRATION") or 6
+    SESSION_EXPIRATION = int(SESSION_EXPIRATION)
     INTERVAL_DB_CHECK = os.environ.get("INTERVAL_DB_CHECK") or 3  # seconds
+    INTERVAL_DB_CHECK = int(INTERVAL_DB_CHECK)
     DELETE_SENT_SESSION = (
         True if os.environ.get("DELETE_SENT_SESSION") == "True" else False
     )
+    SCHEDULER_API_ENABLED = True
 
     # Stella Server
     STELLA_SERVER_ADDRESS = os.environ.get("STELLA_SERVER_ADDRESS") or "nginx"
@@ -74,6 +78,9 @@ class Config:
     except FileNotFoundError:
         HEAD_QUERIES = []
         print("No head queries found")
+
+    STELLA_SERVER_TOKEN = ""
+    TOKEN_EXPIRATION = datetime.now()
 
 
 class DevelopmentConfig(Config):
