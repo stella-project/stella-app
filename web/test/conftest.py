@@ -1,3 +1,4 @@
+import requests_mock
 import pytest
 from app.app import create_app, db
 from app.commands import init_db
@@ -9,6 +10,7 @@ from .create_test_data import (
     create_systems,
     create_result,
     create_feedback,
+    create_experimental_return,
 )
 
 
@@ -123,3 +125,25 @@ def feedback(sessions):
         "ranker": feedbacks_ranker,
         "recommender": feedbacks_recommender,
     }
+
+
+@pytest.fixture
+def mock_request_experimental_system(requests_mock):
+    """Fixture for mocking the request to the experimental system."""
+    container_name = "ranker"
+
+    # Mock the debug docker network endpoint
+    requests_mock.get(
+        f"http+docker://localhost/v1.45/containers/{container_name}/json",
+        json={
+            "NetworkSettings": {
+                "Networks": {"stella-app_default": {"IPAddress": "localhost"}}
+            }
+        },
+        status_code=200,
+    )
+
+    # Mock the experimental system ranking endpoint
+    data = create_experimental_return()
+    requests_mock.get("http://localhost:5000/ranking", json=data, status_code=200)
+    return requests_mock

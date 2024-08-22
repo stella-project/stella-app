@@ -121,7 +121,7 @@ def create_feedback(number_of_feedbacks, sessions, type="ranker"):
 
         # set session end time
         end_time = sessions[type].start + datetime.timedelta(seconds=3000)
-        
+
         for click in rank_clicks:
             click_time_str = random_date(
                 sessions[type].start.strftime("%Y-%m-%d %H:%M:%S"),
@@ -144,3 +144,30 @@ def create_feedback(number_of_feedbacks, sessions, type="ranker"):
             )
         )
         return generated_feedbacks
+
+
+def create_experimental_return():
+    page = 0
+    rpp = 10
+    query = "Test Query"
+    itemlist = [
+        "doc1",
+        "doc2",
+        "doc3",
+        "doc4",
+        "doc5",
+        "doc6",
+        "doc7",
+        "doc8",
+        "doc9",
+        "doc10",
+    ]
+
+    data = {
+        "page": page,
+        "rpp": rpp,
+        "query": query,
+        "itemlist": itemlist,
+        "num_found": len(itemlist),
+    }
+    return data

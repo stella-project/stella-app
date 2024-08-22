@@ -1,4 +1,4 @@
-from app.models import System
+from app.models import System, Result
 from ..create_test_data import create_feedback
 
 
