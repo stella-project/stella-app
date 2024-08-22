@@ -115,4 +115,14 @@ class PostgresConfig(Config):
     )
 
 
-config = {"default": DevelopmentConfig, "postgres": PostgresConfig}
+class TestConfig(Config):
+    TESTING = True
+    WTF_CSRF_ENABLED = False
+    RANKING_CONTAINER_NAMES = ["ranker_base", "ranker"]
+    RANKING_BASELINE_CONTAINER = "ranker_base"
+
+    RECOMMENDER_CONTAINER_NAMES = ["recommender_base", "recommender"]
+    RECOMMENDER_BASELINE_CONTAINER = "recommender_base"
+
+
+config = {"default": DevelopmentConfig, "postgres": PostgresConfig, "test": TestConfig}

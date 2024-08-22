@@ -8,51 +8,14 @@ import docker
 import requests
 from app.models import Feedback, Result, Session, System, db
 from app.services.interleave_service import tdi, tdi_rec
-from app.services.system_service import get_least_served
 from app.utils import create_dict_response
 from flask import current_app, jsonify, request
 from pytz import timezone
 
+from app.services.session_service import create_new_session
+
 client = docker.DockerClient(base_url="unix://var/run/docker.sock")
 tz = timezone("Europe/Berlin")
-
-
-def new_session(container_rec_name=None, container_name=None, sid=None):
-    """
-    create a new session which sets container_name as a ranking system and container_rec_name as a recommendation system
-    and return session_id
-    Args:
-        container_name: container name of ranking system
-        container_rec_name: container name of recommendation system
-
-    Returns:
-        session_id: the created session id
-    """
-
-    if sid is None or not isinstance(sid, str):
-        sid = uuid4().hex
-
-    session = Session(
-        id=sid,
-        start=datetime.now(tz).replace(tzinfo=None),
-        system_ranking=(
-            System.query.filter_by(name=container_name).first().id
-            if container_name is not None
-            else None
-        ),
-        system_recommendation=(
-            System.query.filter_by(name=container_rec_name).first().id
-            if container_rec_name is not None
-            else None
-        ),
-        site_user="unknown",
-        exit=False,
-        sent=False,
-    )
-    db.session.add(session)
-    db.session.commit()
-
-    return session.id
 
 
 def rest_rec_data(container_name, item_id, rpp, page):
@@ -353,7 +316,6 @@ def recommend_dataset():
     if container_name is None:
 
         if itemid in current_app.config["HEAD_ITEMS"]:
-            # container_name = get_least_served(current_app.config["container_dict"])
             container_name = (
                 System.query.filter(
                     System.name != current_app.config["RECOMMENDER_BASELINE_CONTAINER"]
@@ -396,11 +358,11 @@ def recommend_dataset():
     try:
         if session_id is None:
             # make new session and get session_id as sid
-            session_id = new_session(container_rec_name=container_name)
+            session_id = create_new_session(container_name=container_name, type="recommender")
         else:
             if Session.query.get(session_id) is None:
-                session_id = new_session(
-                    container_rec_name=container_name, sid=session_id
+                session_id = create_new_session(
+                    container_name=container_name, sid=session_id, type="recommender"
                 )
 
             recommendation_id = Session.query.get_or_404(
@@ -520,7 +482,6 @@ def recommend():
 
     # no container_name specified? -> select least served container
     if container_name is None:
-        # container_name = get_least_served(current_app.config["container_dict"])
         if itemid in current_app.config["HEAD_ITEMS"]:
             container_name = (
                 System.query.filter(
@@ -556,10 +517,12 @@ def recommend():
 
     if session_id is None:
         # make new session and get session_id as sid
-        session_id = new_session(container_rec_name=container_name)
+        session_id = create_new_session(container_name=container_name)
     else:
         if Session.query.get(session_id) is None:
-            session_id = new_session(container_rec_name=container_name, sid=session_id)
+            session_id = create_new_session(
+                container_name=container_name, sid=session_id, type="recommender"
+            )
 
         recommendation_id = Session.query.get_or_404(session_id).system_recommendation
         container_name = System.query.filter_by(id=recommendation_id).first().name

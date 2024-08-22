@@ -288,14 +288,3 @@ def check_db_sessions():
 
         if len(sessions_exited) > 0:
             post_sessions(sessions_exited)
-
-
-# def cron():
-#     current_app.config["TOKEN_EXPIRATION"] = datetime.now()
-#     scheduler = BackgroundScheduler()
-#     scheduler.add_job(
-#         func=lambda: check_db_sessions(app_context),
-#         trigger="interval",
-#         seconds=current_app.config["INTERVAL_DB_CHECK"],
-#     )
-#     return scheduler

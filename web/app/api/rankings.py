@@ -1,19 +1,16 @@
 import docker
 import json
 import time
-from uuid import uuid4
 from datetime import datetime
 import requests
-import random
 from flask import jsonify, request, current_app
 from app import api
-from app.services.system_service import get_least_served
 from app.models import db, Session, System, Result, Feedback
 from app.services.interleave_service import tdi
 from app.utils import create_dict_response
 from pytz import timezone
 from . import api
-
+from app.services.session_service import create_new_session
 
 client = docker.DockerClient(base_url="unix://var/run/docker.sock")
 tz = timezone("Europe/Berlin")
@@ -193,93 +190,49 @@ def query_system(container_name, query, rpp, page, session_id, type="EXP"):
     return ranking
 
 
-def new_session(container_name=None, container_rec_name=None, sid=None):
-    """
-    create a new session and set experimental ranking and recommender-container for session
-
-    @param container_name:      ranking container name (str)
-    @param container_rec_name:  recommendation container name (str)
-
-    @return:                    session-id (int)
-    """
-
-    if sid is None or not isinstance(sid, str):
-        sid = uuid4().hex
-
-    session = Session(
-        id=sid,
-        start=datetime.now(tz).replace(tzinfo=None),
-        system_ranking=(
-            db.session.query(System).filter_by(name=container_name).first().id
-            if container_name is not None
-            else None
-        ),
-        system_recommendation=(
-            db.session.query(System).filter_by(name=container_rec_name).first().id
-            if container_rec_name is not None
-            else None
-        ),
-        site_user="unknown",
-        exit=False,
-        sent=False,
-    )
-    db.session.add(session)
-    db.session.commit()
-
-    return session.id
-
-
 @api.route("/test/<string:container_name>", methods=["GET"])
 def test(container_name):
     """
-    run test script for given container name
+    Use the Docker client to execute a test script on an experimental system in a container
 
     @param container_name:  container name (str)
 
     @return: Test-Message (str)
     """
-
-    if request.method == "GET":
-        container = client.containers.get(container_name)
-
-        cmd = "python3 /script/test"
-
-        out = container.exec_run(cmd)
-
-        return "<h1> " + out.output.decode("utf-8") + " </h1>"
+    container = client.containers.get(container_name)
+    cmd = "python3 /script/test"
+    out = container.exec_run(cmd)
+    return "<h1> " + out.output.decode("utf-8") + " </h1>"
 
 
 @api.route("/ranking/<int:id>/feedback", methods=["POST"])
 def post_feedback(id):
-    # 1) check if ranking with id exists
-    # 2) check if feedback is not already in db
-
-    """
-    add user feedback to database (collect data for statistics)
+    """Add user feedback to database (collect data for statistics)
+    Tested: True
 
     @param id:  ranking id (int)
-
     @return:    HTTP status message
     """
-
     clicks = request.values.get("clicks", None)
     if clicks is None:
         clicks = request.json.get("clicks", None)
 
     if clicks is not None:
         ranking = db.session.query(Result).get_or_404(id)
+
         feedback = Feedback(
             start=ranking.q_date,
             session_id=ranking.session_id,
             interleave=ranking.tdi is not None,
             clicks=clicks,
         )
-
         db.session.add(feedback)
         db.session.commit()
+
         ranking.feedback_id = feedback.id
         db.session.add(ranking)
         db.session.commit()
+
         rankings = db.session.query(Result).filter_by(tdi=ranking.id).all()
         for r in rankings:
             r.feedback_id = feedback.id
@@ -291,29 +244,32 @@ def post_feedback(id):
 
 @api.route("/ranking/<int:rid>", methods=["GET"])
 def ranking_from_db(rid):
+    """Get a ranking by its result id from the database.
+    Tested: true"""
     ranking = db.session.query(Result).get_or_404(rid)
     return jsonify(ranking.serialize)
 
 
 @api.route("/ranking", methods=["GET"])
 def ranking():
-    """
-    produce a ranking for current session
+    """Produce a ranking for current session
 
     @return:    ranking result (dict)
                 header contains meta-data
                 body contains ranked document list
     """
 
-    # look for mandatory GET-parameters (query, container_name)
+    # look for "mandatory" GET-parameters (query, container_name, session_id)
     query = request.args.get("query", None)
     container_name = request.args.get("container", None)
     session_id = request.args.get("sid", None)
+
     # Look for optional GET-parameters and set default values
     page = request.args.get("page", default=0, type=int)
     rpp = request.args.get("rpp", default=20, type=int)
 
-    # if rankings have been retrieved for a specific item before in the corresponding session, read it from the database
+    # Return cached results for known (session ID, query) combinations
+    # tested: true
     if session_id and query:
         ranking = (
             db.session.query(Result)
@@ -348,15 +304,15 @@ def ranking():
             }
             return jsonify(response)
 
-    # no query ? -> Nothing to do
+    # If no query is given, return an empty response
+    # TODO: Is this save?
     if query is None:
         return create_dict_response(status=1, ts=round(time.time() * 1000))
 
-    # no container_name specified? -> select least served container
+    # Select least served container if no container_name is given. This is the default case for an interleaved experiment.
     if container_name is None:
-
+        # Depricated precomputed runs code. Will be removed in the future.
         if query in current_app.config["HEAD_QUERIES"]:
-            # container_name = get_least_served(current_app.config["container_dict"])
             container_name = (
                 db.session.query(System)
                 .filter(System.name != current_app.config["RANKING_BASELINE_CONTAINER"])
@@ -370,12 +326,8 @@ def ranking():
                 .first()
                 .name
             )
-            # This code is actually deprecated, since we do not have any use case for sessions with both rankings and recommendations
-            # container_rec_name = System.query.filter(System.name != conf['app']['container_baseline']).filter(
-            #     System.name.notin_(current_app.config["container_list"])).order_by(
-            #     System.num_requests).first().name
-
         else:
+            # Select least served container
             container_name = (
                 db.session.query(System)
                 .filter(System.name != current_app.config["RANKING_BASELINE_CONTAINER"])
@@ -391,25 +343,24 @@ def ranking():
                 .name
             )
 
-    # container_name does not exist in config? -> Nothing to do
-    # i think this check is not necessary anymore. the system names in the database are extracted from
-    # the config file when the application starts
-    # if not container_name in current_app.config["container_dict"]:
-    #     return create_dict_response(status=1,
-    #                                 ts=round(time.time()*1000))
-
+    # Create new session if no session_id is given
     if session_id is None:
         # make new session and get session_id as sid
-        session_id = new_session(container_name)
+        session_id = create_new_session(container_name, type="ranker")
     else:
-        if db.session.query(Session, session_id) is None:
-            session_id = new_session(container_name=container_name, sid=session_id)
+        # SessionID is given, but does not exist in the database
+        if db.session.query(Session).filter_by(id=session_id) is None:
+            session_id = create_new_session(
+                container_name=container_name, sid=session_id, type="ranker"
+            )
 
-        ranking_id = (
-            db.session.query(Session, session_id).get_or_404(session_id).system_ranking
-        )
-        container_name = db.session.query(System).filter_by(id=ranking_id).first().name
+        # TODO: At this point, the containername is given! The container name is overwritten here. Therefore I commented out the following lines.
+        # ranking_system_id = (
+        #     db.session.query(Session).filter_by(id=session_id).first().system_ranking
+        # )
+        # container_name = db.session.query(System).filter_by(id=ranking_system_id).first().name
 
+    # Query the experimental and baseline system
     ranking_exp = query_system(container_name, query, rpp, page, session_id)
 
     ranking_base = query_system(
@@ -420,6 +371,7 @@ def ranking():
         session_id,
         type="BASE",
     )
+
     if current_app.config["INTERLEAVE"]:
         response = interleave(ranking_exp, ranking_base)
         response_complete = {

@@ -11,15 +11,25 @@ from flask import Flask
 import sys, socket
 
 
-def create_app():
+def create_app(config_name=None):
     """Create application factory, as explained here: http://flask.pocoo.org/docs/patterns/appfactories/.
 
-    :param config_object: The configuration object to use.
+    :param config_object: The configuration object or dictionary to use.
     """
-    config_name = os.getenv("FLASK_CONFIG") or "default"
+    config_name_environment = os.getenv("FLASK_CONFIG") or "default"
     print("Create app from:", __name__)
     app = Flask(__name__.split(".")[0])
-    app.config.from_object(config[config_name])
+
+    # Load the default configuration
+    app.config.from_object(config[config_name_environment])
+
+    # If a test config or other config object is provided, load it
+    if config_name:
+        if isinstance(config_name, dict):
+            app.config.update(config_name)
+        else:
+            app.config.from_object(config[config_name])
+
     configure_logger(app)
     register_extensions(app)
     register_blueprints(app)
@@ -56,13 +66,12 @@ def register_extensions(app):
     migrate.init_app(app, db)
     bootstrap.init_app(app)
 
-    from app.services.cron_service import check_db_sessions
-
-    print("Scheduler init app")
-    scheduler.init_app(app)
-    logging.getLogger("apscheduler").setLevel(logging.INFO)
-    print("Scheduler start")
-    scheduler.start()
+    if scheduler.state == 0:
+        print("Scheduler init app")
+        scheduler.init_app(app)
+        logging.getLogger("apscheduler").setLevel(logging.INFO)
+        print("Scheduler start")
+        scheduler.start()
     return app
 
 
