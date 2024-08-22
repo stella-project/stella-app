@@ -7,7 +7,7 @@ from . import api
 import docker
 import requests
 from app.models import Feedback, Result, Session, System, db
-from app.services.interleave_service import tdi, tdi_rec
+from app.services.interleave_service import tdi
 from app.utils import create_dict_response
 from flask import current_app, jsonify, request
 from pytz import timezone
@@ -173,7 +173,7 @@ def interleave(recommendation_exp, recommendation_base, rec_type="DATA"):
     exp = {k: v.get("docid") for k, v in recommendation_exp.items.items()}
 
     if rec_type == "DATA":
-        item_dict = tdi_rec(base, exp)
+        item_dict = tdi(base, exp)
     if rec_type == "PUB":
         item_dict = tdi(base, exp)
     recommendation = Result(
@@ -316,6 +316,7 @@ def recommend_dataset():
     if container_name is None:
 
         if itemid in current_app.config["HEAD_ITEMS"]:
+            # container_name = get_least_served(current_app.config["container_dict"])
             container_name = (
                 System.query.filter(
                     System.name != current_app.config["RECOMMENDER_BASELINE_CONTAINER"]
@@ -340,7 +341,8 @@ def recommend_dataset():
 
         else:
             container_name = (
-                System.query.filter(
+                db.session.query(System)
+                .filter(
                     System.name != current_app.config["RECOMMENDER_BASELINE_CONTAINER"]
                 )
                 .filter(
@@ -358,9 +360,11 @@ def recommend_dataset():
     try:
         if session_id is None:
             # make new session and get session_id as sid
-            session_id = create_new_session(container_name=container_name, type="recommender")
+            session_id = create_new_session(
+                container_name=container_name, type="recommender"
+            )
         else:
-            if Session.query.get(session_id) is None:
+            if db.session.query(Session).get(session_id) is None:
                 session_id = create_new_session(
                     container_name=container_name, sid=session_id, type="recommender"
                 )
@@ -368,7 +372,9 @@ def recommend_dataset():
             recommendation_id = Session.query.get_or_404(
                 session_id
             ).system_recommendation
-            container_name = System.query.filter_by(id=recommendation_id).first().name
+            container_name = (
+                db.session.query(System).filter_by(id=recommendation_id).first().name
+            )
 
         recommendation_exp = query_system(container_name, itemid, rpp, page, session_id)
 
@@ -519,7 +525,7 @@ def recommend():
         # make new session and get session_id as sid
         session_id = create_new_session(container_name=container_name)
     else:
-        if Session.query.get(session_id) is None:
+        if db.session.query(Session).get(session_id) is None:
             session_id = create_new_session(
                 container_name=container_name, sid=session_id, type="recommender"
             )

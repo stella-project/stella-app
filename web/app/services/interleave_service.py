@@ -1,4 +1,5 @@
 import random
+from app.models import db, Result
 
 
 def tdi(item_dict_base, item_dict_exp):
@@ -52,57 +53,49 @@ def tdi(item_dict_base, item_dict_exp):
     return result
 
 
-def tdi_rec(item_dict_base, item_dict_exp):
-    # team draft interleaving
-    # implementation taken from https://bitbucket.org/living-labs/ll-api/src/master/ll/core/interleave.py
+def interleave_rankings(ranking_exp, ranking_base):
+    """
+    Create interleaved ranking from experimental and baseline system
+    Used method: Team-Draft-Interleaving (TDI) [1]
 
-    result = {}
-    result_set = set([])
+    [1] "How Does Clickthrough Data Reflect Retrieval Quality?"
+        Radlinski, Kurup, Joachims
+        Published in CIKM '15 2015
 
-    max_length = len(item_dict_exp.values())
+    @param ranking_exp:     experimental ranking (Result)
+    @param ranking_base:    baseline ranking (Result)
+    @return:                interleaved ranking (dict)
+    """
+    base = {k: v.get("docid") for k, v in ranking_base.items.items()}
+    exp = {k: v.get("docid") for k, v in ranking_exp.items.items()}
 
-    pointer_exp = 0
-    pointer_base = 0
+    item_dict = tdi(base, exp)
+    ranking = Result(
+        session_id=ranking_exp.session_id,
+        system_id=ranking_exp.system_id,
+        type="RANK",
+        q=ranking_exp.q,
+        q_date=ranking_exp.q_date,
+        q_time=ranking_exp.q_time,
+        num_found=ranking_exp.num_found,
+        hits=ranking_base.num_found,
+        page=ranking_exp.page,
+        rpp=ranking_exp.rpp,
+        items=item_dict,
+    )
 
-    recommendation_exp = [rec for rec in item_dict_exp.values()]
-    recommendation_base = [rec for rec in item_dict_base.values()]
-    length_ranking_exp = len(recommendation_exp)
-    length_ranking_base = len(recommendation_base)
+    db.session.add(ranking)
+    db.session.commit()
 
-    length_exp = 0
-    length_base = 0
+    ranking_id = ranking.id
+    ranking.tdi = ranking_id
 
-    pos = 1
+    ranking_exp.tdi = ranking_id
+    db.session.add(ranking_exp)
+    db.session.commit()
 
-    while (
-        pointer_exp < length_ranking_exp
-        and pointer_base < length_ranking_base
-        and len(result) < max_length
-    ):
-        if length_exp < length_base or (
-            length_exp == length_base and bool(random.getrandbits(1))
-        ):
-            result.update(
-                {pos: {"docid": recommendation_exp[pointer_exp], "type": "EXP"}}
-            )
-            result_set.add(recommendation_exp[pointer_exp])
-            length_exp += 1
-            pos += 1
-        else:
-            result.update(
-                {pos: {"docid": recommendation_base[pointer_base], "type": "BASE"}}
-            )
-            result_set.add(recommendation_base[pointer_base])
-            length_base += 1
-            pos += 1
-        while (
-            pointer_exp < length_ranking_exp
-            and recommendation_exp[pointer_exp] in result_set
-        ):
-            pointer_exp += 1
-        while (
-            pointer_base < length_ranking_base
-            and recommendation_base[pointer_base] in result_set
-        ):
-            pointer_base += 1
-    return result
+    ranking_base.tdi = ranking_id
+    db.session.add(ranking_base)
+    db.session.commit()
+
+    return ranking.items

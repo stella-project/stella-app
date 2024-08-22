@@ -8,7 +8,7 @@ def exit_session(sid):
     """Exit a session by its ID.
     Tested: True
     """
-    session = Session.query.get_or_404(sid)
+    session = db.session.query(Session).get_or_404(sid)
 
     if not session.exit:
         session.exit = True
@@ -22,7 +22,7 @@ def post_user(sid):
     """Add a user ID to a session by the session ID.
     Tested: True
     """
-    session = Session.query.get_or_404(sid)
+    session = db.session.query(Session).get_or_404(sid)
     session.site_user = request.values.get("site_user", None)
     db.session.add(session)
     db.session.commit()
