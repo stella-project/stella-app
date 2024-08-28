@@ -96,6 +96,11 @@ def query_system(container_name, query, rpp, page, session_id, type="EXP"):
     ts_end = time.time()
     q_time = round((ts_end - ts_start) * 1000)
 
+    # TODO: extract the itemlist from the ranking given the config for the system
+    # Get path to hitlist in result from config for system
+    
+    # extract hits list from result
+    
     item_dict = {
         i + 1: {"docid": result["itemlist"][i], "type": type}
         for i in range(0, len(result["itemlist"]))
@@ -117,4 +122,7 @@ def query_system(container_name, query, rpp, page, session_id, type="EXP"):
     db.session.add(ranking)
     db.session.commit()
 
+    # Add the original response of the system to the result object
+    # This is currently not saved to the database
+    ranking.result = result
     return ranking

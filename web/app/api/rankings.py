@@ -126,6 +126,7 @@ def ranking():
                 },
                 "body": ranking.items,
             }
+            # TODO: Return the extended native ranking json
             return jsonify(response)
 
     # If no query is given, return an empty response
@@ -185,19 +186,22 @@ def ranking():
         # container_name = db.session.query(System).filter_by(id=ranking_system_id).first().name
 
     # Query the experimental and baseline system
-    ranking_exp = query_system(container_name, query, rpp, page, session_id)
+    ranking_exp = query_system(container_name, query, rpp, page, session_id, type="EXP")
 
-    ranking_base = query_system(
-        current_app.config["RANKING_BASELINE_CONTAINER"],
-        query,
-        rpp,
-        page,
-        session_id,
-        type="BASE",
-    )
-
+    # hits
     if current_app.config["INTERLEAVE"]:
+        ranking_base = query_system(
+            current_app.config["RANKING_BASELINE_CONTAINER"],
+            query,
+            rpp,
+            page,
+            session_id,
+            type="BASE",
+        )
+    
         response = interleave_rankings(ranking_exp, ranking_base)
+        
+        # TODO: Rework the reponse to work natively with the results provided by the ranking service
         response_complete = {
             "header": {
                 "sid": ranking_exp.session_id,

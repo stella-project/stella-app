@@ -5,7 +5,6 @@ from app.models import db, Result
 def tdi(item_dict_base, item_dict_exp):
     # team draft interleaving
     # implementation taken from https://bitbucket.org/living-labs/ll-api/src/master/ll/core/interleave.py
-
     result = {}
     result_set = set([])
 
@@ -66,10 +65,20 @@ def interleave_rankings(ranking_exp, ranking_base):
     @param ranking_base:    baseline ranking (Result)
     @return:                interleaved ranking (dict)
     """
+    hits_path = response_config[ranking_exp.system_id]["hits_path"]
+    doc_id_name = response_config[ranking_exp.system_id]["doc_id_name"]
+    
+    
+    # Extract the IDs of the documents from the rankings for tdi
     base = {k: v.get("docid") for k, v in ranking_base.items.items()}
     exp = {k: v.get("docid") for k, v in ranking_exp.items.items()}
 
     item_dict = tdi(base, exp)
+    
+    # TODO: use the interleaved ranking to construct the output hit list
+
+
+    # TODO add the original response of the base system to the result object
     ranking = Result(
         session_id=ranking_exp.session_id,
         system_id=ranking_exp.system_id,

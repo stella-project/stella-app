@@ -19,7 +19,9 @@ def test_query_system(mock_request_experimental_system, sessions, db_session):
     query = "Test Query"
     rpp = 10
     page = 1
-    query_system(container_name, query, rpp, page, sessions["ranker"].id, type="EXP")
+    result = query_system(
+        container_name, query, rpp, page, sessions["ranker"].id, type="EXP"
+    )
 
     system = db_session.query(System).filter_by(name=container_name).first()
     assert system.num_requests_no_head == 1
