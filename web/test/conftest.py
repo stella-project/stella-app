@@ -1,6 +1,7 @@
-import requests_mock
+from app.app import db, create_app
+import os
 import pytest
-from app.app import create_app, db
+
 from app.commands import init_db
 from app.models import Session
 import random
@@ -13,10 +14,13 @@ from .create_test_data import (
     create_experimental_return,
 )
 
+import os
+
 
 @pytest.fixture()
 def app():
     # setup flask app
+
     app = create_app()
 
     # setup database

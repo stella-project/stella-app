@@ -1,6 +1,32 @@
 # Release notes
 All notable changes to this project will be documented in this file.
 
+
+
+
+## Allow system config as JSON
+Allow passing the systems config in the docker compose environment variables as a JSON string. This is cleaner and clearer and will allow the configuration of additional system parameters necessary for future updates.
+
+Before:
+```
+RECSYS_LIST: gesis_rec_pyterrier gesis_rec_pyserini
+RECSYS_BASE: gesis_rec_pyterrier
+RANKSYS_LIST: gesis_rank_pyserini_base gesis_rank_pyserini
+RANKSYS_BASE: gesis_rank_pyserini_base
+```
+
+After:
+```
+SYSTEMS_CONFIG: |
+          '[
+            {"name": "gesis_rec_pyterrier", "type": "recommender", "base": true},
+            {"name": "gesis_rec_pyserini", "type": "recommender"},
+            {"name": "gesis_rank_pyserini_base", "type": "ranker", "base": true},
+            {"name": "gesis_rank_pyserini", "type": "recommender"}
+          ]'
+```
+
+
 ## Update to Python 3.9 and Flask 3.0
 - Update minimal Python version to 3.9
     - Update the `python` version in the `Dockerfile` to `3.9`
