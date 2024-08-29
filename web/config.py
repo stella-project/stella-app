@@ -1,7 +1,14 @@
 import os
 from datetime import datetime
+import json
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+
+def load_from_json(env_var):
+    config_string = os.getenv(env_var, "{}").replace("\n", "").strip()
+    system_configs = json.loads(config_string)
+    return system_configs
 
 
 def load_as_list(env_var):
@@ -14,6 +21,7 @@ def load_as_list(env_var):
 
 
 class Config:
+
     SECRET_KEY = os.environ.get("SECRET_KEY") or "change-me"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
@@ -38,22 +46,50 @@ class Config:
     STELLA_SERVER_PASS = os.environ.get("STELLA_SERVER_PASS") or "pass"
     STELLA_SERVER_USERNAME = os.environ.get("STELLA_SERVER_USERNAME") or "GESIS"
 
-    # Load registered systems
-    # Ranking
-    RANKING_CONTAINER_NAMES = load_as_list("RANKSYS_LIST")  # container_list
-    RANKING_PRECOMPUTED_CONTAINER_NAMES = load_as_list(
-        "RANKSYS_PRECOM_LIST"
-    )  # container_list_recommendation
-    RANKING_BASELINE_CONTAINER = os.environ.get("RANKSYS_BASE")
+    STELLA_SERVER_TOKEN = ""
+    TOKEN_EXPIRATION = datetime.now()
 
-    # Recommendation
-    RECOMMENDER_CONTAINER_NAMES = load_as_list(
-        "RECSYS_LIST"
-    )  # container_list_recommendation
-    RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES = load_as_list(
-        "RECSYS_PRECOM_LIST"
-    )  # container_precom_list_recommendation
-    RECOMMENDER_BASELINE_CONTAINER = os.environ.get("RECSYS_BASE")
+    # Load registered systems
+    if os.environ.get("SYSTEMS_CONFIG"):
+        SYSTEMS_CONFIG = load_from_json("SYSTEMS_CONFIG")
+
+        RANKING_CONTAINER_NAMES = []
+        RANKING_PRECOMPUTED_CONTAINER_NAMES = []
+        RANKING_BASELINE_CONTAINER = ""
+
+        RECOMMENDER_CONTAINER_NAMES = []
+        RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES = []
+        RECOMMENDER_BASELINE_CONTAINER = ""
+
+        for system in SYSTEMS_CONFIG:
+            if system["type"] == "recommender":
+                if system.get("precomputed"):
+                    RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES.append(system["name"])
+                else:
+                    RECOMMENDER_CONTAINER_NAMES.append(system["name"])
+                if system.get("base"):
+                    RECOMMENDER_BASELINE_CONTAINER = system["name"]
+            elif system["type"] == "ranker":
+                if system.get("precomputed"):
+                    RANKING_PRECOMPUTED_CONTAINER_NAMES.append(system["name"])
+                else:
+                    RANKING_CONTAINER_NAMES.append(system["name"])
+                if system.get("base"):
+                    RANKING_BASELINE_CONTAINER = system["name"]
+
+    else:
+        # Ranking
+        RANKING_CONTAINER_NAMES = load_as_list("RANKSYS_LIST")  # container_list
+        # container_list_recommendation
+        RANKING_PRECOMPUTED_CONTAINER_NAMES = load_as_list("RANKSYS_PRECOM_LIST")
+        RANKING_BASELINE_CONTAINER = os.environ.get("RANKSYS_BASE")
+
+        # Recommendation
+        # container_list_recommendation
+        RECOMMENDER_CONTAINER_NAMES = load_as_list("RECSYS_LIST")
+        # container_precom_list_recommendation
+        RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES = load_as_list("RECSYS_PRECOM_LIST")
+        RECOMMENDER_BASELINE_CONTAINER = os.environ.get("RECSYS_BASE")
 
     # Create container_dict
     RANKING_CONTAINER_DICT = {}
@@ -79,29 +115,12 @@ class Config:
         HEAD_QUERIES = []
         print("No head queries found")
 
-    STELLA_SERVER_TOKEN = ""
-    TOKEN_EXPIRATION = datetime.now()
-
 
 class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         "DEV_DATABASE_URL"
     ) or "sqlite:///" + os.path.join(basedir, "data-dev.sqlite")
-
-    # Load registered systems
-    # Ranking
-    RANKING_CONTAINER_NAMES = [
-        "livivo_base",
-        "livivo_rank_pyterrier",
-    ]  # container_list
-    RANKING_PRECOMPUTED_CONTAINER_NAMES = ["livivo_rank_pyterrier"]
-    RANKING_BASELINE_CONTAINER = "livivo_base"
-
-    # Recommendation
-    RECOMMENDER_CONTAINER_NAMES = ["gesis_rec_pyterrier"]
-    RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES = ["gesis_rec_precom"]
-    RECOMMENDER_BASELINE_CONTAINER = "gesis_rec_pyterrier"
 
 
 class PostgresConfig(Config):

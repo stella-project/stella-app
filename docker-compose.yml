@@ -12,31 +12,35 @@ services:
         - "8080:8000"
     environment:
       # Config
-        - FLASK_APP=app/app
-        - FLASK_CONFIG=postgres
-        - INTERLEAVE=True
-        - BULK_INDEX=False
-        - DELETE_SENT_SESSION=True
-        - INTERVAL_DB_CHECK=3
-        - SESSION_EXPIRATION=6
+      FLASK_APP: app/app
+      FLASK_CONFIG: postgres
+      INTERLEAVE: True
+      BULK_INDEX: False
+      DELETE_SENT_SESSION: True
+      INTERVAL_DB_CHECK: 3
+      SESSION_EXPIRATION: 6
 
       # Systems
-        - RECSYS_LIST=gesis_rec_pyterrier gesis_rec_pyserini
-        - RECSYS_BASE=gesis_rec_pyterrier
-        - RANKSYS_LIST=gesis_rank_pyserini_base gesis_rank_pyserini
-        - RANKSYS_BASE=gesis_rank_pyserini_base
-      
+      SYSTEMS_CONFIG: |
+                [
+                  {"name": "gesis_rec_pyterrier", "type": "recommender", "base": true},
+                  {"name": "gesis_rec_pyserini", "type": "recommender"},
+                  {"name": "gesis_rank_pyserini_base", "type": "ranker", "base": true},
+                  {"name": "gesis_rank_pyserini", "type": "recommender"}
+                ]
+
       # Stella Server
-        - STELLA_SERVER_ADDRESS=http://host.docker.internal:8000
-        - STELLA_SERVER_USER=site@stella-project.org
-        - STELLA_SERVER_PASS=pass
-        - STELLA_SERVER_USERNAME=LIVIVO
-            
+      STELLA_SERVER_ADDRESS: http://host.docker.internal:8000
+      STELLA_SERVER_USER: site@stella-project.org
+      STELLA_SERVER_PASS: pass
+      STELLA_SERVER_USERNAME: LIVIVO
+          
       # Database
-        - POSTGRES_USER=postgres
-        - POSTGRES_PW=change-me
-        - POSTGRES_DB=postgres
-        - POSTGRES_URL=db:5430
+      POSTGRES_USER: postgres
+      POSTGRES_PW: change-me
+      POSTGRES_DB: postgres
+      POSTGRES_URL: db:5430
+
     command: gunicorn -w 2 --timeout 60 -b :8000 'app.app:create_app()'
     links:
       - db:db
