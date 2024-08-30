@@ -22,13 +22,12 @@ services:
 
       # Systems
       SYSTEMS_CONFIG: |
-                [
-                  {"name": "gesis_rec_pyterrier", "type": "recommender", "base": true},
-                  {"name": "gesis_rec_pyserini", "type": "recommender"},
-                  {"name": "gesis_rank_pyserini_base", "type": "ranker", "base": true},
-                  {"name": "gesis_rank_pyserini", "type": "recommender"}
-                ]
-
+        {
+            "gesis_rec_pyterrier": {"type": "recommender", "base": true},
+            "gesis_rec_pyserini": {"type": "recommender"},
+            "gesis_rank_pyserini_base": {"type": "ranker", "base": true},
+            "gesis_rank_pyserini": {"type": "recommender"},
+        }
       # Stella Server
       STELLA_SERVER_ADDRESS: http://host.docker.internal:8000
       STELLA_SERVER_USER: site@stella-project.org

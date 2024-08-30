@@ -21,7 +21,7 @@ import os
 def app():
     # setup flask app
 
-    app = create_app()
+    app = create_app("test")
 
     # setup database
     with app.app_context():

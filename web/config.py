@@ -7,8 +7,8 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 def load_from_json(env_var):
     config_string = os.getenv(env_var, "{}").replace("\n", "").strip()
-    system_configs = json.loads(config_string)
-    return system_configs
+    config_dict = json.loads(config_string)
+    return config_dict
 
 
 def load_as_list(env_var):
@@ -61,21 +61,21 @@ class Config:
         RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES = []
         RECOMMENDER_BASELINE_CONTAINER = ""
 
-        for system in SYSTEMS_CONFIG:
-            if system["type"] == "recommender":
-                if system.get("precomputed"):
-                    RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES.append(system["name"])
+        for system in SYSTEMS_CONFIG.keys():
+            if SYSTEMS_CONFIG[system]["type"] == "recommender":
+                if SYSTEMS_CONFIG[system].get("precomputed"):
+                    RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES.append(system)
                 else:
-                    RECOMMENDER_CONTAINER_NAMES.append(system["name"])
-                if system.get("base"):
-                    RECOMMENDER_BASELINE_CONTAINER = system["name"]
-            elif system["type"] == "ranker":
-                if system.get("precomputed"):
-                    RANKING_PRECOMPUTED_CONTAINER_NAMES.append(system["name"])
+                    RECOMMENDER_CONTAINER_NAMES.append(system)
+                if SYSTEMS_CONFIG[system].get("base"):
+                    RECOMMENDER_BASELINE_CONTAINER = system
+            elif SYSTEMS_CONFIG[system]["type"] == "ranker":
+                if SYSTEMS_CONFIG[system].get("precomputed"):
+                    RANKING_PRECOMPUTED_CONTAINER_NAMES.append(system)
                 else:
-                    RANKING_CONTAINER_NAMES.append(system["name"])
-                if system.get("base"):
-                    RANKING_BASELINE_CONTAINER = system["name"]
+                    RANKING_CONTAINER_NAMES.append(system)
+                if SYSTEMS_CONFIG[system].get("base"):
+                    RANKING_BASELINE_CONTAINER = system
 
     else:
         # Ranking
@@ -142,6 +142,13 @@ class TestConfig(Config):
 
     RECOMMENDER_CONTAINER_NAMES = ["recommender_base", "recommender"]
     RECOMMENDER_BASELINE_CONTAINER = "recommender_base"
+
+    SYSTEMS_CONFIG = {
+        "recommender_base": {"type": "recommender", "base": True},
+        "recommender": {"type": "recommender"},
+        "ranker_base": {"type": "ranker", "base": True},
+        "ranker": {"type": "ranker", "docid": "id", "hits_path": "$.hits.hits[*]"},
+    }
 
 
 config = {"default": DevelopmentConfig, "postgres": PostgresConfig, "test": TestConfig}
