@@ -1,5 +1,7 @@
 import random
-from app.models import db, Result
+from app.models import db, Result, System
+from jsonpath_ng import jsonpath
+from flask import current_app
 
 
 def tdi(item_dict_base, item_dict_exp):
@@ -65,18 +67,22 @@ def interleave_rankings(ranking_exp, ranking_base):
     @param ranking_base:    baseline ranking (Result)
     @return:                interleaved ranking (dict)
     """
-    hits_path = response_config[ranking_exp.system_id]["hits_path"]
-    doc_id_name = response_config[ranking_exp.system_id]["doc_id_name"]
-    
-    
+
+    system_name_exp = db.session.query(System.name).get(ranking_exp.system_id)
+    hits_path_exp = current_app.config["SYSTEMS_CONFIG"][system_name_exp]["hits_path"]
+    docid_exp = current_app.config["SYSTEMS_CONFIG"][system_name_exp]["docid"]
+
+    system_name_base = db.session.query(System.name).get(ranking_base.system_id)
+    hits_path_base = current_app.config["SYSTEMS_CONFIG"][system_name_base]["hits_path"]
+    docid_base = current_app.config["SYSTEMS_CONFIG"][system_name_base]["docid"]
+
     # Extract the IDs of the documents from the rankings for tdi
     base = {k: v.get("docid") for k, v in ranking_base.items.items()}
     exp = {k: v.get("docid") for k, v in ranking_exp.items.items()}
 
     item_dict = tdi(base, exp)
-    
-    # TODO: use the interleaved ranking to construct the output hit list
 
+    # TODO: use the interleaved ranking to construct the output hit list
 
     # TODO add the original response of the base system to the result object
     ranking = Result(
