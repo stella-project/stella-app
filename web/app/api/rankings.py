@@ -8,7 +8,7 @@ from app.utils import create_dict_response
 from pytz import timezone
 from . import api
 from app.services.session_service import create_new_session
-from app.services.ranking_service import query_system
+from app.services.ranking_service import query_system, build_response
 
 client = docker.DockerClient(base_url="unix://var/run/docker.sock")
 tz = timezone("Europe/Berlin")
@@ -92,8 +92,7 @@ def ranking():
     page = request.args.get("page", default=0, type=int)
     rpp = request.args.get("rpp", default=20, type=int)
 
-    # Return cached results for known (session ID, query) combinations
-    # tested: true
+    # Cached results for known (session ID, query) combinations
     if session_id and query:
         ranking = (
             db.session.query(Result)
@@ -113,20 +112,8 @@ def ranking():
             container_name = (
                 db.session.query(System).filter_by(id=system_id).first().name
             )
-
-            response = {
-                "header": {
-                    "sid": ranking.session_id,
-                    "rid": ranking.id,
-                    "q": query,
-                    "page": ranking.page,
-                    "rpp": ranking.rpp,
-                    "hits": ranking.hits,
-                    "container": {"exp": container_name},
-                },
-                "body": ranking.items,
-            }
-            # TODO: Return the extended native ranking json
+            # TODO: This is not possible for passthrough right now because the result is not saved in the database
+            response = build_response(ranking, container_name)
             return jsonify(response)
 
     # If no query is given, return an empty response
@@ -170,7 +157,6 @@ def ranking():
 
     # Create new session if no session_id is given
     if session_id is None:
-        # make new session and get session_id as sid
         session_id = create_new_session(container_name, type="ranker")
     else:
         # SessionID is given, but does not exist in the database
@@ -186,10 +172,10 @@ def ranking():
         # container_name = db.session.query(System).filter_by(id=ranking_system_id).first().name
 
     # Query the experimental and baseline system
-    ranking_exp = query_system(container_name, query, rpp, page, session_id, type="EXP")
+    ranking = query_system(container_name, query, rpp, page, session_id, type="EXP")
 
-    # hits
     if current_app.config["INTERLEAVE"]:
+        current_app.logger.info("Interleaving rankings")
         ranking_base = query_system(
             current_app.config["RANKING_BASELINE_CONTAINER"],
             query,
@@ -198,37 +184,18 @@ def ranking():
             session_id,
             type="BASE",
         )
-    
-        response = interleave_rankings(ranking_exp, ranking_base)
-        
-        # TODO: Rework the reponse to work natively with the results provided by the ranking service
-        response_complete = {
-            "header": {
-                "sid": ranking_exp.session_id,
-                "rid": ranking_exp.tdi,
-                "q": query,
-                "page": page,
-                "rpp": rpp,
-                "hits": ranking_base.num_found,
-                "container": {
-                    "base": current_app.config["RANKING_BASELINE_CONTAINER"],
-                    "exp": container_name,
-                },
-            },
-            "body": response,
-        }
-    else:
-        response_complete = {
-            "header": {
-                "sid": ranking_exp.session_id,
-                "rid": ranking_exp.id,
-                "q": query,
-                "page": page,
-                "rpp": rpp,
-                "hits": ranking_exp.num_found,
-                "container": {"exp": container_name},
-            },
-            "body": ranking_exp.items,
-        }
 
-    return jsonify(response_complete)
+        interleaved_ranking = interleave_rankings(ranking, ranking_base)
+
+        response = build_response(
+            ranking,
+            container_name,
+            interleaved_ranking,
+            ranking_base,
+            current_app.config["RANKING_BASELINE_CONTAINER"],
+        )
+
+    else:
+        response = build_response(ranking, container_name)
+
+    return jsonify(response)

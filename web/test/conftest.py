@@ -11,7 +11,8 @@ from .create_test_data import (
     create_systems,
     create_result,
     create_feedback,
-    create_experimental_return,
+    create_return_base,
+    create_return_experimental,
 )
 
 import os
@@ -132,6 +133,30 @@ def feedback(sessions):
 
 
 @pytest.fixture
+def mock_request_base_system(requests_mock):
+    """Fixture for mocking the request to the experimental system."""
+    container_name = "ranker_base"
+
+    # Mock the debug docker network endpoint
+    requests_mock.get(
+        f"http+docker://localhost/v1.45/containers/{container_name}/json",
+        json={
+            "NetworkSettings": {
+                "Networks": {"stella-app_default": {"IPAddress": container_name}}
+            }
+        },
+        status_code=200,
+    )
+
+    # Mock the experimental system ranking endpoint
+    data = create_return_base()
+    requests_mock.get(
+        f"http://{container_name}:5000/ranking", json=data, status_code=200
+    )
+    return requests_mock
+
+
+@pytest.fixture
 def mock_request_experimental_system(requests_mock):
     """Fixture for mocking the request to the experimental system."""
     container_name = "ranker"
@@ -141,13 +166,15 @@ def mock_request_experimental_system(requests_mock):
         f"http+docker://localhost/v1.45/containers/{container_name}/json",
         json={
             "NetworkSettings": {
-                "Networks": {"stella-app_default": {"IPAddress": "localhost"}}
+                "Networks": {"stella-app_default": {"IPAddress": container_name}}
             }
         },
         status_code=200,
     )
 
     # Mock the experimental system ranking endpoint
-    data = create_experimental_return()
-    requests_mock.get("http://localhost:5000/ranking", json=data, status_code=200)
+    data = create_return_experimental()
+    requests_mock.get(
+        f"http://{container_name}:5000/ranking", json=data, status_code=200
+    )
     return requests_mock

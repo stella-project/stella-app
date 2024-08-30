@@ -9,6 +9,7 @@ from app.services.interleave_service import tdi
 from app.utils import create_dict_response
 from pytz import timezone
 from app.services.session_service import create_new_session
+from jsonpath_ng import jsonpath, parse
 
 client = docker.DockerClient(base_url="unix://var/run/docker.sock")
 tz = timezone("Europe/Berlin")
@@ -75,7 +76,7 @@ def query_system(container_name, query, rpp, page, session_id, type="EXP"):
 
     @return:                ranking (Result)
     """
-    current_app.logger.debug(f'produce ranking with container: "{container_name}"...')
+    current_app.logger.debug(f'Produce ranking with system: "{container_name}"...')
     q_date = datetime.now(tz).replace(tzinfo=None, microsecond=0)
     ts_start = time.time()
 
@@ -96,33 +97,122 @@ def query_system(container_name, query, rpp, page, session_id, type="EXP"):
     ts_end = time.time()
     q_time = round((ts_end - ts_start) * 1000)
 
-    # TODO: extract the itemlist from the ranking given the config for the system
-    # Get path to hitlist in result from config for system
-    
-    # extract hits list from result
-    
-    item_dict = {
-        i + 1: {"docid": result["itemlist"][i], "type": type}
-        for i in range(0, len(result["itemlist"]))
-    }
+    # Extract hits list from result and allow custom fields for docid and hits_path
+    docid_name = current_app.config["SYSTEMS_CONFIG"][container_name].get(
+        "docid", "docid"
+    )
+    hits_path = current_app.config["SYSTEMS_CONFIG"][container_name].get("hits_path")
+
+    if hits_path is None:
+        hits = result["itemlist"]
+    else:
+        jsonpath_expr = parse(hits_path)
+        hits = jsonpath_expr.find(result)[0].value
+
+    if isinstance(hits[0], dict):
+        item_dict = {
+            i + 1: {"docid": hits[i][docid_name], "type": type}
+            for i in range(0, len(hits))
+        }
+    else:
+        item_dict = {
+            i + 1: {"docid": hits[i], "type": type} for i in range(0, len(hits))
+        }
+
+    # Save the ranking to the database
+    system_id = db.session.query(System).filter_by(name=container_name).first().id
 
     ranking = Result(
         session_id=session_id,
-        system_id=db.session.query(System).filter_by(name=container_name).first().id,
+        system_id=system_id,
         type="RANK",
         q=query,
         q_date=q_date,
         q_time=q_time,
-        num_found=result["num_found"],
+        num_found=len(hits),
         page=page,
         rpp=rpp,
         items=item_dict,
     )
-
     db.session.add(ranking)
     db.session.commit()
 
-    # Add the original response of the system to the result object
-    # This is currently not saved to the database
+    # Passthrough the original response of the system to construct the response object
     ranking.result = result
     return ranking
+
+
+def build_response(
+    ranking,
+    container_name,
+    interleaved_ranking=None,
+    ranking_base=None,
+    container_name_base=None,
+):
+    """Function to build the response object for the ranking. This can handle interleving and passthrough."""
+
+    def build_id_map(container_name, ranking):
+        """Build the docid ranking position map to construct passthrough responses from interleaved rankings."""
+        hits_path = current_app.config["SYSTEMS_CONFIG"][container_name].get(
+            "hits_path"
+        )
+        docid_name = current_app.config["SYSTEMS_CONFIG"][container_name].get(
+            "docid", "docid"
+        )
+        if hits_path:
+            jsonpath_expr = parse(hits_path)
+            matches = jsonpath_expr.find(ranking.result)
+            assert len(matches) == 1
+
+            id_map = {hit[docid_name]: hit for hit in matches[0].value}
+        else:
+            id_map = {hit[docid_name]: hit for hit in ranking.items.values()}
+        return id_map
+
+    def build_header(ranking_obj, container_names):
+        """Helper function to build the response header."""
+        return {
+            "sid": ranking_obj.session_id,
+            "rid": ranking_obj.tdi,
+            "q": ranking_obj.q,
+            "page": ranking_obj.page,
+            "rpp": ranking_obj.rpp,
+            "hits": ranking_obj.num_found,
+            "container": container_names,
+        }
+
+    def build_simple_response(ranking_obj):
+        """Helper function to build a simple response when no interleaving."""
+        container_names = {"exp": container_name}
+        return {
+            "header": build_header(ranking_obj, container_names),
+            "body": ranking_obj.items,
+        }
+
+    if not interleaved_ranking:
+        if current_app.config["SYSTEMS_CONFIG"][container_name].get("hits_path"):
+            return ranking.result
+        return build_simple_response(ranking)
+
+    # If interleaved_ranking is provided
+    id_map = build_id_map(
+        current_app.config["RANKING_BASELINE_CONTAINER"], ranking_base
+    )
+    id_map.update(build_id_map(container_name, ranking))
+    hits = [id_map[doc["docid"]] for doc in interleaved_ranking.items.values()]
+
+    base_path = current_app.config["SYSTEMS_CONFIG"][container_name_base].get(
+        "hits_path"
+    )
+    if base_path:
+        jsonpath_expr = parse(base_path)
+        matches = jsonpath_expr.find(ranking_base.result)
+        assert len(matches) == 1
+        matches[0].value = hits
+        return ranking_base.result
+
+    container_names = {"exp": container_name, "base": container_name_base}
+    return {
+        "header": build_header(ranking_base, container_names),
+        "body": hits,
+    }

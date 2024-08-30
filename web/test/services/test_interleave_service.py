@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from app.services.interleave_service import tdi, interleave_rankings
 from ..create_test_data import create_result
 
@@ -43,7 +45,6 @@ def test_tdi():
 
 
 def test_interleave_rankings(sessions):
-    from copy import deepcopy
 
     result = create_result(sessions, "ranker")
 
@@ -63,7 +64,6 @@ def test_interleave_rankings(sessions):
     print(results_base.items.items())
 
     interleaved_results = interleave_rankings(results_exp, results_base)
-
     # The interleaved dict is added to the Result object which is a JSON type. Therefore the keys are konverted from int to str. Here we revert this conversion.
-    interleaved_results = {int(k): v for k, v in interleaved_results.items()}
+    interleaved_results = {int(k): v for k, v in interleaved_results.items.items()}
     assert interleaved_results in possible_results
