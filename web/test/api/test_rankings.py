@@ -1,5 +1,5 @@
 from app.models import System, Result
-from ..create_test_data import create_feedback, create_return_experimental
+from ..create_test_data import create_feedbacks, create_return_experimental
 
 
 def test_ranking_from_db(client, results, sessions):
@@ -21,13 +21,17 @@ class TestRanking:
         assert "response_header" in data
         assert "response" in data
 
-    def test_ranking_cached_query_session(self, client, results, sessions):
-        session_id = sessions["ranker"].id
+    def test_ranking_cached(self, client, results, sessions):
+        session_id = sessions["ranker_base"].id
         result = client.get(self.URL + f"?query=test&sid={session_id}")
         data = result.json
         assert 200 == result.status_code
-        assert data["body"] == results["ranker"].items
+        assert data["body"] == results["ranker_base"].items
         assert data["header"]["sid"] == session_id
+
+    # def test_ranking_cached_passthrough(self, client, systems, sessions):
+    #     session_id = sessions["ranker"].id
+    #     result = client.get(self.URL + f"?query=test&sid={session_id}")
 
     def test_ranking(self, client, results, sessions, mock_request_base_system):
         result = client.get(self.URL + "?query=test query&container=ranker_base")
@@ -62,12 +66,12 @@ class TestRanking:
 def test_ranking_cached_query_session_interleaved(app, client, results, sessions):
     app.config["INTERLEAVE"] = True
 
-    session_id = sessions["ranker"].id
+    session_id = sessions["ranker_base"].id
     result = client.get(f"/stella/api/v1/ranking?query=test&sid={session_id}")
 
     data = result.json
     assert 200 == result.status_code
-    assert data["body"] == results["ranker"].items
+    assert data["body"] == results["ranker_base"].items
     assert data["header"]["sid"] == session_id
 
 
@@ -99,17 +103,17 @@ class TestPostFeedback:
     URL = "/stella/api/v1/ranking/{}/feedback"
 
     def test_post_feedback(self, client, results, sessions):
-        feedbacks = create_feedback(1, sessions, type="ranker")
+        feedbacks = create_feedbacks(sessions)
         data = {
-            "clicks": feedbacks[0].clicks,
+            "clicks": feedbacks["ranker_base"].clicks,
         }
         result = client.post(self.URL.format(results["ranker"].id), data=data)
         assert 201 == result.status_code
 
     def test_post_feedback_wrong_id(self, client, results, sessions):
-        feedbacks = create_feedback(1, sessions, type="ranker")
+        feedbacks = create_feedbacks(sessions)
         data = {
-            "clicks": feedbacks[0].clicks,
+            "clicks": feedbacks["ranker_base"].clicks,
         }
         result = client.post(self.URL.format("999"), data=data)
         assert 404 == result.status_code

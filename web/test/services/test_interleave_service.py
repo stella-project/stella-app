@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 from app.services.interleave_service import tdi, interleave_rankings
-from ..create_test_data import create_result
+from ..create_test_data import create_results
 
 possible_results = [
     {
@@ -45,17 +45,16 @@ def test_tdi():
 
 
 def test_interleave_rankings(sessions):
+    result = create_results(sessions)
 
-    result = create_result(sessions, "ranker")
-
-    results_base = deepcopy(result)
+    results_base = result["ranker_base"]
     results_base.items = {
         1: {"docid": "doc1", "type": "BASE"},
         2: {"docid": "doc2", "type": "BASE"},
         3: {"docid": "doc3", "type": "BASE"},
     }
 
-    results_exp = deepcopy(result)
+    results_exp = result["ranker"]
     results_exp.items = {
         1: {"docid": "doc11", "type": "EXP"},
         2: {"docid": "doc12", "type": "EXP"},
