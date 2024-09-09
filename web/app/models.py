@@ -30,6 +30,7 @@ class Result(db.Model):
     hits = db.Column(db.Integer)
     items = db.Column(db.JSON)
     tdi = db.Column(db.Integer, db.ForeignKey("results.id"))
+    result = db.Column(db.JSON, nullable=True)
 
     @property
     def serialize(self):

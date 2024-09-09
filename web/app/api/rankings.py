@@ -90,7 +90,7 @@ def ranking():
 
     # Look for optional GET-parameters and set default values
     page = request.args.get("page", default=0, type=int)
-    rpp = request.args.get("rpp", default=20, type=int)
+    rpp = request.args.get("rpp", default=10, type=int)
 
     # Cached results for known (session ID, query) combinations
     if session_id and query:
@@ -112,7 +112,6 @@ def ranking():
             container_name = (
                 db.session.query(System).filter_by(id=system_id).first().name
             )
-            # TODO: This is not possible for passthrough right now because the result is not saved in the database
             response = build_response(ranking, container_name)
             return jsonify(response)
 

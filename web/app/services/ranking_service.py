@@ -133,12 +133,11 @@ def query_system(container_name, query, rpp, page, session_id, type="EXP"):
         page=page,
         rpp=rpp,
         items=item_dict,
+        result=result,
     )
     db.session.add(ranking)
     db.session.commit()
 
-    # Passthrough the original response of the system to construct the response object
-    ranking.result = result
     return ranking
 
 

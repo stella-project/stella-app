@@ -72,7 +72,6 @@ def interleave_rankings(ranking_exp, ranking_base):
 
     item_dict = tdi(base, exp)
 
-    # TODO add the original response of the base system to the result object
     ranking = Result(
         session_id=ranking_exp.session_id,
         system_id=ranking_exp.system_id,

@@ -29,9 +29,12 @@ class TestRanking:
         assert data["body"] == results["ranker_base"].items
         assert data["header"]["sid"] == session_id
 
-    # def test_ranking_cached_passthrough(self, client, systems, sessions):
-    #     session_id = sessions["ranker"].id
-    #     result = client.get(self.URL + f"?query=test&sid={session_id}")
+    def test_ranking_cached_passthrough(self, client, systems, results, sessions):
+        session_id = sessions["ranker"].id
+        result = client.get(self.URL + f"?query=test&sid={session_id}")
+        data = result.json
+        assert 200 == result.status_code
+        assert data == results["ranker"].result
 
     def test_ranking(self, client, results, sessions, mock_request_base_system):
         result = client.get(self.URL + "?query=test query&container=ranker_base")

@@ -46,16 +46,14 @@ def test_query_experimental_system(
     rpp = 10
     page = 1
     result = query_system(
-        container_name, query, rpp, page, sessions["ranker_base"].id, type="EXP"
+        container_name, query, rpp, page, sessions["ranker"].id, type="EXP"
     )
 
     system = db_session.query(System).filter_by(name=container_name).first()
     assert system.num_requests_no_head == 1
 
     result = (
-        db_session.query(Result)
-        .filter_by(session_id=sessions["ranker_base"].id)
-        .first()
+        db_session.query(Result).filter_by(session_id=sessions["ranker"].id).first()
     )
     assert result.q == query
     assert result.rpp == rpp
