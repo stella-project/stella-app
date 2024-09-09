@@ -6,7 +6,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 def load_from_json(env_var):
-    config_string = os.getenv(env_var, "{}").replace("\n", "").strip()
+    config_string = os.getenv(env_var, "{}")
     config_dict = json.loads(config_string)
     return config_dict
 
