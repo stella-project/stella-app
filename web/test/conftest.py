@@ -138,7 +138,7 @@ def mock_request_experimental_system(requests_mock):
 
     # Mock the debug docker network endpoint
     requests_mock.get(
-        f"http+docker://localhost/v1.45/containers/{container_name}/json",
+        f"http+docker://localhost/v1.46/containers/{container_name}/json",
         json={
             "NetworkSettings": {
                 "Networks": {"stella-app_default": {"IPAddress": "localhost"}}
