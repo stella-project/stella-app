@@ -171,11 +171,13 @@ def ranking():
         # container_name = db.session.query(System).filter_by(id=ranking_system_id).first().name
 
     # Query the experimental and baseline system
-    ranking = query_system(container_name, query, rpp, page, session_id, type="EXP")
+    ranking, result = query_system(
+        container_name, query, rpp, page, session_id, type="EXP"
+    )
 
     if current_app.config["INTERLEAVE"]:
         current_app.logger.info("Interleaving rankings")
-        ranking_base = query_system(
+        ranking_base, result_base = query_system(
             current_app.config["RANKING_BASELINE_CONTAINER"],
             query,
             rpp,
@@ -192,9 +194,11 @@ def ranking():
             interleaved_ranking,
             ranking_base,
             current_app.config["RANKING_BASELINE_CONTAINER"],
+            result,
+            result_base,
         )
 
     else:
-        response = build_response(ranking, container_name)
+        response = build_response(ranking, container_name, result=result)
 
     return jsonify(response)

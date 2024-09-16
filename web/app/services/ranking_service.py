@@ -133,12 +133,11 @@ def query_system(container_name, query, rpp, page, session_id, type="EXP"):
         page=page,
         rpp=rpp,
         items=item_dict,
-        result=result,
     )
     db.session.add(ranking)
     db.session.commit()
 
-    return ranking
+    return ranking, result
 
 
 def build_response(
@@ -147,10 +146,12 @@ def build_response(
     interleaved_ranking=None,
     ranking_base=None,
     container_name_base=None,
+    result=None,
+    result_base=None,
 ):
     """Function to build the response object for the ranking. This can handle interleving and passthrough."""
 
-    def build_id_map(container_name, ranking):
+    def build_id_map(container_name, ranking, result):
         """Build the docid ranking position map to construct passthrough responses from interleaved rankings."""
         hits_path = current_app.config["SYSTEMS_CONFIG"][container_name].get(
             "hits_path"
@@ -160,7 +161,7 @@ def build_response(
         )
         if hits_path:
             jsonpath_expr = parse(hits_path)
-            matches = jsonpath_expr.find(ranking.result)
+            matches = jsonpath_expr.find(result)
             assert len(matches) == 1
 
             id_map = {hit[docid_name]: hit for hit in matches[0].value}
@@ -190,14 +191,14 @@ def build_response(
 
     if not interleaved_ranking:
         if current_app.config["SYSTEMS_CONFIG"][container_name].get("hits_path"):
-            return ranking.result
+            return result
         return build_simple_response(ranking)
 
     # If interleaved_ranking is provided
     id_map = build_id_map(
-        current_app.config["RANKING_BASELINE_CONTAINER"], ranking_base
+        current_app.config["RANKING_BASELINE_CONTAINER"], ranking_base, result_base
     )
-    id_map.update(build_id_map(container_name, ranking))
+    id_map.update(build_id_map(container_name, ranking, result))
     hits = [id_map[doc["docid"]] for doc in interleaved_ranking.items.values()]
 
     base_path = current_app.config["SYSTEMS_CONFIG"][container_name_base].get(
@@ -205,10 +206,10 @@ def build_response(
     )
     if base_path:
         jsonpath_expr = parse(base_path)
-        matches = jsonpath_expr.find(ranking_base.result)
+        matches = jsonpath_expr.find(result_base)
         assert len(matches) == 1
         matches[0].value = hits
-        return ranking_base.result
+        return result_base
 
     container_names = {"exp": container_name, "base": container_name_base}
     return {
