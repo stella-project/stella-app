@@ -50,12 +50,12 @@ def configure_logger(app):
         app.logger.addHandler(stream_handler)
 
     # FileHandler for logging to a file
-    file_handler = logging.FileHandler(
-        "data/log/stella-app.log"
-    )  # Define your log file name
-    file_handler.setFormatter(logging.Formatter(log_format))
-    if not any(isinstance(h, logging.FileHandler) for h in app.logger.handlers):
-        app.logger.addHandler(file_handler)
+    # file_handler = logging.FileHandler(
+    #     "data/log/stella-app.log"
+    # )  # Define your log file name
+    # file_handler.setFormatter(logging.Formatter(log_format))
+    # if not any(isinstance(h, logging.FileHandler) for h in app.logger.handlers):
+    #     app.logger.addHandler(file_handler)
 
     app.logger.info("Logging setup complete.")
 
