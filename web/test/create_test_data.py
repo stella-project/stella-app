@@ -161,7 +161,6 @@ def create_results(sessions):
                         "10": "doc10",
                     }
                 )
-                result_objs[system].result = create_return_base()
 
             elif system == "ranker":
                 result_objs[system].items = json.dumps(
@@ -178,7 +177,6 @@ def create_results(sessions):
                         "10": "10014575867",
                     }
                 )
-                result_objs[system].result = create_return_experimental()
     return result_objs
 
 
