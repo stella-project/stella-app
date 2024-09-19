@@ -1,6 +1,6 @@
+import json
 import os
 from datetime import datetime
-import json
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -21,9 +21,10 @@ def load_as_list(env_var):
 
 
 class Config:
-
     SECRET_KEY = os.environ.get("SECRET_KEY") or "change-me"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    CACHE_TYPE = "FileSystemCache"
+    CACHE_DIR = "/tmp"
 
     # General settings
     INTERLEAVE = True if os.environ.get("INTERLEAVE") == "True" else False

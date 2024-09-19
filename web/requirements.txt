@@ -83,3 +83,4 @@ WTForms==3.1.2
 Flask-APScheduler==1.13.1
 requests-mock==1.12.1
 jsonpath-ng==1.6.1
+Flask-Caching==2.3.0

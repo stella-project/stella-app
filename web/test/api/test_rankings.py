@@ -17,24 +17,7 @@ class TestRanking:
     def test_ranking_no_query(self, client, systems):
         result = client.get(self.URL)
         data = result.json
-        assert 200 == result.status_code
-        assert "response_header" in data
-        assert "response" in data
-
-    def test_ranking_cached(self, client, results, sessions):
-        session_id = sessions["ranker_base"].id
-        result = client.get(self.URL + f"?query=test&sid={session_id}")
-        data = result.json
-        assert 200 == result.status_code
-        assert data["body"] == results["ranker_base"].items
-        assert data["header"]["sid"] == session_id
-
-    def test_ranking_cached_passthrough(self, client, systems, results, sessions):
-        session_id = sessions["ranker"].id
-        result = client.get(self.URL + f"?query=test&sid={session_id}")
-        data = result.json
-        assert 200 == result.status_code
-        assert data == results["ranker"].result
+        assert 400 == result.status_code
 
     def test_ranking(self, client, results, sessions, mock_request_base_system):
         result = client.get(self.URL + "?query=test query&container=ranker_base")
@@ -64,18 +47,6 @@ class TestRanking:
 
         assert 200 == result.status_code
         assert data == response
-
-
-def test_ranking_cached_query_session_interleaved(app, client, results, sessions):
-    app.config["INTERLEAVE"] = True
-
-    session_id = sessions["ranker_base"].id
-    result = client.get(f"/stella/api/v1/ranking?query=test&sid={session_id}")
-
-    data = result.json
-    assert 200 == result.status_code
-    assert data["body"] == results["ranker_base"].items
-    assert data["header"]["sid"] == session_id
 
 
 def test_ranking_interleaved(

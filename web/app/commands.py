@@ -6,7 +6,7 @@ import click
 import config
 from app.extensions import db
 from app.models import System
-from app.services.system_indexer_service import cmd_index, rest_index
+from app.services.system_service import cmd_index, rest_index
 from flask import current_app
 from flask.cli import with_appcontext
 

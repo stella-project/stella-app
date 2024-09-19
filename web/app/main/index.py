@@ -1,7 +1,9 @@
 import threading
-from . import main
+
+from app.services.system_service import cmd_index, rest_index
 from flask import current_app
-from app.services.system_indexer_service import rest_index, cmd_index
+
+from . import main
 
 
 @main.route("/index/<string:container_name>")

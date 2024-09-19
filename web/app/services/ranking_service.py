@@ -1,15 +1,17 @@
-import docker
 import json
 import time
 from datetime import datetime
+
+import docker
 import requests
-from flask import jsonify, request, current_app
-from app.models import db, Session, System, Result, Feedback
-from app.services.interleave_service import tdi
-from app.utils import create_dict_response
-from pytz import timezone
+from app.extensions import cache
+from app.models import Feedback, Result, Session, System, db
+from app.services.interleave_service import interleave_rankings
 from app.services.session_service import create_new_session
+from app.utils import create_dict_response
+from flask import current_app, jsonify, request
 from jsonpath_ng import jsonpath, parse
+from pytz import timezone
 
 client = docker.DockerClient(base_url="unix://var/run/docker.sock")
 tz = timezone("Europe/Berlin")
@@ -216,3 +218,38 @@ def build_response(
         "header": build_header(ranking_base, container_names),
         "body": hits,
     }
+
+
+@cache.memoize(timeout=600)
+def make_ranking(container_name, query, rpp, page, session_id):
+    ranking, result = query_system(
+        container_name, query, rpp, page, session_id, type="EXP"
+    )
+
+    if current_app.config["INTERLEAVE"]:
+        current_app.logger.info("Interleaving rankings")
+        ranking_base, result_base = query_system(
+            current_app.config["RANKING_BASELINE_CONTAINER"],
+            query,
+            rpp,
+            page,
+            session_id,
+            type="BASE",
+        )
+
+        interleaved_ranking = interleave_rankings(ranking, ranking_base)
+
+        response = build_response(
+            ranking,
+            container_name,
+            interleaved_ranking,
+            ranking_base,
+            current_app.config["RANKING_BASELINE_CONTAINER"],
+            result,
+            result_base,
+        )
+
+    else:
+        response = build_response(ranking, container_name, result=result)
+
+    return response
