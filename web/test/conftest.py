@@ -1,23 +1,24 @@
-import requests_mock
+from app.app import db, create_app
 import pytest
-from app.app import create_app, db
+
 from app.commands import init_db
 from app.models import Session
-import random
-from app.services.session_service import create_new_session
 
 from .create_test_data import (
     create_systems,
-    create_result,
-    create_feedback,
-    create_experimental_return,
+    create_sessions,
+    create_results,
+    create_feedbacks,
+    create_return_base,
+    create_return_experimental,
 )
 
 
 @pytest.fixture()
 def app():
     # setup flask app
-    app = create_app()
+
+    app = create_app("test")
 
     # setup database
     with app.app_context():
@@ -58,73 +59,66 @@ def db_session(app):
         session.remove()
 
 
-# Data fixtures
 @pytest.fixture
 def systems():
-    systems_ranker = create_systems(type="ranker")
-    systems_recommender = create_systems(type="recommender")
-
-    db.session.add_all(systems_ranker)
-    db.session.add_all(systems_recommender)
+    test_systems = create_systems()
+    for system in test_systems.values():
+        db.session.add(system)
     db.session.commit()
 
-    return {
-        "ranker": systems_ranker,
-        "recommender": systems_recommender,
-    }
+    return test_systems
 
 
 @pytest.fixture
 def sessions(systems):
-    ranker_session_id = create_new_session(
-        container_name="ranker_base", sid=None, type="ranker"
-    )
-    ranker_session = db.session.query(Session).filter_by(id=ranker_session_id).first()
-
-    recommender_session_id = create_new_session(
-        container_name="recommender_base", sid=None, type="recommender"
-    )
-    recommender_session = (
-        db.session.query(Session).filter_by(id=recommender_session_id).first()
-    )
-
-    return {
-        "ranker": ranker_session,
-        "recommender": recommender_session,
-    }
+    test_sessions = create_sessions(systems)
+    for system, session_id in test_sessions.items():
+        session_obj = db.session.query(Session).filter_by(id=session_id).first()
+        test_sessions[system] = session_obj
+    return test_sessions
 
 
 @pytest.fixture
 def results(sessions):
-    ranker_result = create_result(sessions, type="ranker")
-    recommender_result = create_result(sessions, type="recommender")
-
-    db.session.add_all([ranker_result, recommender_result])
+    result_objs = create_results(sessions)
+    for result in result_objs.values():
+        db.session.add(result)
     db.session.commit()
-
-    return {
-        "ranker": ranker_result,
-        "recommender": recommender_result,
-    }
+    return result_objs
 
 
 @pytest.fixture
 def feedback(sessions):
-    number_of_feedbacks = random.randint(1, 4)
-    feedbacks_ranker = create_feedback(number_of_feedbacks, sessions, type="ranker")
-    db.session.add_all(feedbacks_ranker)
-
-    feedbacks_recommender = create_feedback(
-        number_of_feedbacks, sessions, type="recommender"
-    )
-    db.session.add_all(feedbacks_recommender)
-
+    feedbacks = create_feedbacks(sessions)
+    for feedback in feedbacks.values():
+        db.session.add(feedback)
     db.session.commit()
 
-    return {
-        "ranker": feedbacks_ranker,
-        "recommender": feedbacks_recommender,
-    }
+    return feedbacks
+
+
+@pytest.fixture
+def mock_request_base_system(requests_mock):
+    """Fixture for mocking the request to the experimental system."""
+    container_name = "ranker_base"
+
+    # Mock the debug docker network endpoint
+    requests_mock.get(
+        f"http+docker://localhost/v1.47/containers/{container_name}/json",
+        json={
+            "NetworkSettings": {
+                "Networks": {"stella-app_default": {"IPAddress": container_name}}
+            }
+        },
+        status_code=200,
+    )
+
+    # Mock the experimental system ranking endpoint
+    data = create_return_base()
+    requests_mock.get(
+        f"http://{container_name}:5000/ranking", json=data, status_code=200
+    )
+    return requests_mock
 
 
 @pytest.fixture
@@ -134,16 +128,18 @@ def mock_request_experimental_system(requests_mock):
 
     # Mock the debug docker network endpoint
     requests_mock.get(
-        f"http+docker://localhost/v1.45/containers/{container_name}/json",
+        f"http+docker://localhost/v1.47/containers/{container_name}/json",
         json={
             "NetworkSettings": {
-                "Networks": {"stella-app_default": {"IPAddress": "localhost"}}
+                "Networks": {"stella-app_default": {"IPAddress": container_name}}
             }
         },
         status_code=200,
     )
 
     # Mock the experimental system ranking endpoint
-    data = create_experimental_return()
-    requests_mock.get("http://localhost:5000/ranking", json=data, status_code=200)
+    data = create_return_experimental()
+    requests_mock.get(
+        f"http://{container_name}:5000/ranking", json=data, status_code=200
+    )
     return requests_mock

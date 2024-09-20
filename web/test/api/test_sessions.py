@@ -1,26 +1,27 @@
 import pytest
 
 
-@pytest.mark.parametrize("type", ["ranker", "recommender"])
-def test_exit_session(client, sessions, type):
-    result = client.put(f"/stella/api/v1/sessions/{sessions[type].id}/exit")
-
+@pytest.mark.parametrize(
+    "system", ["ranker", "recommender", "ranker_base", "recommender_base"]
+)
+def test_exit_session(client, sessions, system):
+    result = client.put(f"/stella/api/v1/sessions/{sessions[system].id}/exit")
     assert 204 == result.status_code
 
 
 def test_exit_session_wrong_id(client):
     result = client.put(f"/stella/api/v1/sessions/NoID/exit")
-
     assert 404 == result.status_code
 
 
-@pytest.mark.parametrize("type", ["ranker", "recommender"])
-def test_post_user(client, sessions, type):
+@pytest.mark.parametrize(
+    "system", ["ranker", "recommender", "ranker_base", "recommender_base"]
+)
+def test_post_user(client, sessions, system):
     result = client.post(
-        f"/stella/api/v1/sessions/{sessions[type].id}/user",
+        f"/stella/api/v1/sessions/{sessions[system].id}/user",
         data={"site_user": "test"},
     )
-
     assert 201 == result.status_code
 
 
