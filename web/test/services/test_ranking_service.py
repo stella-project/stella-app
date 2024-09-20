@@ -2,6 +2,10 @@ from app.models import System, Result
 from app.services.ranking_service import request_results_from_conatiner, query_system
 import requests_mock
 from ..create_test_data import create_return_experimental, create_return_base
+import os
+import pytest
+
+running_in_ci = os.getenv("CI") == "true"
 
 
 def test_request_results_from_conatiner(mock_request_base_system):
@@ -14,6 +18,9 @@ def test_request_results_from_conatiner(mock_request_base_system):
     assert result == data
 
 
+@pytest.mark.skipif(
+    running_in_ci, reason="Test requires Docker and will not run in CI environment"
+)
 def test_query_base_system(mock_request_base_system, sessions, db_session):
     container_name = "ranker_base"
     query = "Test Query"
@@ -38,6 +45,9 @@ def test_query_base_system(mock_request_base_system, sessions, db_session):
         assert list(result.items[str(i + 1)].keys()) == ["docid", "type"]
 
 
+@pytest.mark.skipif(
+    running_in_ci, reason="Test requires Docker and will not run in CI environment"
+)
 def test_query_experimental_system(
     mock_request_experimental_system, sessions, db_session
 ):

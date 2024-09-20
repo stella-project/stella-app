@@ -1,5 +1,8 @@
-from app.models import System, Result
+import os
+import pytest
 from ..create_test_data import create_feedbacks, create_return_experimental
+
+running_in_ci = os.getenv("CI") == "true"
 
 
 def test_ranking_from_db(client, results, sessions):
@@ -19,6 +22,9 @@ class TestRanking:
         data = result.json
         assert 400 == result.status_code
 
+    @pytest.mark.skipif(
+        running_in_ci, reason="Test requires Docker and will not run in CI environment"
+    )
     def test_ranking(self, client, results, sessions, mock_request_base_system):
         result = client.get(self.URL + "?query=test query&container=ranker_base")
         data = result.json
@@ -31,6 +37,9 @@ class TestRanking:
         assert data["header"]["container"].keys() == {"exp"}
         assert data["header"]["container"]["exp"] == "ranker_base"
 
+    @pytest.mark.skipif(
+        running_in_ci, reason="Test requires Docker and will not run in CI environment"
+    )
     def test_ranking_experimental(
         self,
         app,
@@ -49,6 +58,9 @@ class TestRanking:
         assert data == response
 
 
+@pytest.mark.skipif(
+    running_in_ci, reason="Test requires Docker and will not run in CI environment"
+)
 def test_ranking_interleaved(
     app,
     client,

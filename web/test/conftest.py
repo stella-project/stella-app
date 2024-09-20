@@ -1,11 +1,8 @@
 from app.app import db, create_app
-import os
 import pytest
 
 from app.commands import init_db
 from app.models import Session
-import random
-from app.services.session_service import create_new_session
 
 from .create_test_data import (
     create_systems,
@@ -15,8 +12,6 @@ from .create_test_data import (
     create_return_base,
     create_return_experimental,
 )
-
-import os
 
 
 @pytest.fixture()
