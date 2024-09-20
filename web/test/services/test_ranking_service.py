@@ -8,6 +8,9 @@ import pytest
 running_in_ci = os.getenv("CI") == "true"
 
 
+@pytest.mark.skipif(
+    running_in_ci, reason="Test requires Docker and will not run in CI environment"
+)
 def test_request_results_from_conatiner(mock_request_base_system):
     container_name = "ranker_base"
     result = request_results_from_conatiner(
