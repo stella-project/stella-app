@@ -523,7 +523,7 @@ def recommend():
 
     if session_id is None:
         # make new session and get session_id as sid
-        session_id = create_new_session(container_name=container_name)
+        session_id = create_new_session(container_name=container_name, type="recommender")
     else:
         if db.session.query(Session).get(session_id) is None:
             session_id = create_new_session(
