@@ -1,11 +1,11 @@
 import random
-from app.models import db, Result
+from app.models import db, Result, System
+from flask import current_app
 
 
 def tdi(item_dict_base, item_dict_exp):
     # team draft interleaving
     # implementation taken from https://bitbucket.org/living-labs/ll-api/src/master/ll/core/interleave.py
-
     result = {}
     result_set = set([])
 
@@ -66,10 +66,12 @@ def interleave_rankings(ranking_exp, ranking_base):
     @param ranking_base:    baseline ranking (Result)
     @return:                interleaved ranking (dict)
     """
+    # Extract the IDs of the documents from the rankings for tdi
     base = {k: v.get("docid") for k, v in ranking_base.items.items()}
     exp = {k: v.get("docid") for k, v in ranking_exp.items.items()}
 
     item_dict = tdi(base, exp)
+
     ranking = Result(
         session_id=ranking_exp.session_id,
         system_id=ranking_exp.system_id,
@@ -89,13 +91,10 @@ def interleave_rankings(ranking_exp, ranking_base):
 
     ranking_id = ranking.id
     ranking.tdi = ranking_id
-
     ranking_exp.tdi = ranking_id
-    db.session.add(ranking_exp)
-    db.session.commit()
-
     ranking_base.tdi = ranking_id
-    db.session.add(ranking_base)
+
+    db.session.add_all([ranking_exp, ranking_base])
     db.session.commit()
 
-    return ranking.items
+    return ranking

@@ -22,5 +22,7 @@ jobs:
         python -m pip install pytest
         if [ -f web/requirements.txt ]; then pip install -r web/requirements.txt; fi
     - name: Test with pytest
+      env:
+        CI: true
       run: |
         pytest
