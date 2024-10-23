@@ -66,12 +66,14 @@ def register_extensions(app):
     migrate.init_app(app, db)
     bootstrap.init_app(app)
 
+    '''
     if scheduler.state == 0:
         print("Scheduler init app")
         scheduler.init_app(app)
         logging.getLogger("apscheduler").setLevel(logging.INFO)
         print("Scheduler start")
         scheduler.start()
+    '''
     return app
 
 

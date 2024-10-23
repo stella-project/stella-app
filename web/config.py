@@ -114,6 +114,15 @@ class PostgresConfig(Config):
         user=POSTGRES_USER, pw=POSTGRES_PW, url=POSTGRES_URL, db=POSTGRES_DB
     )
 
+    JOBS = [
+        {
+            "id": "update_server",
+            "func": 'app.services.cron_service:check_db_sessions',
+            "trigger": "interval",
+            "seconds": os.environ.get("INTERVAL_DB_CHECK") or 3,
+        }
+    ]
+
 
 class TestConfig(Config):
     TESTING = True
