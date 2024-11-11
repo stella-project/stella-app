@@ -1,7 +1,15 @@
+import json
 import os
 from datetime import datetime
+from jsonpath_ng import parse
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+
+def load_from_json(env_var):
+    config_string = os.getenv(env_var, "{}")
+    config_dict = json.loads(config_string)
+    return config_dict
 
 
 def load_as_list(env_var):
@@ -9,13 +17,14 @@ def load_as_list(env_var):
     if os.environ.get(env_var):
         for list_item in os.environ.get(env_var).split(" "):
             variable_list.append(list_item)
-
     return variable_list
 
 
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY") or "change-me"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    CACHE_TYPE = "FileSystemCache"
+    CACHE_DIR = "/tmp"
 
     # General settings
     INTERLEAVE = True if os.environ.get("INTERLEAVE") == "True" else False
@@ -38,22 +47,55 @@ class Config:
     STELLA_SERVER_PASS = os.environ.get("STELLA_SERVER_PASS") or "pass"
     STELLA_SERVER_USERNAME = os.environ.get("STELLA_SERVER_USERNAME") or "GESIS"
 
-    # Load registered systems
-    # Ranking
-    RANKING_CONTAINER_NAMES = load_as_list("RANKSYS_LIST")  # container_list
-    RANKING_PRECOMPUTED_CONTAINER_NAMES = load_as_list(
-        "RANKSYS_PRECOM_LIST"
-    )  # container_list_recommendation
-    RANKING_BASELINE_CONTAINER = os.environ.get("RANKSYS_BASE")
+    STELLA_SERVER_TOKEN = ""
+    TOKEN_EXPIRATION = datetime.now()
 
-    # Recommendation
-    RECOMMENDER_CONTAINER_NAMES = load_as_list(
-        "RECSYS_LIST"
-    )  # container_list_recommendation
-    RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES = load_as_list(
-        "RECSYS_PRECOM_LIST"
-    )  # container_precom_list_recommendation
-    RECOMMENDER_BASELINE_CONTAINER = os.environ.get("RECSYS_BASE")
+    # Load registered systems
+    if os.environ.get("SYSTEMS_CONFIG"):
+        SYSTEMS_CONFIG = load_from_json("SYSTEMS_CONFIG")
+
+        RANKING_CONTAINER_NAMES = []
+        RANKING_PRECOMPUTED_CONTAINER_NAMES = []
+        RANKING_BASELINE_CONTAINER = ""
+
+        RECOMMENDER_CONTAINER_NAMES = []
+        RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES = []
+        RECOMMENDER_BASELINE_CONTAINER = ""
+
+        for system in SYSTEMS_CONFIG.keys():
+            if SYSTEMS_CONFIG[system]["type"] == "recommender":
+                if SYSTEMS_CONFIG[system].get("precomputed"):
+                    RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES.append(system)
+                else:
+                    RECOMMENDER_CONTAINER_NAMES.append(system)
+                if SYSTEMS_CONFIG[system].get("base"):
+                    RECOMMENDER_BASELINE_CONTAINER = system
+            elif SYSTEMS_CONFIG[system]["type"] == "ranker":
+                if SYSTEMS_CONFIG[system].get("precomputed"):
+                    RANKING_PRECOMPUTED_CONTAINER_NAMES.append(system)
+                else:
+                    RANKING_CONTAINER_NAMES.append(system)
+                if SYSTEMS_CONFIG[system].get("base"):
+                    RANKING_BASELINE_CONTAINER = system
+
+            # JSON Path
+            if SYSTEMS_CONFIG[system].get("hits_path"):
+                hits_path = parse(SYSTEMS_CONFIG[system]["hits_path"])
+                SYSTEMS_CONFIG[system]["hits_path"] = hits_path
+
+    else:
+        # Ranking
+        RANKING_CONTAINER_NAMES = load_as_list("RANKSYS_LIST")  # container_list
+        # container_list_recommendation
+        RANKING_PRECOMPUTED_CONTAINER_NAMES = load_as_list("RANKSYS_PRECOM_LIST")
+        RANKING_BASELINE_CONTAINER = os.environ.get("RANKSYS_BASE")
+
+        # Recommendation
+        # container_list_recommendation
+        RECOMMENDER_CONTAINER_NAMES = load_as_list("RECSYS_LIST")
+        # container_precom_list_recommendation
+        RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES = load_as_list("RECSYS_PRECOM_LIST")
+        RECOMMENDER_BASELINE_CONTAINER = os.environ.get("RECSYS_BASE")
 
     # Create container_dict
     RANKING_CONTAINER_DICT = {}
@@ -79,29 +121,12 @@ class Config:
         HEAD_QUERIES = []
         print("No head queries found")
 
-    STELLA_SERVER_TOKEN = ""
-    TOKEN_EXPIRATION = datetime.now()
-
 
 class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         "DEV_DATABASE_URL"
     ) or "sqlite:///" + os.path.join(basedir, "data-dev.sqlite")
-
-    # Load registered systems
-    # Ranking
-    RANKING_CONTAINER_NAMES = [
-        "livivo_base",
-        "livivo_rank_pyterrier",
-    ]  # container_list
-    RANKING_PRECOMPUTED_CONTAINER_NAMES = ["livivo_rank_pyterrier"]
-    RANKING_BASELINE_CONTAINER = "livivo_base"
-
-    # Recommendation
-    RECOMMENDER_CONTAINER_NAMES = ["gesis_rec_pyterrier"]
-    RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES = ["gesis_rec_precom"]
-    RECOMMENDER_BASELINE_CONTAINER = "gesis_rec_pyterrier"
 
 
 class PostgresConfig(Config):
@@ -132,6 +157,13 @@ class TestConfig(Config):
 
     RECOMMENDER_CONTAINER_NAMES = ["recommender_base", "recommender"]
     RECOMMENDER_BASELINE_CONTAINER = "recommender_base"
+
+    SYSTEMS_CONFIG = {
+        "recommender_base": {"type": "recommender", "base": True},
+        "recommender": {"type": "recommender"},
+        "ranker_base": {"type": "ranker", "base": True},
+        "ranker": {"type": "ranker", "docid": "id", "hits_path": "$.hits.hits[*]"},
+    }
 
 
 config = {"default": DevelopmentConfig, "postgres": PostgresConfig, "test": TestConfig}

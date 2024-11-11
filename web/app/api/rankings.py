@@ -1,14 +1,12 @@
 import docker
-import time
-from flask import jsonify, request, current_app
-from app import api
-from app.models import db, Session, System, Result, Feedback
-from app.services.interleave_service import interleave_rankings
-from app.utils import create_dict_response
-from pytz import timezone
-from . import api
+from app.models import Feedback, Result, Session, db
+from app.services.ranking_service import make_ranking
 from app.services.session_service import create_new_session
-from app.services.ranking_service import query_system
+from app.services.system_service import get_least_served_system
+from flask import jsonify, request
+from pytz import timezone
+
+from . import api
 
 client = docker.DockerClient(base_url="unix://var/run/docker.sock")
 tz = timezone("Europe/Berlin")
@@ -82,149 +80,21 @@ def ranking():
                 header contains meta-data
                 body contains ranked document list
     """
-
-    # look for "mandatory" GET-parameters (query, container_name, session_id)
-    query = request.args.get("query", None)
-    container_name = request.args.get("container", None)
-    session_id = request.args.get("sid", None)
-
-    # Look for optional GET-parameters and set default values
     page = request.args.get("page", default=0, type=int)
-    rpp = request.args.get("rpp", default=20, type=int)
+    rpp = request.args.get("rpp", default=10, type=int)
 
-    # Return cached results for known (session ID, query) combinations
-    # tested: true
-    if session_id and query:
-        ranking = (
-            db.session.query(Result)
-            .filter_by(session_id=session_id, q=query, page=page, rpp=rpp)
-            .first()
-        )
-        if ranking:
-            if ranking.tdi:
-                ranking = db.session.query(Result).filter_by(id=ranking.tdi).first()
-
-            system_id = (
-                db.session.query(Session)
-                .filter_by(id=session_id)
-                .first()
-                .system_ranking
-            )
-            container_name = (
-                db.session.query(System).filter_by(id=system_id).first().name
-            )
-
-            response = {
-                "header": {
-                    "sid": ranking.session_id,
-                    "rid": ranking.id,
-                    "q": query,
-                    "page": ranking.page,
-                    "rpp": ranking.rpp,
-                    "hits": ranking.hits,
-                    "container": {"exp": container_name},
-                },
-                "body": ranking.items,
-            }
-            return jsonify(response)
-
-    # If no query is given, return an empty response
-    # TODO: Is this save?
+    query = request.args.get("query", None)
     if query is None:
-        return create_dict_response(status=1, ts=round(time.time() * 1000))
+        return "Missing query string", 400
 
-    # Select least served container if no container_name is given. This is the default case for an interleaved experiment.
+    container_name = request.args.get("container", None)
     if container_name is None:
-        # Depricated precomputed runs code. Will be removed in the future.
-        if query in current_app.config["HEAD_QUERIES"]:
-            container_name = (
-                db.session.query(System)
-                .filter(System.name != current_app.config["RANKING_BASELINE_CONTAINER"])
-                .filter(
-                    System.name.notin_(
-                        current_app.config["RECOMMENDER_CONTAINER_NAMES"]
-                        + current_app.config["RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES"]
-                    )
-                )
-                .order_by(System.num_requests)
-                .first()
-                .name
-            )
-        else:
-            # Select least served container
-            container_name = (
-                db.session.query(System)
-                .filter(System.name != current_app.config["RANKING_BASELINE_CONTAINER"])
-                .filter(
-                    System.name.notin_(
-                        current_app.config["RECOMMENDER_CONTAINER_NAMES"]
-                        + current_app.config["RANKING_PRECOMPUTED_CONTAINER_NAMES"]
-                        + current_app.config["RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES"]
-                    )
-                )
-                .order_by(System.num_requests_no_head)
-                .first()
-                .name
-            )
+        container_name = get_least_served_system(query)
 
-    # Create new session if no session_id is given
-    if session_id is None:
-        # make new session and get session_id as sid
+    session_id = request.args.get("sid", None)
+    if session_id is None or db.session.query(Session).filter_by(id=session_id) is None:
         session_id = create_new_session(container_name, type="ranker")
-    else:
-        # SessionID is given, but does not exist in the database
-        if db.session.query(Session).filter_by(id=session_id) is None:
-            session_id = create_new_session(
-                container_name=container_name, sid=session_id, type="ranker"
-            )
 
-        # TODO: At this point, the containername is given! The container name is overwritten here. Therefore I commented out the following lines.
-        # ranking_system_id = (
-        #     db.session.query(Session).filter_by(id=session_id).first().system_ranking
-        # )
-        # container_name = db.session.query(System).filter_by(id=ranking_system_id).first().name
+    response = make_ranking(container_name, query, rpp, page, session_id)
 
-    # Query the experimental and baseline system
-    ranking_exp = query_system(container_name, query, rpp, page, session_id)
-
-    ranking_base = query_system(
-        current_app.config["RANKING_BASELINE_CONTAINER"],
-        query,
-        rpp,
-        page,
-        session_id,
-        type="BASE",
-    )
-
-    if current_app.config["INTERLEAVE"]:
-        response = interleave_rankings(ranking_exp, ranking_base)
-        response_complete = {
-            "header": {
-                "sid": ranking_exp.session_id,
-                "rid": ranking_exp.tdi,
-                "q": query,
-                "page": page,
-                "rpp": rpp,
-                "hits": ranking_base.num_found,
-                "container": {
-                    "base": current_app.config["RANKING_BASELINE_CONTAINER"],
-                    "exp": container_name,
-                },
-            },
-            "body": response,
-        }
-    else:
-        response_complete = {
-            "header": {
-                "sid": ranking_exp.session_id,
-                "rid": ranking_exp.id,
-                "q": query,
-                "page": page,
-                "rpp": rpp,
-                "hits": ranking_exp.num_found,
-                "container": {"exp": container_name},
-            },
-            "body": ranking_exp.items,
-        }
-
-    return jsonify(response_complete)
+    return jsonify(response)

@@ -3,12 +3,11 @@ import os
 import sys
 
 from app.api import api as api_blueprint
+from app.commands import index_systems, init_db_command, seed_db_command
+from app.extensions import bootstrap, cache, db, migrate, scheduler
 from app.main import main as main_blueprint
-from app.commands import init_db_command, seed_db_command, index_systems
-from app.extensions import bootstrap, db, migrate, scheduler
 from config import config
 from flask import Flask
-import sys, socket
 
 
 def create_app(config_name=None):
@@ -50,12 +49,12 @@ def configure_logger(app):
         app.logger.addHandler(stream_handler)
 
     # FileHandler for logging to a file
-    file_handler = logging.FileHandler(
-        "data/log/stella-app.log"
-    )  # Define your log file name
-    file_handler.setFormatter(logging.Formatter(log_format))
-    if not any(isinstance(h, logging.FileHandler) for h in app.logger.handlers):
-        app.logger.addHandler(file_handler)
+    # file_handler = logging.FileHandler(
+    #     "data/log/stella-app.log"
+    # )  # Define your log file name
+    # file_handler.setFormatter(logging.Formatter(log_format))
+    # if not any(isinstance(h, logging.FileHandler) for h in app.logger.handlers):
+    #     app.logger.addHandler(file_handler)
 
     app.logger.info("Logging setup complete.")
 
@@ -65,6 +64,7 @@ def register_extensions(app):
     db.init_app(app)
     migrate.init_app(app, db)
     bootstrap.init_app(app)
+    cache.init_app(app)
 
     '''
     if scheduler.state == 0:
