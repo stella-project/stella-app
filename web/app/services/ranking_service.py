@@ -8,7 +8,6 @@ from app.extensions import cache
 from app.models import Result, System, db
 from app.services.interleave_service import interleave_rankings
 from flask import current_app
-from jsonpath_ng import parse
 from pytz import timezone
 
 client = docker.DockerClient(base_url="unix://var/run/docker.sock")
@@ -106,8 +105,7 @@ def query_system(container_name, query, rpp, page, session_id, type="EXP"):
     if hits_path is None:
         hits = result["itemlist"]
     else:
-        jsonpath_expr = parse(hits_path)
-        hits = jsonpath_expr.find(result)[0].value
+        hits = hits_path.find(result)[0].value
 
     if isinstance(hits[0], dict):
         item_dict = {
@@ -160,8 +158,7 @@ def build_response(
             "docid", "docid"
         )
         if hits_path:
-            jsonpath_expr = parse(hits_path)
-            matches = jsonpath_expr.find(result)
+            matches = hits_path.find(result)
             assert len(matches) == 1
 
             id_map = {hit[docid_name]: hit for hit in matches[0].value}
@@ -205,8 +202,7 @@ def build_response(
         "hits_path"
     )
     if base_path:
-        jsonpath_expr = parse(base_path)
-        matches = jsonpath_expr.find(result_base)
+        matches = base_path.find(result_base)
         assert len(matches) == 1
         matches[0].value = hits
         return result_base

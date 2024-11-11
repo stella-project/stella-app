@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import datetime
+from jsonpath_ng import parse
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -16,7 +17,6 @@ def load_as_list(env_var):
     if os.environ.get(env_var):
         for list_item in os.environ.get(env_var).split(" "):
             variable_list.append(list_item)
-
     return variable_list
 
 
@@ -77,6 +77,11 @@ class Config:
                     RANKING_CONTAINER_NAMES.append(system)
                 if SYSTEMS_CONFIG[system].get("base"):
                     RANKING_BASELINE_CONTAINER = system
+
+            # JSON Path
+            if SYSTEMS_CONFIG[system].get("hits_path"):
+                hits_path = parse(SYSTEMS_CONFIG[system]["hits_path"])
+                SYSTEMS_CONFIG[system]["hits_path"] = hits_path
 
     else:
         # Ranking
