@@ -34,6 +34,8 @@ class Config:
     SESSION_EXPIRATION = int(SESSION_EXPIRATION)
     INTERVAL_DB_CHECK = os.environ.get("INTERVAL_DB_CHECK") or 3  # seconds
     INTERVAL_DB_CHECK = int(INTERVAL_DB_CHECK)
+    
+    SENDFEEDBACK = False if os.environ.get("SENDFEEDBACK") == "False" else True  # Opt out    
     DELETE_SENT_SESSION = (
         True if os.environ.get("DELETE_SENT_SESSION") == "True" else False
     )
