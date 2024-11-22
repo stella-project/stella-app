@@ -252,33 +252,20 @@ def post_sessions(sessions_exited):
             delete_exited_session(session)
 
 
-@scheduler.task(
-    "interval",
-    id="job_sync",
-    seconds=10,
-    max_instances=1,
-)
 def check_db_sessions():
-    print("Scheduler enters task.")
     with scheduler.app.app_context():
-        current_app.logger.info("Scheduler enters task.")
+        scheduler.app.logger.info("Scheduler enters task.")
 
         sessions_not_exited = Session.query.filter_by(exit=False, sent=False).all()
-        current_app.logger.info(time.strftime("%A, %d. %B %Y %I:%M:%S %p"))
-        current_app.logger.info(
+
+        scheduler.app.logger.info(
             "There is/are " + str(len(sessions_not_exited)) + " running session(s)."
         )
-        if current_app.config["DEBUG"]:
-            print(
-                "There is/are " + str(len(sessions_not_exited)) + " running session(s)."
-            )
 
         # set expired sessions to 'exit'
         update_expired_sessions(sessions_not_exited)
 
         sessions_exited = Session.query.filter_by(exit=True, sent=False).all()
-        if current_app.config["DEBUG"]:
-            print("There is/are " + str(len(sessions_exited)) + " exited session(s).")
 
         if (
             current_app.config["STELLA_SERVER_TOKEN"] is None

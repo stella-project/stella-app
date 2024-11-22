@@ -16,7 +16,6 @@ def create_app(config_name=None):
     :param config_object: The configuration object or dictionary to use.
     """
     config_name_environment = os.getenv("FLASK_CONFIG") or "default"
-    print("Create app from:", __name__)
     app = Flask(__name__.split(".")[0])
 
     # Load the default configuration
@@ -38,25 +37,35 @@ def create_app(config_name=None):
 
 def configure_logger(app):
     """Configure loggers."""
-    log_format = "%(asctime)s %(levelname)s %(filename)s %(funcName)s - %(message)s"
+    if app.config["DEBUG"]:
+        log_format = "[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
 
-    logging.basicConfig(level=logging.DEBUG, format=log_format)
+        logging.basicConfig(level=logging.DEBUG, format=log_format)
 
-    # StreamHandler for logging to console
-    stream_handler = logging.StreamHandler(sys.stdout)
-    stream_handler.setFormatter(logging.Formatter(log_format))
-    if not any(isinstance(h, logging.StreamHandler) for h in app.logger.handlers):
-        app.logger.addHandler(stream_handler)
+        # StreamHandler for logging to console
+        stream_handler = logging.StreamHandler(sys.stdout)
+        stream_handler.setFormatter(logging.Formatter(log_format))
 
-    # FileHandler for logging to a file
-    # file_handler = logging.FileHandler(
-    #     "data/log/stella-app.log"
-    # )  # Define your log file name
-    # file_handler.setFormatter(logging.Formatter(log_format))
-    # if not any(isinstance(h, logging.FileHandler) for h in app.logger.handlers):
-    #     app.logger.addHandler(file_handler)
+        if not any(isinstance(h, logging.StreamHandler) for h in app.logger.handlers):
+            app.logger.addHandler(stream_handler)
 
-    app.logger.info("Logging setup complete.")
+        # FileHandler for logging to a file
+        # file_handler = logging.FileHandler(
+        #     "data/log/stella-app.log"
+        # )  # Define your log file name
+        # file_handler.setFormatter(logging.Formatter(log_format))
+        # if not any(isinstance(h, logging.FileHandler) for h in app.logger.handlers):
+        #     app.logger.addHandler(file_handler)
+
+        app.logger.info("Logging setup for debug complete.")
+
+    else:
+        del app.logger.handlers[:]
+        gunicorn_logger = logging.getLogger("gunicorn.error")
+        app.logger.handlers = gunicorn_logger.handlers
+        app.logger.setLevel(gunicorn_logger.level)
+
+        app.logger.info("Logging setup complete.")
 
 
 def register_extensions(app):
@@ -65,15 +74,6 @@ def register_extensions(app):
     migrate.init_app(app, db)
     bootstrap.init_app(app)
     cache.init_app(app)
-
-    '''
-    if scheduler.state == 0:
-        print("Scheduler init app")
-        scheduler.init_app(app)
-        logging.getLogger("apscheduler").setLevel(logging.INFO)
-        print("Scheduler start")
-        scheduler.start()
-    '''
     return app
 
 

@@ -32,10 +32,11 @@ class Config:
     BULK_INDEX = True if os.environ.get("BULK_INDEX") == "True" else False
     SESSION_EXPIRATION = os.environ.get("SESSION_EXPIRATION") or 6
     SESSION_EXPIRATION = int(SESSION_EXPIRATION)
-    INTERVAL_DB_CHECK = os.environ.get("INTERVAL_DB_CHECK") or 3  # seconds
-    INTERVAL_DB_CHECK = int(INTERVAL_DB_CHECK)
-    
-    SENDFEEDBACK = False if os.environ.get("SENDFEEDBACK") == "False" else True  # Opt out    
+    INTERVAL_DB_CHECK = int(os.environ.get("INTERVAL_DB_CHECK") or 3)  # seconds
+
+    SENDFEEDBACK = (
+        False if os.environ.get("SENDFEEDBACK") == "False" else True
+    )  # Opt out
     DELETE_SENT_SESSION = (
         True if os.environ.get("DELETE_SENT_SESSION") == "True" else False
     )
@@ -141,12 +142,13 @@ class PostgresConfig(Config):
         user=POSTGRES_USER, pw=POSTGRES_PW, url=POSTGRES_URL, db=POSTGRES_DB
     )
 
+    SCHEDULER_API_ENABLED = True
     JOBS = [
         {
             "id": "update_server",
-            "func": 'app.services.cron_service:check_db_sessions',
+            "func": "app.services.cron_service:check_db_sessions",
             "trigger": "interval",
-            "seconds": os.environ.get("INTERVAL_DB_CHECK") or 3,
+            "seconds": Config.INTERVAL_DB_CHECK,
         }
     ]
 
