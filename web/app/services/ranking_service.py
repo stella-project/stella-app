@@ -27,6 +27,7 @@ async def request_results_from_conatiner(container_name, query, rpp, page):
 
     @return:                container-ranking (dict)
     """
+    await asyncio.sleep(2)
     async with httpx.AsyncClient() as client:
         if current_app.config["DEBUG"]:
             container = docker_client.containers.get(container_name)
@@ -224,7 +225,7 @@ async def make_ranking(container_name, query, rpp, page, session_id):
 
     if current_app.config["INTERLEAVE"]:
 
-        current_app.logger.info("Interleaving rankings")
+        current_app.logger.warning("Started gathering")
         baseline, experimental = await asyncio.gather(
             query_system(
                 current_app.config["RANKING_BASELINE_CONTAINER"],
@@ -238,6 +239,8 @@ async def make_ranking(container_name, query, rpp, page, session_id):
         )
         ranking_base, result_base = baseline
         ranking, result = experimental
+
+        current_app.logger.warning("Gathering done")
 
         interleaved_ranking = interleave_rankings(ranking, ranking_base)
 
