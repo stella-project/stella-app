@@ -16,7 +16,6 @@ services:
       FLASK_CONFIG: postgres
       INTERLEAVE: True
       BULK_INDEX: False
-      DELETE_SENT_SESSION: True
       INTERVAL_DB_CHECK: 3
       SESSION_EXPIRATION: 6
 

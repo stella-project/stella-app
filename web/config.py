@@ -21,6 +21,7 @@ def load_as_list(env_var):
 
 
 class Config:
+    DEBUG = True
     SECRET_KEY = os.environ.get("SECRET_KEY") or "change-me"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     CACHE_TYPE = "FileSystemCache"
@@ -40,7 +41,6 @@ class Config:
     DELETE_SENT_SESSION = (
         True if os.environ.get("DELETE_SENT_SESSION") == "True" else False
     )
-    SCHEDULER_API_ENABLED = True
 
     # Stella Server
     STELLA_SERVER_ADDRESS = os.environ.get("STELLA_SERVER_ADDRESS") or "nginx"
@@ -133,7 +133,6 @@ class DevelopmentConfig(Config):
 
 
 class PostgresConfig(Config):
-    DEBUG = False
     POSTGRES_USER = os.environ.get("POSTGRES_USER") or "postgres"
     POSTGRES_PW = os.environ.get("POSTGRES_PW") or "change-me"
     POSTGRES_URL = os.environ.get("POSTGRES_URL") or "db:5432"
@@ -141,6 +140,7 @@ class PostgresConfig(Config):
     SQLALCHEMY_DATABASE_URI = "postgresql://{user}:{pw}@{url}/{db}".format(
         user=POSTGRES_USER, pw=POSTGRES_PW, url=POSTGRES_URL, db=POSTGRES_DB
     )
+    DEBUG = False
 
     SCHEDULER_API_ENABLED = True
     JOBS = [

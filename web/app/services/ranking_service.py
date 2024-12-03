@@ -1,20 +1,21 @@
 import json
 import time
 from datetime import datetime
+import asyncio
+import httpx
 
 import docker
-import requests
 from app.extensions import cache
 from app.models import Result, System, db
 from app.services.interleave_service import interleave_rankings
 from flask import current_app
 from pytz import timezone
 
-client = docker.DockerClient(base_url="unix://var/run/docker.sock")
+docker_client = docker.DockerClient(base_url="unix://var/run/docker.sock")
 tz = timezone("Europe/Berlin")
 
 
-def request_results_from_conatiner(container_name, query, rpp, page):
+async def request_results_from_conatiner(container_name, query, rpp, page):
     """
     Produce container-ranking via rest-call implementation
     Tested: True
@@ -26,22 +27,24 @@ def request_results_from_conatiner(container_name, query, rpp, page):
 
     @return:                container-ranking (dict)
     """
-    if current_app.config["DEBUG"]:
-        container = client.containers.get(container_name)
-        ip_address = container.attrs["NetworkSettings"]["Networks"][
-            "stella-app_default"
-        ]["IPAddress"]
-        content = requests.get(
-            "http://" + ip_address + ":5000/ranking",
-            params={"query": query, "rpp": rpp, "page": page},
-        ).content
-        return json.loads(content)
+    async with httpx.AsyncClient() as client:
+        if current_app.config["DEBUG"]:
+            container = docker_client.containers.get(container_name)
+            ip_address = container.attrs["NetworkSettings"]["Networks"][
+                "stella-app_default"
+            ]["IPAddress"]
 
-    content = requests.get(
-        f"http://{container_name}:5000/ranking",
-        params={"query": query, "rpp": rpp, "page": page},
-    ).content
-    return json.loads(content)
+            content = await client.get(
+                "http://" + ip_address + ":5000/ranking",
+                params={"query": query, "rpp": rpp, "page": page},
+            )
+
+        content = await client.get(
+            f"http://{container_name}:5000/ranking",
+            params={"query": query, "rpp": rpp, "page": page},
+        )
+
+    return content.json()
 
 
 def request_results_from_conatiner_cmd(container_name, query, rpp, page):
@@ -55,14 +58,14 @@ def request_results_from_conatiner_cmd(container_name, query, rpp, page):
 
     @return:                container-ranking (dict)
     """
-    container = client.containers.get(container_name)
+    container = docker_client.containers.get(container_name)
     cmd = "python3 /script/ranking {} {} {}".format(query, rpp, page)
     exec_res = container.exec_run(cmd)
     result = json.loads(exec_res.output.decode("utf-8"))
     return result
 
 
-def query_system(container_name, query, rpp, page, session_id, type="EXP"):
+async def query_system(container_name, query, rpp, page, session_id, type="EXP"):
     """
     Produce ranking from experimental system in docker container by the container name
 
@@ -88,9 +91,11 @@ def query_system(container_name, query, rpp, page, session_id, type="EXP"):
     db.session.commit()
 
     if current_app.config["REST_QUERY"]:
-        result = request_results_from_conatiner(container_name, query, rpp, page)
+        result = await request_results_from_conatiner(container_name, query, rpp, page)
     else:
-        result = request_results_from_conatiner_cmd(container_name, query, rpp, page)
+        result = await request_results_from_conatiner_cmd(
+            container_name, query, rpp, page
+        )
 
     # calc query execution time in ms
     ts_end = time.time()
@@ -214,22 +219,25 @@ def build_response(
     }
 
 
-@cache.memoize(timeout=600)
-def make_ranking(container_name, query, rpp, page, session_id):
-    ranking, result = query_system(
-        container_name, query, rpp, page, session_id, type="EXP"
-    )
+# @cache.memoize(timeout=600)
+async def make_ranking(container_name, query, rpp, page, session_id):
 
     if current_app.config["INTERLEAVE"]:
+
         current_app.logger.info("Interleaving rankings")
-        ranking_base, result_base = query_system(
-            current_app.config["RANKING_BASELINE_CONTAINER"],
-            query,
-            rpp,
-            page,
-            session_id,
-            type="BASE",
+        baseline, experimental = await asyncio.gather(
+            query_system(
+                current_app.config["RANKING_BASELINE_CONTAINER"],
+                query,
+                rpp,
+                page,
+                session_id,
+                type="BASE",
+            ),
+            query_system(container_name, query, rpp, page, session_id, type="EXP"),
         )
+        ranking_base, result_base = baseline
+        ranking, result = experimental
 
         interleaved_ranking = interleave_rankings(ranking, ranking_base)
 
@@ -244,6 +252,9 @@ def make_ranking(container_name, query, rpp, page, session_id):
         )
 
     else:
+        ranking, result = await query_system(
+            container_name, query, rpp, page, session_id, type="EXP"
+        )
         response = build_response(ranking, container_name, result=result)
 
     return response
