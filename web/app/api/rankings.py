@@ -2,8 +2,10 @@ from app.models import Feedback, Result, Session, db
 from app.services.ranking_service import make_ranking
 from app.services.session_service import create_new_session
 from app.services.system_service import get_least_served_system
-from flask import jsonify, request
+from app.services.profile_service import profile_route
+from flask import jsonify, request, current_app
 from pytz import timezone
+import asyncio
 
 from . import api
 
@@ -56,6 +58,7 @@ def ranking_from_db(rid):
 
 
 @api.route("/ranking", methods=["GET"])
+@profile_route
 def ranking():
     """Produce a ranking for current session
 
@@ -78,6 +81,10 @@ def ranking():
     if session_id is None or db.session.query(Session).filter_by(id=session_id) is None:
         session_id = create_new_session(container_name, type="ranker")
 
-    response = make_ranking(container_name, query, rpp, page, session_id)
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    response = loop.run_until_complete(
+        make_ranking(container_name, query, rpp, page, session_id)
+    )
 
-    return jsonify(response)
+    return response
