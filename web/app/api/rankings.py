@@ -95,12 +95,11 @@ def ranking():
         container_name = get_least_served_system(query)
 
     session_id = request.args.get("sid", None)
-    if session_id is None or db.session.query(Session).filter_by(id=session_id) is None:
+    session_exists = db.session.query(Session).filter_by(id=session_id).first()
+    if not session_exists:
         session_id = create_new_session(container_name, type="ranker")
 
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    response = loop.run_until_complete(
+    response = asyncio.get_event_loop().run_until_complete(
         make_ranking(container_name, query, rpp, page, session_id)
     )
 
