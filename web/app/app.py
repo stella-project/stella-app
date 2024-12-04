@@ -9,6 +9,8 @@ from app.main import main as main_blueprint
 from config import config
 from flask import Flask
 
+from app.db_async import init_async_session
+
 
 def create_app(config_name=None):
     """Create application factory, as explained here: http://flask.pocoo.org/docs/patterns/appfactories/.
@@ -38,6 +40,7 @@ def create_app(config_name=None):
     register_extensions(app)
     register_blueprints(app)
     register_commands(app)
+
     return app
 
 
@@ -80,6 +83,8 @@ def register_extensions(app):
     migrate.init_app(app, db)
     bootstrap.init_app(app)
     cache.init_app(app)
+    init_async_session(app)
+
     return app
 
 

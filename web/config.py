@@ -173,7 +173,7 @@ class PostgresConfig(Config):
     SQLALCHEMY_DATABASE_URI = "postgresql://{user}:{pw}@{url}/{db}".format(
         user=POSTGRES_USER, pw=POSTGRES_PW, url=POSTGRES_URL, db=POSTGRES_DB
     )
-    DEBUG = True
+    DEBUG = False
 
     SCHEDULER_API_ENABLED = True
     JOBS = [
