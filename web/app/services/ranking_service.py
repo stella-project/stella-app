@@ -6,7 +6,7 @@ import httpx
 
 import docker
 from app.extensions import cache
-from app.models import Result, System, db
+from app.models import Result, System
 from app.services.interleave_service import interleave_rankings
 from flask import current_app
 from pytz import timezone
@@ -38,33 +38,7 @@ async def request_results_from_conatiner(container_name, query, rpp, page):
     return content.json()
 
 
-async def query_system(container_name, query, rpp, page, session_id, type="EXP"):
-    """query a system with a given query and return the ranking and the result"""
-    current_app.logger.debug(f'Produce ranking with system: "{container_name}"...')
-    q_date = datetime.now(tz).replace(tzinfo=None, microsecond=0)
-    ts_start = time.time()
-
-    # increase number of request counter before actual request, in case of a failure
-    async_session_factory = current_app.extensions["async_session"]
-    async with async_session_factory() as session:
-        system = await session.execute(
-            select(System).where(System.name == container_name)
-        )
-        system = system.scalar()
-        # system = db.session.query(System).filter_by(name=container_name).first()
-
-        if query in current_app.config["HEAD_QUERIES"]:
-            system.num_requests += 1
-        else:
-            system.num_requests_no_head += 1
-        await session.commit()
-
-    result = await request_results_from_conatiner(container_name, query, rpp, page)
-
-    # calc query execution time in ms
-    ts_end = time.time()
-    q_time = round((ts_end - ts_start) * 1000)
-
+def extract_hits(result, container_name, type):
     # Extract hits list from result and allow custom fields for docid and hits_path
     docid_name = current_app.config["SYSTEMS_CONFIG"][container_name].get(
         "docid", "docid"
@@ -86,26 +60,59 @@ async def query_system(container_name, query, rpp, page, session_id, type="EXP")
             i + 1: {"docid": hits[i], "type": type} for i in range(0, len(hits))
         }
 
+    return item_dict, hits
+
+
+async def query_system(container_name, query, rpp, page, session_id, type="EXP"):
+    """query a system with a given query and return the ranking and the result"""
+    current_app.logger.debug(f'Produce ranking with system: "{container_name}"')
+
+    q_date = datetime.now(tz).replace(tzinfo=None, microsecond=0)
+    ts_start = time.time()
+
+    # increase number of request counter before actual request, in case of a failure
+    async_session_factory = current_app.extensions["async_session"]
     async with async_session_factory() as session:
-        # Save the ranking to the database
+        system = await session.execute(
+            select(System).where(System.name == container_name)
+        )
+        system = system.scalar()
+        # system = db.session.query(System).filter_by(name=container_name).first()
+
+        if query in current_app.config["HEAD_QUERIES"]:
+            system.num_requests += 1
+        else:
+            system.num_requests_no_head += 1
+        await session.commit()
+
+    result = await request_results_from_conatiner(container_name, query, rpp, page)
+    item_dict, hits = extract_hits(result, container_name, type)
+
+    # calc query execution time in ms
+    ts_end = time.time()
+    q_time = round((ts_end - ts_start) * 1000)
+
+    # Save the ranking to the database
+    async with async_session_factory() as session:
         system_id = await session.execute(
             select(System).where(System.name == container_name)
         )
         system_id = system_id.scalar()
 
+    ranking = Result(
+        session_id=session_id,
+        system_id=system_id.id,
+        type="RANK",
+        q=query,
+        q_date=q_date,
+        q_time=q_time,
+        num_found=len(hits),
+        page=page,
+        rpp=rpp,
+        items=item_dict,
+    )
+
     async with async_session_factory() as session:
-        ranking = Result(
-            session_id=session_id,
-            system_id=system_id.id,
-            type="RANK",
-            q=query,
-            q_date=q_date,
-            q_time=q_time,
-            num_found=len(hits),
-            page=page,
-            rpp=rpp,
-            items=item_dict,
-        )
         session.add(ranking)
         await session.commit()
 
@@ -190,9 +197,7 @@ def build_response(
 
 # @cache.memoize(timeout=600)
 async def make_ranking(container_name, query, rpp, page, session_id):
-
     if current_app.config["INTERLEAVE"]:
-
         current_app.logger.warning("Started gathering")
         baseline, experimental = await asyncio.gather(
             query_system(

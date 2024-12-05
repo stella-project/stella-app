@@ -4,7 +4,7 @@ from app.services.ranking_service import make_ranking
 from app.services.session_service import create_new_session
 from app.services.system_service import get_least_served_system
 from app.services.profile_service import profile_route
-from flask import jsonify, request, current_app
+from flask import jsonify, request
 from pytz import timezone
 import asyncio
 
@@ -75,7 +75,6 @@ def ranking_from_db(rid):
 
 
 @api.route("/ranking", methods=["GET"])
-@profile_route
 def ranking():
     """Produce a ranking for current session
 
