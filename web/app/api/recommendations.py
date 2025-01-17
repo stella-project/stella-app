@@ -14,8 +14,80 @@ from pytz import timezone
 
 from app.services.session_service import create_new_session
 
-client = docker.DockerClient(base_url="unix://var/run/docker.sock")
+
 tz = timezone("Europe/Berlin")
+
+import os
+# import os
+if os.name == 'nt':  # Windows
+    client = docker.DockerClient(base_url="npipe:////./pipe/docker_engine")
+else:  # Unix-based systems like Linux or macOS
+    client = docker.DockerClient(base_url="unix://var/run/docker.sock")
+
+# # Set up logging
+# logger = logging.getLogger(__name__)
+# logger.setLevel(logging.DEBUG)
+
+# # Define function to fetch recommendation data
+# def rest_rec_data(container_name: str, item_id: str, rpp: int, page: int) -> Dict[str, Any]:
+#     """
+#     Fetch ranking datasets produced by the given container.
+
+#     Args:
+#         container_name (str): Name of the container to produce recommendation.
+#         item_id (str): Item ID as a seed for recommendation.
+#         rpp (int): Results per page.
+#         page (int): Page number.
+
+#     Returns:
+#         Dict[str, Any]: Dataset recommendation ranking for the given item ID.
+#     """
+#     try:
+#         if current_app.config.get("DEBUG", False):
+#             # Attempt to get container information
+#             container = client.containers.get(container_name)
+#             ip_address = container.attrs.get("NetworkSettings", {}).get("Networks", {}).get(
+#                 "stella-app_default", {}
+#             ).get("IPAddress")
+
+#             if not ip_address:
+#                 logger.error("Failed to retrieve IP address for container: %s", container_name)
+#                 return {"error": "Container IP address not found"}
+
+#             # Send request to container's API
+#             response = requests.get(
+#                 f"http://{ip_address}:5000/recommendation/datasets",
+#                 params={"item_id": item_id, "rpp": rpp, "page": page},
+#                 timeout=10  # Add timeout to prevent hanging
+#             )
+#         else:
+#             # Production: Use container name as hostname
+#             response = requests.get(
+#                 f"http://{container_name}:5000/recommendation/datasets",
+#                 params={"item_id": item_id, "rpp": rpp, "page": page},
+#                 timeout=10
+#             )
+
+#         # Check response status
+#         response.raise_for_status()
+#         return response.json()
+
+#     except docker.errors.NotFound:
+#         logger.error("Container not found: %s", container_name)
+#         return {"error": "Container not found"}
+
+#     except requests.exceptions.RequestException as e:
+#         logger.error("HTTP request failed: %s", str(e))
+#         return {"error": "HTTP request failed", "details": str(e)}
+
+#     except docker.errors.DockerException as e:
+#         logger.error("Docker client error: %s", str(e))
+#         return {"error": "Docker client error", "details": str(e)}
+
+#     except Exception as e:
+#         logger.error("An unexpected error occurred: %s", str(e))
+#         return {"error": "Unexpected error", "details": str(e)}
+
 
 
 def rest_rec_data(container_name, item_id, rpp, page):
