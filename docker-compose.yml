@@ -26,7 +26,7 @@ services:
             "gesis_rec_pyterrier": {"type": "recommender", "base": true},
             "gesis_rec_pyserini": {"type": "recommender"},
             "gesis_rank_pyserini_base": {"type": "ranker", "base": true},
-            "gesis_rank_pyserini": {"type": "recommender"}
+            "gesis_rank_pyserini": {"type": "ranker"}
         }
       # Stella Server
       STELLA_SERVER_ADDRESS: http://host.docker.internal:8000
@@ -50,7 +50,7 @@ services:
   db:
     image: postgres
     ports:
-      - 5430:5430
+      - 5430:5430 
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=change-me

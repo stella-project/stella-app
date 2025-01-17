@@ -14,8 +14,17 @@ from pytz import timezone
 
 from app.services.session_service import create_new_session
 
-client = docker.DockerClient(base_url="unix://var/run/docker.sock")
+
 tz = timezone("Europe/Berlin")
+
+import os
+# import os
+if os.name == 'nt':  # Windows
+    client = docker.DockerClient(base_url="npipe:////./pipe/docker_engine")
+else:  # Unix-based systems like Linux or macOS
+    client = docker.DockerClient(base_url="unix://var/run/docker.sock")
+
+
 
 
 def rest_rec_data(container_name, item_id, rpp, page):
