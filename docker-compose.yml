@@ -1,5 +1,10 @@
 name: stella-app
 
+networks:
+  stella-shared:
+    external: true
+    name: stella-server_default
+
 services:
   web:
     build: ./web
@@ -10,6 +15,8 @@ services:
       - "8000"
     ports:
         - "8080:8000"
+    networks:
+        - stella-shared
     environment:
       # Config
       FLASK_APP: app/app
@@ -29,7 +36,7 @@ services:
             "gesis_rank_pyserini": {"type": "ranker"}
         }
       # Stella Server
-      STELLA_SERVER_ADDRESS: http://host.docker.internal:8000
+      STELLA_SERVER_ADDRESS: http://stella-server-web-1:8000
       STELLA_SERVER_USER: site@stella-project.org
       STELLA_SERVER_PASS: pass
       STELLA_SERVER_USERNAME: LIVIVO
@@ -50,7 +57,9 @@ services:
   db:
     image: postgres
     ports:
-      - 5430:5430 
+      - 5430:5430
+    networks:
+        - stella-shared
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=change-me
@@ -63,21 +72,29 @@ services:
     container_name: gesis_rank_pyserini_base
     volumes:
         - ./data/:/data/
+    networks:
+        - stella-shared
 
   gesis_rank_pyserini:
     build: https://github.com/stella-project/gesis_rank_pyserini.git#main
     container_name: gesis_rank_pyserini
     volumes:
         - ./data/:/data/
+    networks:
+        - stella-shared
 
   gesis_rec_pyterrier:
     build: https://github.com/stella-project/gesis_rec_pyterrier.git#master
     container_name: gesis_rec_pyterrier
     volumes:
         - ./data/:/data/
+    networks:
+        - stella-shared
 
   gesis_rec_pyserini:
     build: https://github.com/stella-project/gesis_rec_pyserini.git#master
     container_name: gesis_rec_pyserini
     volumes:
         - ./data/:/data/
+    networks:
+        - stella-shared
