@@ -10,11 +10,14 @@ from app.services.interleave_service import interleave_rankings
 from flask import current_app
 from pytz import timezone
 
+'''
 import os
 if os.name == 'nt':  # Windows
     client = docker.DockerClient(base_url="npipe:////./pipe/docker_engine")
 else:  # Unix-based systems like Linux or macOS
     client = docker.DockerClient(base_url="unix://var/run/docker.sock")
+'''
+
 tz = timezone("Europe/Berlin")
 
 
