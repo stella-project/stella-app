@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: C:\ProgramData\chocolatey\lib\kubernetes-kompose\tools\kompose.exe convert
+    kompose.version: 1.35.0 (9532ceef3)
+  labels:
+    io.kompose.service: stella-server
+  name: stella-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: stella-server
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: C:\ProgramData\chocolatey\lib\kubernetes-kompose\tools\kompose.exe convert
+        kompose.version: 1.35.0 (9532ceef3)
+      labels:
+        io.kompose.service: stella-server
+    spec:
+      containers:
+        - args:
+            - gunicorn
+            - -w
+            - "2"
+            - --timeout
+            - "60"
+            - -b
+            - :8000
+            - app.app:create_app()
+          env:
+            - name: ADMIN_MAIL
+              value: admin@stella-project.org
+            - name: ADMIN_PASS
+              value: pass
+            - name: AUTOMATOR_GH_KEY
+            - name: EXPERIMENTER_MAIL
+              value: experimenter@stella-project.org
+            - name: EXPERIMENTER_PASS
+              value: pass
+            - name: FLASK_APP
+              value: app/app
+            - name: FLASK_CONFIG
+              value: postgres
+            - name: POSTGRES_DB
+              value: postgres
+            - name: POSTGRES_PW
+              value: change-me
+            - name: POSTGRES_URL
+              value: db-server:5432
+            - name: POSTGRES_USER
+              value: postgres
+            - name: SECRET_KEY
+              value: change-me
+            - name: SITE_MAIL
+              value: site@stella-project.org
+            - name: SITE_PASS
+              value: pass
+          image: docker.io/dnztrkmn/stella-server:latest
+          name: stella-server
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+      restartPolicy: Always
