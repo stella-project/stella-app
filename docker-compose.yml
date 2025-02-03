@@ -1,4 +1,4 @@
-name: stella-app
+name: stella
 
 networks:
   stella-shared:
@@ -6,7 +6,7 @@ networks:
     name: stella-shared
 
 services:
-  web:
+  app:
     build: ./web
     volumes:
         - /var/run/docker.sock:/var/run/docker.sock
@@ -18,7 +18,7 @@ services:
     networks:
         stella-shared:
           aliases:
-          - app-web
+          - stella-app
     environment:
       # Config
       FLASK_APP: app/app
@@ -38,7 +38,7 @@ services:
             "gesis_rank_pyserini": {"type": "ranker"}
         }
       # Stella Server
-      STELLA_SERVER_ADDRESS: http://server-web:8000
+      STELLA_SERVER_ADDRESS: http://stella-server:8000
       STELLA_SERVER_USER: site@stella-project.org
       STELLA_SERVER_PASS: pass
       STELLA_SERVER_USERNAME: site
@@ -47,27 +47,25 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PW: change-me
       POSTGRES_DB: postgres
-      POSTGRES_URL: app-db:5430
+      POSTGRES_URL: db-app:5430
 
     command: gunicorn -w 2 --timeout 60 -b :8000 'app.app:create_app()'
     depends_on:
-      - db
+      - db-app
       - gesis_rec_pyterrier
       - gesis_rec_pyserini
       - gesis_rank_pyserini_base
       - gesis_rank_pyserini
 
 
-  db:
+  db-app:
     image: postgres
     expose:
       - "5430"
     ports:
       - "5430:5430"
     networks:
-        stella-shared:
-          aliases:
-          - app-db
+      - stella-shared
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=change-me
