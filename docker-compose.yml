@@ -28,6 +28,7 @@ services:
       DELETE_SENT_SESSION: "True"
       INTERVAL_DB_CHECK: 3
       SESSION_EXPIRATION: 6
+      SESSION_KILL: 120
 
       # Systems
       SYSTEMS_CONFIG: |

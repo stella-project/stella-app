@@ -30,8 +30,8 @@ class Config:
     INTERLEAVE = True if os.environ.get("INTERLEAVE") == "True" else False
     REST_QUERY = True
     BULK_INDEX = True if os.environ.get("BULK_INDEX") == "True" else False
-    SESSION_EXPIRATION = os.environ.get("SESSION_EXPIRATION") or 6
-    SESSION_EXPIRATION = int(SESSION_EXPIRATION)
+    SESSION_EXPIRATION = int(os.environ.get("SESSION_EXPIRATION") or 6)
+    SESSION_KILL = int(os.environ.get("SESSION_KILL") or 300)
     INTERVAL_DB_CHECK = int(os.environ.get("INTERVAL_DB_CHECK") or 3)  # seconds
 
     SENDFEEDBACK = (
