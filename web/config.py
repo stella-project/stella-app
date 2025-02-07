@@ -28,7 +28,6 @@ class Config:
 
     # General settings
     INTERLEAVE = True if os.environ.get("INTERLEAVE") == "True" else False
-    REST_QUERY = True
     BULK_INDEX = True if os.environ.get("BULK_INDEX") == "True" else False
     SESSION_EXPIRATION = int(os.environ.get("SESSION_EXPIRATION") or 6)
     SESSION_KILL = int(os.environ.get("SESSION_KILL") or 300)
@@ -125,13 +124,6 @@ class Config:
         print("No head queries found")
 
 
-class DevelopmentConfig(Config):
-    DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "DEV_DATABASE_URL"
-    ) or "sqlite:///" + os.path.join(basedir, "data-dev.sqlite")
-
-
 class PostgresConfig(Config):
     DEBUG = False
     POSTGRES_USER = os.environ.get("POSTGRES_USER") or "postgres"
@@ -156,6 +148,11 @@ class PostgresConfig(Config):
 class TestConfig(Config):
     TESTING = True
     WTF_CSRF_ENABLED = False
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        "DEV_DATABASE_URL"
+    ) or "sqlite:///" + os.path.join(basedir, "data-dev.sqlite")
+
     RANKING_CONTAINER_NAMES = ["ranker_base", "ranker"]
     RANKING_BASELINE_CONTAINER = "ranker_base"
 
@@ -170,4 +167,4 @@ class TestConfig(Config):
     }
 
 
-config = {"default": DevelopmentConfig, "postgres": PostgresConfig, "test": TestConfig}
+config = {"postgres": PostgresConfig, "test": TestConfig}

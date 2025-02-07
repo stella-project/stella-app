@@ -2,10 +2,9 @@ import threading
 import time
 
 import click
-import config
 from app.extensions import db
 from app.models import System
-from app.services.system_service import cmd_index, rest_index
+from app.services.system_service import rest_index
 from flask import current_app
 from flask.cli import with_appcontext
 
@@ -85,17 +84,10 @@ def index_systems():
     time.sleep(30)
 
     threads = []
-
-    if config.REST_QUERY:
-        for container_name in container_list:
-            t = threading.Thread(target=rest_index, args=(container_name,))
-            threads.append(t)
-            t.start()
-    else:
-        for container_name in container_list:
-            t = threading.Thread(target=cmd_index, args=(container_name,))
-            threads.append(t)
-            t.start()
+    for container_name in container_list:
+        t = threading.Thread(target=rest_index, args=(container_name,))
+        threads.append(t)
+        t.start()
 
 
 @click.command("init-db")

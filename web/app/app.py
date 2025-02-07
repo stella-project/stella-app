@@ -15,7 +15,7 @@ def create_app(config_name=None):
 
     :param config_object: The configuration object or dictionary to use.
     """
-    config_name_environment = os.getenv("FLASK_CONFIG") or "default"
+    config_name_environment = os.getenv("FLASK_CONFIG", "test")
     app = Flask(__name__.split(".")[0])
 
     # Load the default configuration
