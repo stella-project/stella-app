@@ -31,9 +31,6 @@ def request_results_from_conatiner(container_name, query, rpp, page):
     return json.loads(content)
 
 
-
-
-
 def query_system(container_name, query, rpp, page, session_id, type="EXP"):
     """
     Produce ranking from experimental system in docker container by the container name
@@ -70,10 +67,12 @@ def query_system(container_name, query, rpp, page, session_id, type="EXP"):
         "docid", "docid"
     )
     hits_path = current_app.config["SYSTEMS_CONFIG"][container_name].get("hits_path")
-
+    print(hits_path)
+    print(result)
     if hits_path is None:
         hits = result["itemlist"]
     else:
+        print(hits_path.find(result))
         hits = hits_path.find(result)[0].value
 
     if isinstance(hits[0], dict):
