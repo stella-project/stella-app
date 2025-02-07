@@ -79,6 +79,7 @@ def rest_rec_pub(container_name, item_id, rpp, page):
         f"http://{container_name}:5000/recommendation/publications",
         params={"item_id": item_id, "rpp": rpp, "page": page},
     ).content
+    print(content)
     return json.loads(content)
 
 
@@ -123,11 +124,13 @@ def query_system(
             result = rest_rec_data(container_name, item_id, rpp, page)
         if rec_type == "PUB":
             result = rest_rec_pub(container_name, item_id, rpp, page)
+            print(result)
     else:
         if rec_type == "DATA":
             result = cmd_rec_data(container_name, item_id, rpp, page)
         if rec_type == "PUB":
             result = cmd_rec_pub(container_name, item_id, rpp, page)
+            
 
     ts_end = time.time()
     # calc query execution time in ms
@@ -154,7 +157,7 @@ def query_system(
     # system.num_requests += 1
     db.session.add(recommendation)
     db.session.commit()
-
+    print(recommendation)
     return recommendation
 
 
@@ -480,7 +483,7 @@ def recommend():
 
     # Look for optional GET-parameters and set default values
     page = request.args.get("page", default=0, type=int)
-    rpp = request.args.get("rpp", default=10, type=int)
+    rpp = request.args.get("rpp", default=60, type=int)
 
     # no item_id ? -> Nothing to do
     if itemid is None:

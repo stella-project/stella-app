@@ -119,7 +119,7 @@ class PostgresConfig(Config):
             "id": "update_server",
             "func": 'app.services.cron_service:check_db_sessions',
             "trigger": "interval",
-            "seconds": os.environ.get("INTERVAL_DB_CHECK") or 3,
+            "seconds": int(os.environ.get("INTERVAL_DB_CHECK")) or int(3),
         }
     ]
 

@@ -14,20 +14,35 @@ def update_expired_sessions(sessions_not_exited):
         tz = timezone("Europe/Berlin")
         delta = datetime.now(tz).replace(tzinfo=None) - session.start
         if delta.seconds > current_app.config["SESSION_EXPIRATION"]:
+            current_app.logger.info("Delta is greater than session expiration: Updating expired session")
             complete = True
+            current_app.logger.info(f"Session complete. Complete value 1: {complete}")
+            
             feedbacks = Feedback.query.filter_by(session_id=session.id).all()
             if len(feedbacks) == 0:
                 complete = False
-            for feedback in feedbacks:
-                results = Result.query.filter_by(feedback_id=feedback.id).all()
-                if len(results) == 0:
-                    complete = False
-
-            if complete:
-                session.exit = True
-                db.session.add(session)
-                db.session.commit()
+                current_app.logger.info(f"No feedbacks found for session {session.id}. Complete value 2: {complete}")
             else:
+                for feedback in feedbacks:
+                    results = Result.query.filter_by(session_id=session.id).all()
+                    current_app.logger.info(f"Results for feedback {feedback.id}: {results}")
+                    
+                    if len(results) == 0:
+                        complete = False
+                        current_app.logger.info(f"No results found for feedback {feedback.id}. Complete value 3: {complete}")
+                        break
+
+            current_app.logger.info(f"Complete value final: {complete}")
+            if complete:
+                current_app.logger.info("Session complete")
+                session.exit = True
+                current_app.logger.info("Setting session expiry to True in Session")
+                db.session.add(session)
+                current_app.logger.info("Session added to DB")
+                db.session.commit()
+                current_app.logger.info("Session commited")
+            else:
+                current_app.logger.info("Executing else conditional")
                 if (
                     delta.seconds > 60 * 60 * 24 * 3
                 ):  # session longer than three days will be deleted TODO: add to yml-file
@@ -78,7 +93,7 @@ def get_side_identifier():
         auth=(current_app.config["STELLA_SERVER_TOKEN"], ""),
     )
     r_json = json.loads(r.text)
-
+    current_app.logger.info(f"get_site_identifier: {r_json}")
     return r_json.get("id")
 
 
@@ -94,6 +109,8 @@ def post_session(session, site_id):
     system_recommendation_name = (
         system_recommendation.name if system_recommendation else None
     )
+
+    current_app.logger.info(f"system recommendation: {system_recommendation_name}")
 
     payload = {
         "site_user": session.site_user,
@@ -113,6 +130,7 @@ def post_session(session, site_id):
         data=payload,
         auth=(current_app.config["STELLA_SERVER_TOKEN"], ""),
     )
+    current_app.logger.info(r) 
     r_json = json.loads(r.text)
 
     return r_json["session_id"]
@@ -255,7 +273,7 @@ def post_sessions(sessions_exited):
 @scheduler.task(
     "interval",
     id="job_sync",
-    seconds=10,
+    seconds=int(10),
     max_instances=1,
 )
 def check_db_sessions():
@@ -263,6 +281,7 @@ def check_db_sessions():
     with scheduler.app.app_context():
         current_app.logger.info("Scheduler enters task.")
 
+        current_app.logger.info("Retrieving non exited sessions")
         sessions_not_exited = Session.query.filter_by(exit=False, sent=False).all()
         current_app.logger.info(time.strftime("%A, %d. %B %Y %I:%M:%S %p"))
         current_app.logger.info(
@@ -270,13 +289,18 @@ def check_db_sessions():
         )
         if current_app.config["DEBUG"]:
             print(
-                "There is/are " + str(len(sessions_not_exited)) + " running session(s)."
+                "There is/are " + str(len(sessions_not_exited)) + " debug running session(s)."
             )
 
         # set expired sessions to 'exit'
+        current_app.logger.info("Updating expired sessions")
         update_expired_sessions(sessions_not_exited)
 
+        current_app.logger.info("Retrieving exited sessions")
         sessions_exited = Session.query.filter_by(exit=True, sent=False).all()
+        current_app.logger.info(
+            "There is/are " + str(len(sessions_exited)) + " exited session(s)."
+        )
         if current_app.config["DEBUG"]:
             print("There is/are " + str(len(sessions_exited)) + " exited session(s).")
 
