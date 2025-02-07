@@ -9,7 +9,7 @@ JSON_CONFIG = {
     "recommender_base": {"type": "recommender", "base": True},
     "recommender": {"type": "recommender"},
     "ranker_base": {"type": "ranker", "base": True},
-    "ranker": {"type": "ranker"},
+    "ranker": {"type": "ranker", "docid": "id", "hits_path": "$.hits.hits[*]"},
 }
 
 
@@ -29,6 +29,8 @@ def test_load_conf_json():
     importlib.reload(app)
 
     app_instance = app.create_app()
+    print(app_instance.config["SYSTEMS_CONFIG"])
+    print(JSON_CONFIG)
 
     assert app_instance.config["SYSTEMS_CONFIG"] == JSON_CONFIG
 
