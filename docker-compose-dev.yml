@@ -12,7 +12,6 @@ services:
       context: ./web
       dockerfile: Dockerfile.dev
     volumes:
-        - /var/run/docker.sock:/var/run/docker.sock
         - ./data:/data
         - ./web:/app
     expose:
