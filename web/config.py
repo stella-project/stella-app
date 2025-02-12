@@ -147,7 +147,7 @@ class Config:
 
 
 class PostgresConfig(Config):
-    DEBUG = bool(os.environ.get("POSTGRES_USER", False))
+    DEBUG = bool(os.environ.get("DEBUG", False))
     POSTGRES_USER = os.environ.get("POSTGRES_USER") or "postgres"
     POSTGRES_PW = os.environ.get("POSTGRES_PW") or "change-me"
     POSTGRES_URL = os.environ.get("POSTGRES_URL") or "db:5432"
