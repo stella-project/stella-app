@@ -1,4 +1,4 @@
-name: stella-app-dev
+name: stella-dev
 
 networks:
   stella-shared:
@@ -25,12 +25,14 @@ services:
     environment:
       # Config
       FLASK_APP: app/app
+      DEBUG: "True"
       FLASK_CONFIG: postgres
       INTERLEAVE: "True"
       BULK_INDEX: "False"
       INTERVAL_DB_CHECK: 3
       SESSION_EXPIRATION: 6
       SESSION_KILL: 120
+      SENDFEEDBACK: "True"
 
       # Systems
       SYSTEMS_CONFIG: |

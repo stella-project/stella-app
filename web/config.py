@@ -104,7 +104,7 @@ class Config:
             RECOMMENDER_CONTAINER_NAMES,
             RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES,
             RECOMMENDER_BASELINE_CONTAINER,
-            SYSTEMS_CONFIG
+            SYSTEMS_CONFIG,
         ) = parse_systems_config(SYSTEMS_CONFIG)
 
     else:
@@ -147,7 +147,7 @@ class Config:
 
 
 class PostgresConfig(Config):
-    DEBUG = False
+    DEBUG = bool(os.environ.get("POSTGRES_USER", False))
     POSTGRES_USER = os.environ.get("POSTGRES_USER") or "postgres"
     POSTGRES_PW = os.environ.get("POSTGRES_PW") or "change-me"
     POSTGRES_URL = os.environ.get("POSTGRES_URL") or "db:5432"
