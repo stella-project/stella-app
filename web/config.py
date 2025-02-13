@@ -62,6 +62,7 @@ def parse_systems_config(SYSTEMS_CONFIG):
 
 
 class Config:
+    DEBUG = True
     SECRET_KEY = os.environ.get("SECRET_KEY") or "change-me"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     CACHE_TYPE = "FileSystemCache"
@@ -80,7 +81,6 @@ class Config:
     DELETE_SENT_SESSION = (
         True if os.environ.get("DELETE_SENT_SESSION") == "True" else False
     )
-    SCHEDULER_API_ENABLED = True
 
     # Stella Server
     STELLA_SERVER_ADDRESS = os.environ.get("STELLA_SERVER_ADDRESS") or "nginx"
