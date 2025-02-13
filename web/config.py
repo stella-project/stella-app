@@ -20,6 +20,47 @@ def load_as_list(env_var):
     return variable_list
 
 
+def parse_systems_config(SYSTEMS_CONFIG):
+    RANKING_CONTAINER_NAMES = []
+    RANKING_PRECOMPUTED_CONTAINER_NAMES = []
+    RANKING_BASELINE_CONTAINER = ""
+
+    RECOMMENDER_CONTAINER_NAMES = []
+    RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES = []
+    RECOMMENDER_BASELINE_CONTAINER = ""
+
+    for system in SYSTEMS_CONFIG.keys():
+        if SYSTEMS_CONFIG[system]["type"] == "recommender":
+            if SYSTEMS_CONFIG[system].get("precomputed"):
+                RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES.append(system)
+            else:
+                RECOMMENDER_CONTAINER_NAMES.append(system)
+            if SYSTEMS_CONFIG[system].get("base"):
+                RECOMMENDER_BASELINE_CONTAINER = system
+        elif SYSTEMS_CONFIG[system]["type"] == "ranker":
+            if SYSTEMS_CONFIG[system].get("precomputed"):
+                RANKING_PRECOMPUTED_CONTAINER_NAMES.append(system)
+            else:
+                RANKING_CONTAINER_NAMES.append(system)
+            if SYSTEMS_CONFIG[system].get("base"):
+                RANKING_BASELINE_CONTAINER = system
+
+        # JSON Path
+        if SYSTEMS_CONFIG[system].get("hits_path"):
+            hits_path = parse(SYSTEMS_CONFIG[system]["hits_path"])
+            SYSTEMS_CONFIG[system]["hits_path"] = hits_path
+
+    return (
+        RANKING_CONTAINER_NAMES,
+        RANKING_PRECOMPUTED_CONTAINER_NAMES,
+        RANKING_BASELINE_CONTAINER,
+        RECOMMENDER_CONTAINER_NAMES,
+        RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES,
+        RECOMMENDER_BASELINE_CONTAINER,
+        SYSTEMS_CONFIG,
+    )
+
+
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY") or "change-me"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -28,7 +69,6 @@ class Config:
 
     # General settings
     INTERLEAVE = True if os.environ.get("INTERLEAVE") == "True" else False
-    REST_QUERY = True
     BULK_INDEX = True if os.environ.get("BULK_INDEX") == "True" else False
     SESSION_EXPIRATION = int(os.environ.get("SESSION_EXPIRATION") or 6)
     SESSION_KILL = int(os.environ.get("SESSION_KILL") or 300)
@@ -57,34 +97,15 @@ class Config:
     if os.environ.get("SYSTEMS_CONFIG"):
         SYSTEMS_CONFIG = load_from_json("SYSTEMS_CONFIG")
 
-        RANKING_CONTAINER_NAMES = []
-        RANKING_PRECOMPUTED_CONTAINER_NAMES = []
-        RANKING_BASELINE_CONTAINER = ""
-
-        RECOMMENDER_CONTAINER_NAMES = []
-        RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES = []
-        RECOMMENDER_BASELINE_CONTAINER = ""
-
-        for system in SYSTEMS_CONFIG.keys():
-            if SYSTEMS_CONFIG[system]["type"] == "recommender":
-                if SYSTEMS_CONFIG[system].get("precomputed"):
-                    RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES.append(system)
-                else:
-                    RECOMMENDER_CONTAINER_NAMES.append(system)
-                if SYSTEMS_CONFIG[system].get("base"):
-                    RECOMMENDER_BASELINE_CONTAINER = system
-            elif SYSTEMS_CONFIG[system]["type"] == "ranker":
-                if SYSTEMS_CONFIG[system].get("precomputed"):
-                    RANKING_PRECOMPUTED_CONTAINER_NAMES.append(system)
-                else:
-                    RANKING_CONTAINER_NAMES.append(system)
-                if SYSTEMS_CONFIG[system].get("base"):
-                    RANKING_BASELINE_CONTAINER = system
-
-            # JSON Path
-            if SYSTEMS_CONFIG[system].get("hits_path"):
-                hits_path = parse(SYSTEMS_CONFIG[system]["hits_path"])
-                SYSTEMS_CONFIG[system]["hits_path"] = hits_path
+        (
+            RANKING_CONTAINER_NAMES,
+            RANKING_PRECOMPUTED_CONTAINER_NAMES,
+            RANKING_BASELINE_CONTAINER,
+            RECOMMENDER_CONTAINER_NAMES,
+            RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES,
+            RECOMMENDER_BASELINE_CONTAINER,
+            SYSTEMS_CONFIG,
+        ) = parse_systems_config(SYSTEMS_CONFIG)
 
     else:
         # Ranking
@@ -125,15 +146,8 @@ class Config:
         print("No head queries found")
 
 
-class DevelopmentConfig(Config):
-    DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "DEV_DATABASE_URL"
-    ) or "sqlite:///" + os.path.join(basedir, "data-dev.sqlite")
-
-
 class PostgresConfig(Config):
-    DEBUG = False
+    DEBUG = bool(os.environ.get("DEBUG", False))
     POSTGRES_USER = os.environ.get("POSTGRES_USER") or "postgres"
     POSTGRES_PW = os.environ.get("POSTGRES_PW") or "change-me"
     POSTGRES_URL = os.environ.get("POSTGRES_URL") or "db:5432"
@@ -156,11 +170,12 @@ class PostgresConfig(Config):
 class TestConfig(Config):
     TESTING = True
     WTF_CSRF_ENABLED = False
-    RANKING_CONTAINER_NAMES = ["ranker_base", "ranker"]
-    RANKING_BASELINE_CONTAINER = "ranker_base"
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        "DEV_DATABASE_URL"
+    ) or "sqlite:///" + os.path.join(basedir, "data-dev.sqlite")
 
-    RECOMMENDER_CONTAINER_NAMES = ["recommender_base", "recommender"]
-    RECOMMENDER_BASELINE_CONTAINER = "recommender_base"
+    CONTAINER = "recommender_base"
 
     SYSTEMS_CONFIG = {
         "recommender_base": {"type": "recommender", "base": True},
@@ -168,6 +183,15 @@ class TestConfig(Config):
         "ranker_base": {"type": "ranker", "base": True},
         "ranker": {"type": "ranker", "docid": "id", "hits_path": "$.hits.hits[*]"},
     }
+    (
+        RANKING_CONTAINER_NAMES,
+        RANKING_PRECOMPUTED_CONTAINER_NAMES,
+        RANKING_BASELINE_CONTAINER,
+        RECOMMENDER_CONTAINER_NAMES,
+        RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES,
+        RECOMMENDER_BASELINE_CONTAINER,
+        SYSTEMS_CONFIG,
+    ) = parse_systems_config(SYSTEMS_CONFIG)
 
 
-config = {"default": DevelopmentConfig, "postgres": PostgresConfig, "test": TestConfig}
+config = {"postgres": PostgresConfig, "test": TestConfig}

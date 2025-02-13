@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 
 
+## Remove the Docker Client
+The Python Docker Client was used to get the address of experimental systems in docker container so that they can be accessed if the stella-app was run locally outside of the docker network. This was removed and a new local development strategy is introduced. The `docker-compose-dev.yml` uses the `Dockerfile.dev` to build the stella-app and mounts it in the container. This enables hot reloading like and simultaneously the connection through the docker network to the other container.
+
+
 ## Add response passthrough to ranking endpoints
 Previously the STELLA infrastructure demanded a fixed response schema for rankings. The ranking systems were expected to return the documents or items in a certain format and the STELLA app would pass the results after the interleaving als in a certain format. This was not flexible and all content needed to be loaded afterwards from external sources based on the returned ID.  
 

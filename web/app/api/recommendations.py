@@ -4,7 +4,6 @@ from datetime import datetime
 from uuid import uuid4
 from . import api
 
-import docker
 import requests
 from app.models import Feedback, Result, Session, System, db
 from app.services.interleave_service import tdi
@@ -16,15 +15,6 @@ from app.services.session_service import create_new_session
 
 
 tz = timezone("Europe/Berlin")
-
-'''
-import os
-# import os
-if os.name == 'nt':  # Windows
-    client = docker.DockerClient(base_url="npipe:////./pipe/docker_engine")
-else:  # Unix-based systems like Linux or macOS
-    client = docker.DockerClient(base_url="unix://var/run/docker.sock")
-'''
 
 
 
@@ -40,17 +30,6 @@ def rest_rec_data(container_name, item_id, rpp, page):
     Returns:
         dataset recommendation ranking for item_id
     """
-    if current_app.config["DEBUG"]:
-        container = client.containers.get(container_name)
-        ip_address = container.attrs["NetworkSettings"]["Networks"][
-            "stella-app_default"
-        ]["IPAddress"]
-        content = requests.get(
-            "http://" + ip_address + ":5000/recommendation/datasets",
-            params={"item_id": item_id, "rpp": rpp, "page": page},
-        ).content
-        return json.loads(content)
-
     content = requests.get(
         f"http://{container_name}:5000/recommendation/datasets",
         params={"item_id": item_id, "rpp": rpp, "page": page},
@@ -58,8 +37,6 @@ def rest_rec_data(container_name, item_id, rpp, page):
     return json.loads(content)
 
 
-def cmd_rec_data(container_name, query, rpp, page):
-    pass
 
 
 def rest_rec_pub(container_name, item_id, rpp, page):
@@ -74,17 +51,6 @@ def rest_rec_pub(container_name, item_id, rpp, page):
     Returns:
         publications recommendation ranking for item_id
     """
-    if current_app.config["DEBUG"]:
-        container = client.containers.get(container_name)
-        ip_address = container.attrs["NetworkSettings"]["Networks"][
-            "stella-app_default"
-        ]["IPAddress"]
-        content = requests.get(
-            "http://" + ip_address + ":5000/recommendation/publications",
-            params={"item_id": item_id, "rpp": rpp, "page": page},
-        ).content
-        return json.loads(content)
-
     content = requests.get(
         f"http://{container_name}:5000/recommendation/publications",
         params={"item_id": item_id, "rpp": rpp, "page": page},
@@ -92,8 +58,6 @@ def rest_rec_pub(container_name, item_id, rpp, page):
     return json.loads(content)
 
 
-def cmd_rec_pub():
-    pass
 
 
 def query_system(
@@ -128,16 +92,11 @@ def query_system(
         system.num_requests_no_head += 1
     db.session.commit()
 
-    if current_app.config["REST_QUERY"]:
-        if rec_type == "DATA":
-            result = rest_rec_data(container_name, item_id, rpp, page)
-        if rec_type == "PUB":
-            result = rest_rec_pub(container_name, item_id, rpp, page)
-    else:
-        if rec_type == "DATA":
-            result = cmd_rec_data(container_name, item_id, rpp, page)
-        if rec_type == "PUB":
-            result = cmd_rec_pub(container_name, item_id, rpp, page)
+
+    if rec_type == "DATA":
+        result = rest_rec_data(container_name, item_id, rpp, page)
+    if rec_type == "PUB":
+        result = rest_rec_pub(container_name, item_id, rpp, page)
 
     ts_end = time.time()
     # calc query execution time in ms

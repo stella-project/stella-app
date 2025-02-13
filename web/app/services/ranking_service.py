@@ -2,21 +2,12 @@ import json
 import time
 from datetime import datetime
 
-import docker
 import requests
 from app.extensions import cache
 from app.models import Result, System, db
 from app.services.interleave_service import interleave_rankings
 from flask import current_app
 from pytz import timezone
-
-'''
-import os
-if os.name == 'nt':  # Windows
-    client = docker.DockerClient(base_url="npipe:////./pipe/docker_engine")
-else:  # Unix-based systems like Linux or macOS
-    client = docker.DockerClient(base_url="unix://var/run/docker.sock")
-'''
 
 tz = timezone("Europe/Berlin")
 
@@ -33,40 +24,11 @@ def request_results_from_conatiner(container_name, query, rpp, page):
 
     @return:                container-ranking (dict)
     """
-    if current_app.config["DEBUG"]:
-        container = client.containers.get(container_name)
-        ip_address = container.attrs["NetworkSettings"]["Networks"][
-            "stella-app_default"
-        ]["IPAddress"]
-        content = requests.get(
-            "http://" + ip_address + ":5000/ranking",
-            params={"query": query, "rpp": rpp, "page": page},
-        ).content
-        return json.loads(content)
-
     content = requests.get(
         f"http://{container_name}:5000/ranking",
         params={"query": query, "rpp": rpp, "page": page},
     ).content
     return json.loads(content)
-
-
-def request_results_from_conatiner_cmd(container_name, query, rpp, page):
-    """
-    Produce container-ranking via classical cmd-call (fallback solution, much slower than rest-implementation)
-
-    @param container_name:  container name (str)
-    @param query:           search query (str)
-    @param rpp:             results per page (int)
-    @param page:            page number (int)
-
-    @return:                container-ranking (dict)
-    """
-    container = client.containers.get(container_name)
-    cmd = "python3 /script/ranking {} {} {}".format(query, rpp, page)
-    exec_res = container.exec_run(cmd)
-    result = json.loads(exec_res.output.decode("utf-8"))
-    return result
 
 
 def query_system(container_name, query, rpp, page, session_id, type="EXP"):
@@ -94,10 +56,7 @@ def query_system(container_name, query, rpp, page, session_id, type="EXP"):
         system.num_requests_no_head += 1
     db.session.commit()
 
-    if current_app.config["REST_QUERY"]:
-        result = request_results_from_conatiner(container_name, query, rpp, page)
-    else:
-        result = request_results_from_conatiner_cmd(container_name, query, rpp, page)
+    result = request_results_from_conatiner(container_name, query, rpp, page)
 
     # calc query execution time in ms
     ts_end = time.time()
@@ -108,10 +67,12 @@ def query_system(container_name, query, rpp, page, session_id, type="EXP"):
         "docid", "docid"
     )
     hits_path = current_app.config["SYSTEMS_CONFIG"][container_name].get("hits_path")
-
+    print(hits_path)
+    print(result)
     if hits_path is None:
         hits = result["itemlist"]
     else:
+        print(hits_path.find(result))
         hits = hits_path.find(result)[0].value
 
     if isinstance(hits[0], dict):

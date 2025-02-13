@@ -1,4 +1,3 @@
-import docker
 from app.models import Feedback, Result, Session, db
 from app.services.ranking_service import make_ranking
 from app.services.session_service import create_new_session
@@ -8,30 +7,7 @@ from pytz import timezone
 
 from . import api
 
-'''
-import os
-if os.name == 'nt':  # Windows
-    client = docker.DockerClient(base_url="npipe:////./pipe/docker_engine")
-else:  # Unix-based systems like Linux or macOS
-    client = docker.DockerClient(base_url="unix://var/run/docker.sock")
-'''
-
 tz = timezone("Europe/Berlin")
-
-
-@api.route("/test/<string:container_name>", methods=["GET"])
-def test(container_name):
-    """
-    Use the Docker client to execute a test script on an experimental system in a container
-
-    @param container_name:  container name (str)
-
-    @return: Test-Message (str)
-    """
-    container = client.containers.get(container_name)
-    cmd = "python3 /script/test"
-    out = container.exec_run(cmd)
-    return "<h1> " + out.output.decode("utf-8") + " </h1>"
 
 
 @api.route("/ranking/<int:id>/feedback", methods=["POST"])
