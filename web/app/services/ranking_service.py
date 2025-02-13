@@ -24,12 +24,8 @@ async def request_results_from_conatiner(container_name, query, rpp, page):
         )
 
     return content.json()
-        )
-
-    return content.json()
 
 
-def extract_hits(result, container_name, type):
 def extract_hits(result, container_name, type):
     # Extract hits list from result and allow custom fields for docid and hits_path
     docid_name = current_app.config["SYSTEMS_CONFIG"][container_name].get(

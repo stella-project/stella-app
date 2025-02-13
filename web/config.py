@@ -62,7 +62,6 @@ def parse_systems_config(SYSTEMS_CONFIG):
 
 
 class Config:
-    DEBUG = True
     SECRET_KEY = os.environ.get("SECRET_KEY") or "change-me"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     CACHE_TYPE = "FileSystemCache"
