@@ -1,6 +1,11 @@
 import os
 import pytest
-from ..create_test_data import create_feedbacks, create_return_experimental
+from ..create_test_data import (
+    create_feedbacks,
+    create_return_experimental,
+    create_return_base,
+)
+import respx
 
 running_in_ci = os.getenv("CI") == "true"
 
@@ -25,10 +30,17 @@ class TestRanking:
     @pytest.mark.skipif(
         running_in_ci, reason="Test requires Docker and will not run in CI environment"
     )
-    def test_ranking(self, client, results, sessions, mock_request_base_system):
+    def test_ranking(
+        self,
+        client,
+        results,
+        sessions,
+        mock_request_base_system,
+        mock_httpx_base_system,
+    ):
         result = client.get(self.URL + "?query=test query&container=ranker_base")
         data = result.json
-
+        assert mock_httpx_base_system["test"].called
         assert 200 == result.status_code
         assert "header" in data
         assert "body" in data
@@ -48,6 +60,7 @@ class TestRanking:
         results,
         sessions,
         mock_request_experimental_system,
+        mock_httpx_experimental_system,
     ):
         result = client.get(self.URL + "?query=test query&container=ranker")
         data = result.json

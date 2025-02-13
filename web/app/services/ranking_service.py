@@ -1,10 +1,8 @@
-import json
 import time
 from datetime import datetime
 import asyncio
-import httpx
+import aiohttp
 
-import requests
 from app.extensions import cache
 from app.models import Result, System
 from app.services.interleave_service import interleave_rankings
@@ -17,13 +15,12 @@ tz = timezone("Europe/Berlin")
 
 
 async def request_results_from_conatiner(container_name, query, rpp, page):
-    async with httpx.AsyncClient() as client:
-        content = await client.get(
+    async with aiohttp.ClientSession() as session:
+        content = await session.get(
             f"http://{container_name}:5000/ranking",
             params={"query": query, "rpp": rpp, "page": page},
         )
-
-    return content.json()
+        return await content.json()
 
 
 def extract_hits(result, container_name, type):
@@ -32,8 +29,7 @@ def extract_hits(result, container_name, type):
         "docid", "docid"
     )
     hits_path = current_app.config["SYSTEMS_CONFIG"][container_name].get("hits_path")
-    print(hits_path)
-    print(result)
+
     if hits_path is None:
         hits = result["itemlist"]
     else:
@@ -82,44 +78,7 @@ async def query_system(container_name, query, rpp, page, session_id, type="EXP")
     ts_end = time.time()
     q_time = round((ts_end - ts_start) * 1000)
 
-    return item_dict, hits
-
-
-async def query_system(container_name, query, rpp, page, session_id, type="EXP"):
-    """query a system with a given query and return the ranking and the result"""
-    current_app.logger.debug(f'Produce ranking with system: "{container_name}"')
-
-    q_date = datetime.now(tz).replace(tzinfo=None, microsecond=0)
-    ts_start = time.time()
-
-    # increase number of request counter before actual request, in case of a failure
-    async_session_factory = current_app.extensions["async_session"]
-    async with async_session_factory() as session:
-        system = await session.execute(
-            select(System).where(System.name == container_name)
-        )
-        system = system.scalar()
-        # system = db.session.query(System).filter_by(name=container_name).first()
-
-        if query in current_app.config["HEAD_QUERIES"]:
-            system.num_requests += 1
-        else:
-            system.num_requests_no_head += 1
-        await session.commit()
-
-    result = await request_results_from_conatiner(container_name, query, rpp, page)
-    item_dict, hits = extract_hits(result, container_name, type)
-
-    # calc query execution time in ms
-    ts_end = time.time()
-    q_time = round((ts_end - ts_start) * 1000)
-
     # Save the ranking to the database
-    async with async_session_factory() as session:
-        system_id = await session.execute(
-            select(System).where(System.name == container_name)
-        )
-        system_id = system_id.scalar()
     async with async_session_factory() as session:
         system_id = await session.execute(
             select(System).where(System.name == container_name)
@@ -139,10 +98,6 @@ async def query_system(container_name, query, rpp, page, session_id, type="EXP")
         rpp=rpp,
         items=item_dict,
     )
-
-    async with async_session_factory() as session:
-        session.add(ranking)
-        await session.commit()
 
     async with async_session_factory() as session:
         session.add(ranking)
@@ -218,7 +173,6 @@ def build_response(
         matches = base_path.find(result_base)
         assert len(matches) == 1
         matches[0].value = hits
-        return result_base
 
     container_names = {"exp": container_name, "base": container_name_base}
     return {
@@ -229,10 +183,8 @@ def build_response(
 
 # @cache.memoize(timeout=600)
 async def make_ranking(container_name, query, rpp, page, session_id):
-# @cache.memoize(timeout=600)
-async def make_ranking(container_name, query, rpp, page, session_id):
     if current_app.config["INTERLEAVE"]:
-        current_app.logger.warning("Started gathering")
+        current_app.logger.info("Started gathering")
         baseline, experimental = await asyncio.gather(
             query_system(
                 current_app.config["RANKING_BASELINE_CONTAINER"],
@@ -247,11 +199,9 @@ async def make_ranking(container_name, query, rpp, page, session_id):
         ranking_base, result_base = baseline
         ranking, result = experimental
 
-        current_app.logger.warning("Gathering done")
+        current_app.logger.info("Gathering done")
         ranking_base, result_base = baseline
         ranking, result = experimental
-
-        current_app.logger.warning("Gathering done")
 
         interleaved_ranking = interleave_rankings(ranking, ranking_base)
 
@@ -266,9 +216,6 @@ async def make_ranking(container_name, query, rpp, page, session_id):
         )
 
     else:
-        ranking, result = await query_system(
-            container_name, query, rpp, page, session_id, type="EXP"
-        )
         ranking, result = await query_system(
             container_name, query, rpp, page, session_id, type="EXP"
         )

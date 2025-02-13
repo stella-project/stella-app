@@ -5,12 +5,12 @@ async_session = None
 
 
 def init_async_session(app):
+    """Create an async database session"""
     database_uri = app.config["SQLALCHEMY_DATABASE_URI"]
     database_uri = database_uri.replace("postgresql", "postgresql+asyncpg")
     # database_uri = database_uri.replace("sqlite", "sqlite+aiosqlite")
     if app.config["TESTING"]:
         database_uri = database_uri.replace("sqlite:///", "sqlite+aiosqlite:///")
-
         print(f"Using database URI: {database_uri}")
 
     engine = create_async_engine(database_uri, echo=False)

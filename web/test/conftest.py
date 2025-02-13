@@ -1,7 +1,5 @@
 from app.app import db, create_app
 import pytest
-
-from app.commands import init_db
 from app.models import Session
 
 from .create_test_data import (
@@ -22,7 +20,7 @@ def app():
 
     # setup database
     with app.app_context():
-        init_db()
+        db.create_all()
 
     yield app
 
@@ -97,6 +95,20 @@ def feedback(sessions):
     return feedbacks
 
 
+# @pytest.fixture
+# async def mock_httpx_base_system():
+#     async with respx.mock(
+#         base_url="http://ranker_base:5000", assert_all_called=False
+#     ) as respx_mock:
+
+#         data = create_return_base()
+#         system_base_route = respx_mock.get(
+#             "/ranking?query=test+query&rpp=10&page=0", name="test"
+#         )
+#         system_base_route.return_value = Response(status_code=200, json=data)
+#         yield respx_mock
+
+
 @pytest.fixture
 def mock_request_base_system(requests_mock):
     """Fixture for mocking the request to the experimental system."""
@@ -113,11 +125,6 @@ def mock_request_base_system(requests_mock):
         status_code=200,
     )
 
-    # Mock the experimental system ranking endpoint
-    data = create_return_base()
-    requests_mock.get(
-        f"http://{container_name}:5000/ranking", json=data, status_code=200
-    )
     return requests_mock
 
 
@@ -137,9 +144,12 @@ def mock_request_experimental_system(requests_mock):
         status_code=200,
     )
 
-    # Mock the experimental system ranking endpoint
-    data = create_return_experimental()
-    requests_mock.get(
-        f"http://{container_name}:5000/ranking", json=data, status_code=200
-    )
     return requests_mock
+
+
+# @pytest.fixture
+# def mock_httpx_experimental_system():
+#     data = create_return_experimental()
+#     respx.get(re.compile("http://ranker:5000/ranking.*")).mock(
+#         return_value=Response(status_code=200, json=data)
+#     )
