@@ -172,8 +172,6 @@ class PostgresConfig(Config):
     SQLALCHEMY_DATABASE_URI = "postgresql://{user}:{pw}@{url}/{db}".format(
         user=POSTGRES_USER, pw=POSTGRES_PW, url=POSTGRES_URL, db=POSTGRES_DB
     )
-    DEBUG = False
-
     SCHEDULER_API_ENABLED = True
     JOBS = [
         {
@@ -192,8 +190,6 @@ class TestConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         "DEV_DATABASE_URL"
     ) or "sqlite:///" + os.path.join(basedir, "data-dev.sqlite")
-
-    CONTAINER = "recommender_base"
 
     SYSTEMS_CONFIG = {
         "recommender_base": {"type": "recommender", "base": True},

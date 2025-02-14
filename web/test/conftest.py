@@ -1,7 +1,9 @@
+from unittest.mock import AsyncMock, patch
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.app import db, create_app
 import pytest
 from app.models import Session
-
+from aioresponses import aioresponses
 from .create_test_data import (
     create_systems,
     create_sessions,
@@ -95,61 +97,55 @@ def feedback(sessions):
     return feedbacks
 
 
-# @pytest.fixture
-# async def mock_httpx_base_system():
-#     async with respx.mock(
-#         base_url="http://ranker_base:5000", assert_all_called=False
-#     ) as respx_mock:
-
-#         data = create_return_base()
-#         system_base_route = respx_mock.get(
-#             "/ranking?query=test+query&rpp=10&page=0", name="test"
-#         )
-#         system_base_route.return_value = Response(status_code=200, json=data)
-#         yield respx_mock
-
-
 @pytest.fixture
-def mock_request_base_system(requests_mock):
-    """Fixture for mocking the request to the experimental system."""
+def mock_request_base_system():
+    """Fixture to mock aiohttp requests with predefined attributes."""
     container_name = "ranker_base"
-
-    # Mock the debug docker network endpoint
-    requests_mock.get(
-        f"http+docker://localhost/v1.47/containers/{container_name}/json",
-        json={
-            "NetworkSettings": {
-                "Networks": {"stella-app_default": {"IPAddress": container_name}}
-            }
-        },
-        status_code=200,
+    query = "Test Query"
+    rpp = 10
+    page = 0
+    mock_url = (
+        f"http://{container_name}:5000/ranking?query={query}&rpp={rpp}&page={page}"
     )
+    mock_url = (
+        f"http://{container_name}:5000/ranking?page={page}&query={query}&rpp={rpp}"
+    )
+    mock_response = create_return_base()
 
-    return requests_mock
+    with aioresponses() as mocked:
+        mocked.get(mock_url, payload=mock_response)
+        yield {
+            "mock": mocked,  # The aioresponses instance
+            "container_name": container_name,
+            "query": query,
+            "rpp": rpp,
+            "page": page,
+            "mock_url": mock_url,
+            "mock_response": mock_response,
+        }
 
 
 @pytest.fixture
-def mock_request_experimental_system(requests_mock):
-    """Fixture for mocking the request to the experimental system."""
+def mock_request_exp_system():
+    """Fixture to mock aiohttp requests with predefined attributes."""
     container_name = "ranker"
-
-    # Mock the debug docker network endpoint
-    requests_mock.get(
-        f"http+docker://localhost/v1.47/containers/{container_name}/json",
-        json={
-            "NetworkSettings": {
-                "Networks": {"stella-app_default": {"IPAddress": container_name}}
-            }
-        },
-        status_code=200,
+    query = "Test Query"
+    rpp = 10
+    page = 0
+    mock_url = (
+        f"http://{container_name}:5000/ranking?query={query}&rpp={rpp}&page={page}"
     )
+    mock_response = create_return_experimental()
 
-    return requests_mock
+    with aioresponses() as mocked:
+        mocked.get(mock_url, payload=mock_response)
 
-
-# @pytest.fixture
-# def mock_httpx_experimental_system():
-#     data = create_return_experimental()
-#     respx.get(re.compile("http://ranker:5000/ranking.*")).mock(
-#         return_value=Response(status_code=200, json=data)
-#     )
+        yield {
+            "mock": mocked,
+            "container_name": container_name,
+            "query": query,
+            "rpp": rpp,
+            "page": page,
+            "mock_url": mock_url,
+            "mock_response": mock_response,
+        }

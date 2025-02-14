@@ -9,14 +9,14 @@ services:
   app:
     build: ./web
     volumes:
-        - ./data:/data
+      - ./data:/data
     expose:
       - "8000"
     ports:
-        - "8080:8000"
+      - "8080:8000"
     networks:
-        stella-shared:
-          aliases:
+      stella-shared:
+        aliases:
           - stella-app
     environment:
       # Config
@@ -42,7 +42,7 @@ services:
       STELLA_SERVER_USER: site@stella-project.org
       STELLA_SERVER_PASS: pass
       STELLA_SERVER_USERNAME: site
-          
+
       # Database
       POSTGRES_USER: postgres
       POSTGRES_PW: change-me
@@ -56,7 +56,6 @@ services:
       - gesis_rec_pyserini
       - gesis_rank_pyserini_base
       - gesis_rank_pyserini
-
 
   db-app:
     image: postgres
@@ -72,35 +71,34 @@ services:
       - POSTGRES_DB=postgres
     command: -p 5430
 
-
   gesis_rank_pyserini_base:
     build: https://github.com/stella-project/gesis_rank_pyserini_base.git#main
     container_name: gesis_rank_pyserini_base
     volumes:
-        - ./data/:/data/
+      - ./data/:/data/
     networks:
-        - stella-shared
+      - stella-shared
 
   gesis_rank_pyserini:
     build: https://github.com/stella-project/gesis_rank_pyserini.git#main
     container_name: gesis_rank_pyserini
     volumes:
-        - ./data/:/data/
+      - ./data/:/data/
     networks:
-        - stella-shared
+      - stella-shared
 
   gesis_rec_pyterrier:
     build: https://github.com/stella-project/gesis_rec_pyterrier.git#master
     container_name: gesis_rec_pyterrier
     volumes:
-        - ./data/:/data/
+      - ./data/:/data/
     networks:
-        - stella-shared
+      - stella-shared
 
   gesis_rec_pyserini:
     build: https://github.com/stella-project/gesis_rec_pyserini.git#master
     container_name: gesis_rec_pyserini
     volumes:
-        - ./data/:/data/
+      - ./data/:/data/
     networks:
-        - stella-shared
+      - stella-shared

@@ -85,5 +85,6 @@ Flask-APScheduler==1.13.1
 requests-mock==1.12.1
 jsonpath-ng==1.6.1
 Flask-Caching==2.3.0
-aiohttp
-aiosqlite
+aiohttp==3.11.12
+aiosqlite==0.20.0
+aiocache==0.12.3
