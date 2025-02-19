@@ -1,18 +1,19 @@
+import asyncio
 import time
 from datetime import datetime
-import asyncio
+
 import aiohttp
 from app.models import Result, System
 from app.services.interleave_service import interleave_rankings
 from flask import current_app
 from pytz import timezone
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.future import select
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 tz = timezone("Europe/Berlin")
 
 
-async def request_results_from_conatiner(session, container_name, query, rpp, page):
+async def request_results_from_container(session, container_name, query, rpp, page):
     """Request the ranking from the external container."""
     current_app.logger.debug(f"Start getting results from container: {container_name}")
     async with session:
@@ -80,7 +81,7 @@ async def query_system(container_name, query, rpp, page, session_id, type="EXP")
 
     # Get the results from the container
     async with aiohttp.ClientSession() as session:
-        result = await request_results_from_conatiner(
+        result = await request_results_from_container(
             session, container_name, query, rpp, page
         )
 
@@ -124,7 +125,7 @@ def build_response(
     result=None,
     result_base=None,
 ):
-    """Function to build the response object for the ranking. This can handle interleving and passthrough."""
+    """Function to build the response object for the ranking. This can handle interleaving and passthrough."""
 
     def build_id_map(container_name, ranking, result):
         """Build the docid ranking position map to construct passthrough responses from interleaved rankings."""

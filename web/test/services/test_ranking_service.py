@@ -1,6 +1,6 @@
 from app.models import System, Result
 from app.services.ranking_service import (
-    request_results_from_conatiner,
+    request_results_from_container,
     query_system,
     extract_hits,
 )
@@ -15,14 +15,14 @@ running_in_ci = os.getenv("CI") == "true"
 
 @pytest.mark.asyncio
 async def test_request_results_from_container_base(mock_request_base_system):
-    """Test if `request_results_from_conatiner` correctly retrieves and returns API data."""
+    """Test if `request_results_from_container` correctly retrieves and returns API data."""
     container_name = "ranker_base"
     query = "Test Query"
     rpp = 10
     page = 0
 
     async with aiohttp.ClientSession() as session:
-        response = await request_results_from_conatiner(
+        response = await request_results_from_container(
             session=session,
             container_name=container_name,
             query=query,
@@ -40,14 +40,14 @@ async def test_request_results_from_container_base(mock_request_base_system):
 
 @pytest.mark.asyncio
 async def test_request_results_from_container_exp(mock_request_exp_system):
-    """Test if `request_results_from_conatiner` correctly retrieves and returns API data."""
+    """Test if `request_results_from_container` correctly retrieves and returns API data."""
     container_name = "ranker"
     query = "Test Query"
     rpp = 10
     page = 0
 
     async with aiohttp.ClientSession() as session:
-        response = await request_results_from_conatiner(
+        response = await request_results_from_container(
             session=session,
             container_name=container_name,
             query=query,

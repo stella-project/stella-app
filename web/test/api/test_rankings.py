@@ -26,70 +26,58 @@ class TestRanking:
         data = result.json
         assert 400 == result.status_code
 
-    ###########################################
-    @pytest.mark.skipif(
-        running_in_ci, reason="Test requires Docker and will not run in CI environment"
-    )
     def test_ranking(
         self,
-        mock_request_base_system,
-        mock_request_exp_system,
+        mock_request_results,
         client,
         results,
         sessions,
     ):
-        query_params = {
-            "query": "Test Query",
-            "rpp": 10,
-            "page": 0,
-            "sid": "test-session",
-        }
+        """Test the ranking endpoint with a randomly sampled system. Since the database is empty it will always return the only experimental system"""
+        query_params = {"query": "Test Query"}
         result = client.get(self.URL, query_string=query_params)
-        # data = result.json
-        # assert 200 == result.status_code
-        # assert "header" in data
-        # assert "body" in data
-
-        # # only one key since we directly request a container
-        # assert data["header"]["container"].keys() == {"exp"}
-        # assert data["header"]["container"]["exp"] == "ranker_base"
-
-    ###########################################
-    @pytest.mark.skipif(
-        running_in_ci, reason="Test requires Docker and will not run in CI environment"
-    )
-    def test_ranking_experimental(
-        self,
-        app,
-        client,
-        db_session,
-        results,
-        sessions,
-        mock_request_exp_system,
-    ):
-        result = client.get(self.URL + "?query=test query&container=ranker")
         data = result.json
 
+        assert 200 == result.status_code
+        assert "hits" in data
+        assert data["hits"].keys() == {"hits", "max_score", "total"}
+
         response = create_return_experimental()
+        assert data == response
+
+    def test_ranking_fixed_container(
+        self,
+        mock_request_results,
+        client,
+        results,
+        sessions,
+    ):
+        """Test the ranking endpoint with a specified system."""
+        query_params = {"query": "Test Query", "container": "ranker_base"}
+        result = client.get(self.URL, query_string=query_params)
+        data = result.json
 
         assert 200 == result.status_code
-        assert data == response
+        assert data["header"]["q"] == query_params["query"]
+        assert data["header"]["container"].keys() == {"exp"}  # Only one system
+        assert (
+            data["header"]["container"]["exp"] == "ranker_base"
+        )  # System is base system
+
+        response = create_return_base()
+        ranking = [r["docid"] for r in data["body"].values()]
+        assert ranking == response["itemlist"]
 
 
 @pytest.mark.skipif(
     running_in_ci, reason="Test requires Docker and will not run in CI environment"
 )
 def test_ranking_interleaved(
-    app,
-    client,
-    db_session,
-    results,
-    sessions,
-    mock_request_base_system,
-    mock_request_exp_system,
+    app, client, db_session, results, sessions, mock_request_results
 ):
     app.config["INTERLEAVE"] = True
-    result = client.get("/stella/api/v1/ranking?query=Test Query")
+    query_params = {"query": "Test Query"}
+    result = client.get("/stella/api/v1/ranking", query_string=query_params)
 
     print(result)
     data = result.json

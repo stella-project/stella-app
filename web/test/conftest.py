@@ -1,16 +1,17 @@
 from unittest.mock import AsyncMock, patch
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.app import db, create_app
+
 import pytest
-from app.models import Session
 from aioresponses import aioresponses
+from app.app import create_app, db
+from app.models import Session
+
 from .create_test_data import (
-    create_systems,
-    create_sessions,
-    create_results,
     create_feedbacks,
+    create_results,
     create_return_base,
     create_return_experimental,
+    create_sessions,
+    create_systems,
 )
 
 
@@ -107,9 +108,6 @@ def mock_request_base_system():
     mock_url = (
         f"http://{container_name}:5000/ranking?query={query}&rpp={rpp}&page={page}"
     )
-    mock_url = (
-        f"http://{container_name}:5000/ranking?page={page}&query={query}&rpp={rpp}"
-    )
     mock_response = create_return_base()
 
     with aioresponses() as mocked:
@@ -149,3 +147,24 @@ def mock_request_exp_system():
             "mock_url": mock_url,
             "mock_response": mock_response,
         }
+
+
+@pytest.fixture
+def mock_request_results():
+    """Mock `request_results_from_container` with different responses based on input."""
+
+    async def mock_side_effect(session, container_name, query, rpp, page):
+        """Return different mocked responses based on parameters."""
+        if container_name == "ranker_base":
+            return create_return_base()
+        elif container_name == "ranker":
+            return create_return_experimental()
+        else:
+            return {"results": []}
+
+    with patch(
+        "app.services.ranking_service.request_results_from_container",
+        new_callable=AsyncMock,
+    ) as mock_func:
+        mock_func.side_effect = mock_side_effect
+        yield mock_func
