@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 
 
+## Fix timezone warnings and cleanup dependencies
+The logged timestamps used CET time and relied on different dependencies to set the timezone. The dependencies were removed, and the logged queries now use UTC, which is more conventional. Further unnecessary dependencies were removed. 
+
+
 ## Remove the Docker Client
 The Python Docker Client was used to get the address of experimental systems in docker container so that they can be accessed if the stella-app was run locally outside of the docker network. This was removed and a new local development strategy is introduced. The `docker-compose-dev.yml` uses the `Dockerfile.dev` to build the stella-app and mounts it in the container. This enables hot reloading like and simultaneously the connection through the docker network to the other container.
 

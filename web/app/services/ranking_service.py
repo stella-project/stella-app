@@ -1,15 +1,12 @@
 import json
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 import requests
 from app.extensions import cache
 from app.models import Result, System, db
 from app.services.interleave_service import interleave_rankings
 from flask import current_app
-from pytz import timezone
-
-tz = timezone("Europe/Berlin")
 
 
 def request_results_from_conatiner(container_name, query, rpp, page):
@@ -45,7 +42,7 @@ def query_system(container_name, query, rpp, page, session_id, type="EXP"):
     @return:                ranking (Result)
     """
     current_app.logger.debug(f'Produce ranking with system: "{container_name}"...')
-    q_date = datetime.now(tz).replace(tzinfo=None, microsecond=0)
+    q_date = datetime.now(timezone.utc)
     ts_start = time.time()
 
     # increase number of request counter before actual request, in case of a failure

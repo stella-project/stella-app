@@ -1,21 +1,15 @@
 import json
 import time
-from datetime import datetime
-from uuid import uuid4
-from . import api
+from datetime import datetime, timezone
 
 import requests
 from app.models import Feedback, Result, Session, System, db
 from app.services.interleave_service import tdi
+from app.services.session_service import create_new_session
 from app.utils import create_dict_response
 from flask import current_app, jsonify, request
-from pytz import timezone
 
-from app.services.session_service import create_new_session
-
-
-tz = timezone("Europe/Berlin")
-
+from . import api
 
 
 def rest_rec_data(container_name, item_id, rpp, page):
@@ -37,8 +31,6 @@ def rest_rec_data(container_name, item_id, rpp, page):
     return json.loads(content)
 
 
-
-
 def rest_rec_pub(container_name, item_id, rpp, page):
     """
     get the container_name, item_id , rpp and page number and return a ranking publications produced by container_name
@@ -56,8 +48,6 @@ def rest_rec_pub(container_name, item_id, rpp, page):
         params={"item_id": item_id, "rpp": rpp, "page": page},
     ).content
     return json.loads(content)
-
-
 
 
 def query_system(
@@ -80,9 +70,8 @@ def query_system(
     current_app.logger.debug(
         f'produce recommendation with container: "{container_name}"...'
     )
-    q_date = datetime.now(tz).replace(tzinfo=None, microsecond=0)
+    q_date = datetime.now(timezone.utc)
     ts_start = time.time()
-    ts = round(ts_start * 1000)
 
     # increase counter before actual request, in case of a failure
     system = System.query.filter_by(name=container_name).first()
@@ -91,7 +80,6 @@ def query_system(
     else:
         system.num_requests_no_head += 1
     db.session.commit()
-
 
     if rec_type == "DATA":
         result = rest_rec_data(container_name, item_id, rpp, page)
@@ -492,7 +480,9 @@ def recommend():
 
     if session_id is None:
         # make new session and get session_id as sid
-        session_id = create_new_session(container_name=container_name, type="recommender")
+        session_id = create_new_session(
+            container_name=container_name, type="recommender"
+        )
     else:
         if db.session.query(Session).get(session_id) is None:
             session_id = create_new_session(
