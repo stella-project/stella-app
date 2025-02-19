@@ -1,6 +1,9 @@
 # Release notes
 All notable changes to this project will be documented in this file.
 
+## Make calls to base and experimental systems concurrently
+The interleaved ranking is created by combining a ranking from an experimental and a baseline system. These two systems were previously called one after another. Now both systems are called simultaneously which provides some speedups for interleaved rankings.
+This applies currently only to the ranking endpoint and not to the recommendation endpoint.
 
 ## Remove the Docker Client
 The Python Docker Client was used to get the address of experimental systems in docker container so that they can be accessed if the stella-app was run locally outside of the docker network. This was removed and a new local development strategy is introduced. The `docker-compose-dev.yml` uses the `Dockerfile.dev` to build the stella-app and mounts it in the container. This enables hot reloading like and simultaneously the connection through the docker network to the other container.

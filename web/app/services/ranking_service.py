@@ -191,7 +191,6 @@ def build_response(
     }
 
 
-# @cache.memoize(timeout=600)
 async def make_ranking(container_name, query, rpp, page, session_id):
     """Produce a ranking for the given query and container."""
     # Check cache first
