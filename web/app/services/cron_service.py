@@ -1,18 +1,15 @@
 import json
-import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import requests as req
+from app.extensions import scheduler
 from app.models import Feedback, Result, Session, System, db
 from flask import current_app
-from pytz import timezone
-from app.extensions import scheduler
 
 
 def update_expired_sessions(sessions_not_exited):
     for session in sessions_not_exited:
-        tz = timezone("Europe/Berlin")
-        delta = datetime.now(tz).replace(tzinfo=None) - session.start
+        delta = datetime.now(timezone.utc) - session.start
         if delta.seconds > current_app.config["SESSION_EXPIRATION"]:
             complete = True
             feedbacks = Feedback.query.filter_by(session_id=session.id).all()
@@ -28,7 +25,7 @@ def update_expired_sessions(sessions_not_exited):
                 db.session.add(session)
                 db.session.commit()
             else:
-                if (delta.seconds > current_app.config["SESSION_KILL"]):  
+                if delta.seconds > current_app.config["SESSION_KILL"]:
                     # 1. get all results that are NOT interleaved results
                     results_not_tdi = Result.query.filter(
                         Result.id != Result.tdi, Result.session_id == session.id

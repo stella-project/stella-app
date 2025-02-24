@@ -28,8 +28,11 @@ def create_app(config_name=None):
         else:
             app.config.from_object(config[config_name])
 
-    if app.config["DEBUG"] and not app.config["TESTING"]:
-        print("Initializing and starting scheduler inside Gunicorn master process")
+    if (
+        app.config["DEBUG"]
+        and app.config["SEND_FEEDBACK"]
+        and not app.config["TESTING"]
+    ):
         scheduler.init_app(app)
         scheduler.start()
         print("Scheduler started in app factory process")

@@ -3,11 +3,8 @@ from app.services.ranking_service import make_ranking
 from app.services.session_service import create_new_session
 from app.services.system_service import get_least_served_system
 from flask import jsonify, request
-from pytz import timezone
 
 from . import api
-
-tz = timezone("Europe/Berlin")
 
 
 @api.route("/ranking/<int:id>/feedback", methods=["POST"])

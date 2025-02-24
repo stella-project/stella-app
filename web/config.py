@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import datetime
+
 from jsonpath_ng import parse
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -74,8 +75,8 @@ class Config:
     SESSION_KILL = int(os.environ.get("SESSION_KILL") or 300)
     INTERVAL_DB_CHECK = int(os.environ.get("INTERVAL_DB_CHECK") or 3)  # seconds
 
-    SENDFEEDBACK = (
-        False if os.environ.get("SENDFEEDBACK") == "False" else True
+    SEND_FEEDBACK = (
+        False if os.environ.get("SEND_FEEDBACK") == "False" else True
     )  # Opt out
     DELETE_SENT_SESSION = (
         True if os.environ.get("DELETE_SENT_SESSION") == "True" else False

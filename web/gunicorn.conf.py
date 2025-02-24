@@ -7,7 +7,7 @@ def when_ready(server):
 
     app = create_app()  # Create an instance of the app
     with app.app_context():
-        if app.config["SENDFEEDBACK"]:
+        if app.config["SEND_FEEDBACK"]:
             print("Initializing and starting scheduler inside Gunicorn master process")
             scheduler.init_app(app)  # Initialize the scheduler
             scheduler.start()  # Start the scheduler
