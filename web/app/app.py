@@ -15,7 +15,7 @@ def create_app(config_name=None):
 
     :param config_object: The configuration object or dictionary to use.
     """
-    config_name_environment = os.getenv("FLASK_CONFIG") or "default"
+    config_name_environment = os.getenv("FLASK_CONFIG", "test")
     app = Flask(__name__.split(".")[0])
 
     # Load the default configuration
@@ -27,6 +27,12 @@ def create_app(config_name=None):
             app.config.update(config_name)
         else:
             app.config.from_object(config[config_name])
+
+    if app.config["DEBUG"] and not app.config["TESTING"]:
+        print("Initializing and starting scheduler inside Gunicorn master process")
+        scheduler.init_app(app)
+        scheduler.start()
+        print("Scheduler started in app factory process")
 
     configure_logger(app)
     register_extensions(app)

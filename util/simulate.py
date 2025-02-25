@@ -3,8 +3,8 @@ import json
 import random
 import datetime
 
-# STELLA_APP_API = "http://0.0.0.0:8080/stella/api/v1/"
-STELLA_APP_API = "http://localhost:8080/stella/api/v1/"
+STELLA_APP_API = "http://0.0.0.0:8080/stella/api/v1/"
+# STELLA_APP_API = "http://localhost:8080/stella/api/v1/"
 NUM = 100
 
 

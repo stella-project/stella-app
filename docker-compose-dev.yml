@@ -1,15 +1,19 @@
-name: stella
+name: stella-dev
 
 networks:
   stella-shared:
     external: true
     name: stella-shared
 
+
 services:
   app:
-    build: ./web
+    build: 
+      context: ./web
+      dockerfile: Dockerfile.dev
     volumes:
         - ./data:/data
+        - ./web:/app
     expose:
       - "8000"
     ports:
@@ -21,13 +25,14 @@ services:
     environment:
       # Config
       FLASK_APP: app/app
+      DEBUG: "True"
       FLASK_CONFIG: postgres
       INTERLEAVE: "True"
       BULK_INDEX: "False"
-      DELETE_SENT_SESSION: "True"
       INTERVAL_DB_CHECK: 3
       SESSION_EXPIRATION: 6
       SESSION_KILL: 120
+      SENDFEEDBACK: "True"
 
       # Systems
       SYSTEMS_CONFIG: |
@@ -48,8 +53,8 @@ services:
       POSTGRES_PW: change-me
       POSTGRES_DB: postgres
       POSTGRES_URL: db-app:5430
-
-    command: gunicorn -w 2 --timeout 60 -b :8000 'app.app:create_app()'
+    
+    command: flask run --host=0.0.0.0 --port=8000 --reload --debug
     depends_on:
       - db-app
       - gesis_rec_pyterrier
@@ -60,6 +65,9 @@ services:
 
   db-app:
     image: postgres
+    restart: unless-stopped
+    volumes:
+      - ./data/db-app-data:/var/lib/postgresql/data
     expose:
       - "5430"
     ports:

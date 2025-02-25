@@ -28,9 +28,7 @@ def update_expired_sessions(sessions_not_exited):
                 db.session.add(session)
                 db.session.commit()
             else:
-                if (
-                    delta.seconds > 60 * 60 * 24 * 3
-                ):  # session longer than three days will be deleted TODO: add to yml-file
+                if (delta.seconds > current_app.config["SESSION_KILL"]):  
                     # 1. get all results that are NOT interleaved results
                     results_not_tdi = Result.query.filter(
                         Result.id != Result.tdi, Result.session_id == session.id
