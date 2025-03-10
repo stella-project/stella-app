@@ -62,6 +62,7 @@ def create_systems():
         num_requests=0,
         num_requests_no_head=0,
     )
+    
     return returns
 
 
@@ -129,10 +130,11 @@ def create_return_experimental():
         "status": 200,
     }
 
-
 def create_results(sessions):
     result_objs = {}
+
     for system, session in sessions.items():
+        # Handle Ranker Systems
         if system.startswith("ranker"):
             result_objs[system] = Result(
                 session_id=session.id,
@@ -148,18 +150,7 @@ def create_results(sessions):
 
             if system == "ranker_base":
                 result_objs[system].items = json.dumps(
-                    {
-                        "1": "doc1",
-                        "2": "doc2",
-                        "3": "doc3",
-                        "4": "doc4",
-                        "5": "doc5",
-                        "6": "doc6",
-                        "7": "doc7",
-                        "8": "doc8",
-                        "9": "doc9",
-                        "10": "doc10",
-                    }
+                    {str(i): f"doc{i}" for i in range(1, 11)}
                 )
 
             elif system == "ranker":
@@ -177,9 +168,38 @@ def create_results(sessions):
                         "10": "10014575867",
                     }
                 )
+
+        # Handle Recommender Systems
+        elif system.startswith("recommender"):
+            result_objs[system] = Result(
+                session_id=session.id,
+                system_id=session.system_recommendation,
+                type="REC",
+                q="test_item",
+                q_date=session.start,
+                q_time=300,
+                num_found=7,
+                page=0,
+                rpp=10,
+                items=json.dumps({str(i): f"dataset{i}" for i in range(1, 5)}),  # Mock dataset
+            )
+
+        # Ensure recommender_base is added properly
+        if system == "recommender_base":
+            result_objs["recommender_base"] = Result(
+                session_id=session.id,
+                system_id=session.system_recommendation,
+                type="REC",
+                q="test_item",
+                q_date=session.start,
+                q_time=300,
+                num_found=7,
+                page=0,
+                rpp=10,
+                items=json.dumps({str(i): f"dataset{i}" for i in range(1, 5)}),  # Mock dataset
+            )
+
     return result_objs
-
-
 def create_feedbacks(sessions):
     returns = {}
 
@@ -189,20 +209,27 @@ def create_feedbacks(sessions):
         type = "BASE" if system.endswith("base") else "EXP"
 
         click_dict = json.loads(results[system].items)
+
+        # Ensure all expected items exist in click_dict
         for idx in range(1, 11):
-            click_dict[str(idx)] = {
-                "docid": click_dict[str(idx)],
-                "clicked": False,
-                "date": None,
-                "type": type,
-            }
+            key = str(idx)
+            if key not in click_dict:
+                click_dict[key] = {"docid": f"missing_doc{idx}", "clicked": False, "date": None, "type": type}
+            else:
+                click_dict[key] = {
+                    "docid": click_dict[key],  # Ensure it’s correctly structured
+                    "clicked": False,
+                    "date": None,
+                    "type": type,
+                }
 
-        serp_entries = 10
-        num_clicks = random.randint(1, serp_entries)
-        rank_clicks = random.sample(range(1, serp_entries + 1), num_clicks)
-
-        # set session end time
+        # Set session end time
         end_time = session.start + datetime.timedelta(seconds=3000)
+
+        # Fix: Convert keys to list before sampling
+        click_keys = list(click_dict.keys())
+        num_clicks = min(len(click_keys), random.randint(1, 10))  # Avoid exceeding available items
+        rank_clicks = random.sample(click_keys, num_clicks)
 
         for click in rank_clicks:
             click_time_str = random_date(
@@ -210,11 +237,8 @@ def create_feedbacks(sessions):
                 end_time.strftime("%Y-%m-%d %H:%M:%S"),
                 random.random(),
             )
-            click_time = datetime.datetime.strptime(click_time_str, "%Y-%m-%d %H:%M:%S")
-            tmp = click_dict.get(str(click))
-            tmp["clicked"] = True
-            tmp["date"] = click_time_str
-            click_dict[click] = tmp
+            click_dict[click]["clicked"] = True
+            click_dict[click]["date"] = click_time_str
 
         returns[system] = Feedback(
             start=session.start,
@@ -224,4 +248,20 @@ def create_feedbacks(sessions):
             clicks=json.dumps(click_dict),
         )
 
-        return returns
+    return returns
+
+
+
+def create_return_recommendation():
+    return {
+        "body": {
+            "datasets": [{"id": "123", "title": "Mock Dataset"}],
+            "publications": [{"id": "456", "title": "Mock Publication"}]
+        },
+        "header": {
+            "container": {"exp": "recommender"},
+            "itemid": "test_item",
+            "rid": 5,
+            "sid": "some-session-id"
+        }
+    }

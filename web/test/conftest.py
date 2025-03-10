@@ -1,6 +1,6 @@
 from app.app import db, create_app
 import pytest
-
+import re
 from app.commands import init_db
 from app.models import Session
 
@@ -11,6 +11,7 @@ from .create_test_data import (
     create_feedbacks,
     create_return_base,
     create_return_experimental,
+    create_return_recommendation
 )
 
 
@@ -143,3 +144,70 @@ def mock_request_experimental_system(requests_mock):
         f"http://{container_name}:5000/ranking", json=data, status_code=200
     )
     return requests_mock
+@pytest.fixture
+def mock_request_base_recommender_system(requests_mock):
+    """Mock the base recommendation system."""
+    container_name = "recommender_base"
+
+    # Mock the debug docker network endpoint
+    requests_mock.get(
+        f"http+docker://localhost/v1.47/containers/{container_name}/json",
+        json={
+            "NetworkSettings": {
+                "Networks": {"stella-app_default": {"IPAddress": container_name}}
+            }
+        },
+        status_code=200,
+    )
+
+    
+    data = create_return_recommendation()
+    requests_mock.get(
+        re.compile(f"http://{container_name}:5000/recommendation.*"),
+        json=data,
+        status_code=200,
+    )
+    return requests_mock
+
+
+@pytest.fixture
+def mock_request_experimental_recommender_system(requests_mock):
+    """Mock the experimental recommendation system."""
+    container_name = "recommender"
+
+    # Mock the debug docker network endpoint
+    requests_mock.get(
+        f"http+docker://localhost/v1.47/containers/{container_name}/json",
+        json={
+            "NetworkSettings": {
+                "Networks": {"stella-app_default": {"IPAddress": container_name}}
+            }
+        },
+        status_code=200,
+    )
+
+    
+    requests_mock.get(
+        re.compile(f"http://{container_name}:5000/recommendation.*"),
+        json={
+            "body": {  
+                "1": {"docid": "sample-doc-1", "type": "EXP"},
+                "2": {"docid": "sample-doc-2", "type": "EXP"},
+            },
+            "header": {
+                "container": {"exp": "recommender"},
+                "itemid": "test_item",
+                "rid": 5,
+                "sid": "mock-session-id"
+            }
+        },
+        status_code=200,
+    )
+    return requests_mock
+
+
+
+@pytest.fixture
+def mock_least_served_recommendation_system(mocker):
+    """Mock get_least_served_system to return a valid recommendation system instead of None."""
+    mocker.patch("app.services.system_service.get_least_served_system", return_value="recommender_base")

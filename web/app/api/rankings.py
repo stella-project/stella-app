@@ -10,41 +10,68 @@ from . import api
 tz = timezone("Europe/Berlin")
 
 
+# @api.route("/ranking/<int:id>/feedback", methods=["POST"])
+# def post_feedback(id):
+#     """Add user feedback to database (collect data for statistics)
+#     Tested: True
+
+#     @param id:  ranking id (int)
+#     @return:    HTTP status message
+#     """
+#     clicks = request.values.get("clicks", None)
+#     if clicks is None:
+#         clicks = request.json.get("clicks", None)
+
+#     if clicks is not None:
+#         ranking = db.session.query(Result).get_or_404(id)
+
+#         feedback = Feedback(
+#             start=ranking.q_date,
+#             session_id=ranking.session_id,
+#             interleave=ranking.tdi is not None,
+#             clicks=clicks,
+#         )
+#         db.session.add(feedback)
+#         db.session.commit()
+
+#         ranking.feedback_id = feedback.id
+#         db.session.add(ranking)
+#         db.session.commit()
+
+#         rankings = db.session.query(Result).filter_by(tdi=ranking.id).all()
+#         for r in rankings:
+#             r.feedback_id = feedback.id
+#         db.session.add_all(rankings)
+#         db.session.commit()
+
+#         return jsonify({"msg": "Added new feedback with success!"}), 201
+
 @api.route("/ranking/<int:id>/feedback", methods=["POST"])
 def post_feedback(id):
-    """Add user feedback to database (collect data for statistics)
-    Tested: True
+    """Add user feedback to database"""
+    clicks = request.values.get("clicks", None) or request.json.get("clicks", None)
 
-    @param id:  ranking id (int)
-    @return:    HTTP status message
-    """
-    clicks = request.values.get("clicks", None)
     if clicks is None:
-        clicks = request.json.get("clicks", None)
+        return jsonify({"error": "Missing 'clicks' parameter"}), 400 
 
-    if clicks is not None:
-        ranking = db.session.query(Result).get_or_404(id)
+    ranking = db.session.query(Result).get_or_404(id)
 
-        feedback = Feedback(
-            start=ranking.q_date,
-            session_id=ranking.session_id,
-            interleave=ranking.tdi is not None,
-            clicks=clicks,
-        )
-        db.session.add(feedback)
-        db.session.commit()
+    feedback = Feedback(
+        start=ranking.q_date,
+        session_id=ranking.session_id,
+        interleave=ranking.tdi is not None,
+        clicks=clicks,
+    )
 
-        ranking.feedback_id = feedback.id
-        db.session.add(ranking)
-        db.session.commit()
+    db.session.add(feedback)
+    db.session.commit()
 
-        rankings = db.session.query(Result).filter_by(tdi=ranking.id).all()
-        for r in rankings:
-            r.feedback_id = feedback.id
-        db.session.add_all(rankings)
-        db.session.commit()
+    ranking.feedback_id = feedback.id
+    db.session.add(ranking)
+    db.session.commit()
 
-        return jsonify({"msg": "Added new feedback with success!"}), 201
+    return jsonify({"msg": "Feedback added successfully!"}), 201
+
 
 
 @api.route("/ranking/<int:rid>", methods=["GET"])
@@ -71,12 +98,17 @@ def ranking():
         return "Missing query string", 400
 
     container_name = request.args.get("container", None)
+    
     if container_name is None:
         container_name = get_least_served_system(query)
+        if not container_name:
+          return jsonify({"error": "No available ranking system"}), 400
 
     session_id = request.args.get("sid", None)
-    if session_id is None or db.session.query(Session).filter_by(id=session_id) is None:
-        session_id = create_new_session(container_name, type="ranker")
+    session = db.session.query(Session).filter_by(id=session_id).first()
+    if not session:
+        session_id = create_new_session(container_name, type="ranker")  
+
 
     response = make_ranking(container_name, query, rpp, page, session_id)
 

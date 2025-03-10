@@ -17,11 +17,7 @@ tz = timezone("Europe/Berlin")
 
 @api.route("/recommendation", methods=["GET"])
 def recommend():
-    """Fetch recommendations from the unified container API.
-
-    Returns:
-        Response: A JSON response containing recommendations or an error message.
-    """
+    """Fetch recommendations from the unified container API."""
     try:
         itemid = request.args.get("itemid")
         container_name = request.args.get("container")
@@ -44,11 +40,15 @@ def recommend():
         if recommendation_exp is None:
             return jsonify({"message": f"No recommendations found for item '{itemid}'"}), 404
 
-        return jsonify(build_response(recommendation_exp, container_name))
+        #  Debugging - Log the final response before sending it
+        current_app.logger.debug(f"DEBUG: Final API Response: {json.dumps(recommendation_exp, indent=4)}")
+
+        return jsonify(recommendation_exp)
 
     except Exception as e:
         current_app.logger.error(f"Error in recommend: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
 
 @api.route("/recommendation/<int:id>/feedback", methods=["POST"])
 def post_rec_feedback(id: int):
