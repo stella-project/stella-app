@@ -1,7 +1,7 @@
 import random
 from app.models import db, Result, System
 from flask import current_app
-
+import json
 
 def tdi(item_dict_base, item_dict_exp):
     # team draft interleaving
@@ -98,3 +98,67 @@ def interleave_rankings(ranking_exp, ranking_base):
     db.session.commit()
 
     return ranking
+
+def interleave_recommendations(recommendation_exp, recommendation_base):
+    """
+    Create interleaved recommendations from experimental and baseline system.
+    Used method: Team-Draft-Interleaving (TDI)
+    
+    @param recommendation_exp:     experimental recommendation (Result)
+    @param recommendation_base:    baseline recommendation (Result)
+    @return:                        interleaved recommendation (dict)
+    """
+
+    # ✅ Convert JSON string to dict if necessary
+    if isinstance(recommendation_base.items, str):
+        try:
+            recommendation_base.items = json.loads(recommendation_base.items)
+        except json.JSONDecodeError:
+            current_app.logger.error("ERROR: Failed to decode recommendation_base JSON")
+            return None  # Return None if JSON parsing fails
+
+    if isinstance(recommendation_exp.items, str):
+        try:
+            recommendation_exp.items = json.loads(recommendation_exp.items)
+        except json.JSONDecodeError:
+            current_app.logger.error("ERROR: Failed to decode recommendation_exp JSON")
+            return None  # Return None if JSON parsing fails
+
+    # ✅ Ensure both items are dicts before calling `.items()`
+    if not isinstance(recommendation_base.items, dict) or not isinstance(recommendation_exp.items, dict):
+        current_app.logger.error("ERROR: Recommendation items are not dictionaries")
+        return None  # Return None if data is still incorrect
+
+    # Extract the IDs of the items from recommendations for TDI
+    base = {k: v.get("docid") for k, v in recommendation_base.items.items()}
+    exp = {k: v.get("docid") for k, v in recommendation_exp.items.items()}
+
+    item_dict = tdi(base, exp)  # Perform team-draft interleaving
+
+    recommendation = Result(
+        session_id=recommendation_exp.session_id,
+        system_id=recommendation_exp.system_id,
+        type="REC",
+        q=recommendation_exp.q,  # For recommendations, this is item ID
+        q_date=recommendation_exp.q_date,
+        q_time=recommendation_exp.q_time,
+        num_found=recommendation_exp.num_found,
+        hits=recommendation_base.num_found,
+        page=recommendation_exp.page,
+        rpp=recommendation_exp.rpp,
+        items=item_dict,  # Store as dictionary
+    )
+
+    db.session.add(recommendation)
+    db.session.commit()
+
+    recommendation_id = recommendation.id
+    recommendation.tdi = recommendation_id
+    recommendation_exp.tdi = recommendation_id
+    recommendation_base.tdi = recommendation_id
+
+    db.session.add_all([recommendation_exp, recommendation_base])
+    db.session.commit()
+
+    return recommendation
+

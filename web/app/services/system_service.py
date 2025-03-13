@@ -39,4 +39,4 @@ def get_least_served_system(query):
             .first()
             .name
         )
-    return container_name
+    return container_name if container_name else None

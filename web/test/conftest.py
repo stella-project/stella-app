@@ -1,6 +1,6 @@
 from app.app import db, create_app
 import pytest
-import re
+
 from app.commands import init_db
 from app.models import Session
 
@@ -11,7 +11,10 @@ from .create_test_data import (
     create_feedbacks,
     create_return_base,
     create_return_experimental,
-    create_return_recommendation
+    create_return_recommendation_base,
+    create_return_recommendation_experimental,
+    create_results_recommendation,
+    create_feedbacks_recommendation
 )
 
 
@@ -144,70 +147,83 @@ def mock_request_experimental_system(requests_mock):
         f"http://{container_name}:5000/ranking", json=data, status_code=200
     )
     return requests_mock
+
+# for recommedations starts here
+### **Mock Requests for Recommenders**
 @pytest.fixture
-def mock_request_base_recommender_system(requests_mock):
-    """Mock the base recommendation system."""
+def mock_request_base_recommender(requests_mock):
+    """Mock request to the baseline recommendation system."""
     container_name = "recommender_base"
 
-    # Mock the debug docker network endpoint
+    # Mock Docker network endpoint (same as ranking systems)
     requests_mock.get(
         f"http+docker://localhost/v1.47/containers/{container_name}/json",
-        json={
-            "NetworkSettings": {
-                "Networks": {"stella-app_default": {"IPAddress": container_name}}
-            }
-        },
+        json={"NetworkSettings": {"Networks": {"stella-app_default": {"IPAddress": container_name}}}},
         status_code=200,
     )
 
-    
-    data = create_return_recommendation()
-    requests_mock.get(
-        re.compile(f"http://{container_name}:5000/recommendation.*"),
-        json=data,
-        status_code=200,
-    )
+    # Mock recommendation system response
+    data = create_return_recommendation_base()
+    requests_mock.get(f"http://{container_name}:5000/recommendation", json=data, status_code=200)
     return requests_mock
 
 
 @pytest.fixture
-def mock_request_experimental_recommender_system(requests_mock):
-    """Mock the experimental recommendation system."""
+def mock_request_experimental_recommender(requests_mock):
+    """Mock request to the experimental recommendation system."""
     container_name = "recommender"
 
-    # Mock the debug docker network endpoint
     requests_mock.get(
         f"http+docker://localhost/v1.47/containers/{container_name}/json",
-        json={
-            "NetworkSettings": {
-                "Networks": {"stella-app_default": {"IPAddress": container_name}}
-            }
-        },
+        json={"NetworkSettings": {"Networks": {"stella-app_default": {"IPAddress": container_name}}}},
         status_code=200,
     )
 
-    
-    requests_mock.get(
-        re.compile(f"http://{container_name}:5000/recommendation.*"),
-        json={
-            "body": {  
-                "1": {"docid": "sample-doc-1", "type": "EXP"},
-                "2": {"docid": "sample-doc-2", "type": "EXP"},
-            },
-            "header": {
-                "container": {"exp": "recommender"},
-                "itemid": "test_item",
-                "rid": 5,
-                "sid": "mock-session-id"
-            }
-        },
-        status_code=200,
-    )
+    data = create_return_recommendation_experimental()
+    requests_mock.get(f"http://{container_name}:5000/recommendation", json=data, status_code=200)
     return requests_mock
 
 
+@pytest.fixture
+def results_recommendation(sessions):
+    """Fixture to create and store recommendation results separately from ranking results."""
+    result_objs = create_results_recommendation(sessions)
+    for result in result_objs.values():
+        db.session.add(result)
+    db.session.commit()
+    return result_objs
 
 @pytest.fixture
-def mock_least_served_recommendation_system(mocker):
-    """Mock get_least_served_system to return a valid recommendation system instead of None."""
-    mocker.patch("app.services.system_service.get_least_served_system", return_value="recommender_base")
+def feedback_recommendation(sessions):
+    """Fixture to create and store recommendation feedback separately."""
+    feedbacks = create_feedbacks_recommendation(sessions)
+    for feedback in feedbacks.values():
+        db.session.add(feedback)
+    db.session.commit()
+    return feedbacks
+
+
+
+def request_recommendations(container_name, item_id, rpp, page):
+    """
+    Sends a request to the recommendation system inside a Docker container.
+
+    @param container_name: The name of the recommendation system (str)
+    @param item_id: The ID of the item for recommendations (str)
+    @param rpp: Results per page (int)
+    @param page: Page number (int)
+
+    @return: JSON response with recommended items OR None if the request fails.
+    """
+    # Construct API endpoint
+    url = f"http://{container_name}:5000/recommendation?item_id={item_id}&rpp={rpp}&page={page}"
+    
+    try:
+        # Send GET request to the recommendation API
+        response = requests.get(url, timeout=5)  # Timeout after 5 seconds
+        response.raise_for_status()  # Raises an error for bad responses (4xx, 5xx)
+        
+        return response.json()  # Return the parsed JSON response
+    except requests.exceptions.RequestException as e:
+        current_app.logger.error(f"ERROR: Failed to fetch recommendations from {url} - {e}")
+        return None

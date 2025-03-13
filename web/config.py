@@ -2,7 +2,7 @@ import json
 import os
 from datetime import datetime
 from jsonpath_ng import parse
-
+from flask import current_app
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -119,8 +119,8 @@ class Config:
         RECOMMENDER_CONTAINER_NAMES = load_as_list("RECSYS_LIST")
         # container_precom_list_recommendation
         RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES = load_as_list("RECSYS_PRECOM_LIST")
-        RECOMMENDER_BASELINE_CONTAINER = os.environ.get("RECSYS_BASE")
-
+        RECOMMENDER_BASELINE_CONTAINER = os.environ.get("RECSYS_BASE","recommender_base") 
+        
     # Create container_dict
     RANKING_CONTAINER_DICT = {}
     for container_name in RANKING_CONTAINER_NAMES:
