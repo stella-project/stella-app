@@ -1,16 +1,17 @@
-from app.app import db, create_app
-import pytest
+from unittest.mock import AsyncMock, patch
 
-from app.commands import init_db
+import pytest
+from aioresponses import aioresponses
+from app.app import create_app, db
 from app.models import Session
 
 from .create_test_data import (
-    create_systems,
-    create_sessions,
-    create_results,
     create_feedbacks,
+    create_results,
     create_return_base,
     create_return_experimental,
+    create_sessions,
+    create_systems,
 )
 
 
@@ -22,7 +23,7 @@ def app():
 
     # setup database
     with app.app_context():
-        init_db()
+        db.create_all()
 
     yield app
 
@@ -98,48 +99,72 @@ def feedback(sessions):
 
 
 @pytest.fixture
-def mock_request_base_system(requests_mock):
-    """Fixture for mocking the request to the experimental system."""
+def mock_request_base_system():
+    """Fixture to mock aiohttp requests with predefined attributes."""
     container_name = "ranker_base"
-
-    # Mock the debug docker network endpoint
-    requests_mock.get(
-        f"http+docker://localhost/v1.47/containers/{container_name}/json",
-        json={
-            "NetworkSettings": {
-                "Networks": {"stella-app_default": {"IPAddress": container_name}}
-            }
-        },
-        status_code=200,
+    query = "Test Query"
+    rpp = 10
+    page = 0
+    mock_url = (
+        f"http://{container_name}:5000/ranking?query={query}&rpp={rpp}&page={page}"
     )
+    mock_response = create_return_base()
 
-    # Mock the experimental system ranking endpoint
-    data = create_return_base()
-    requests_mock.get(
-        f"http://{container_name}:5000/ranking", json=data, status_code=200
-    )
-    return requests_mock
+    with aioresponses() as mocked:
+        mocked.get(mock_url, payload=mock_response)
+        yield {
+            "mock": mocked,  # The aioresponses instance
+            "container_name": container_name,
+            "query": query,
+            "rpp": rpp,
+            "page": page,
+            "mock_url": mock_url,
+            "mock_response": mock_response,
+        }
 
 
 @pytest.fixture
-def mock_request_experimental_system(requests_mock):
-    """Fixture for mocking the request to the experimental system."""
+def mock_request_exp_system():
+    """Fixture to mock aiohttp requests with predefined attributes."""
     container_name = "ranker"
-
-    # Mock the debug docker network endpoint
-    requests_mock.get(
-        f"http+docker://localhost/v1.47/containers/{container_name}/json",
-        json={
-            "NetworkSettings": {
-                "Networks": {"stella-app_default": {"IPAddress": container_name}}
-            }
-        },
-        status_code=200,
+    query = "Test Query"
+    rpp = 10
+    page = 0
+    mock_url = (
+        f"http://{container_name}:5000/ranking?query={query}&rpp={rpp}&page={page}"
     )
+    mock_response = create_return_experimental()
 
-    # Mock the experimental system ranking endpoint
-    data = create_return_experimental()
-    requests_mock.get(
-        f"http://{container_name}:5000/ranking", json=data, status_code=200
-    )
-    return requests_mock
+    with aioresponses() as mocked:
+        mocked.get(mock_url, payload=mock_response)
+
+        yield {
+            "mock": mocked,
+            "container_name": container_name,
+            "query": query,
+            "rpp": rpp,
+            "page": page,
+            "mock_url": mock_url,
+            "mock_response": mock_response,
+        }
+
+
+@pytest.fixture
+def mock_request_results():
+    """Mock `request_results_from_container` with different responses based on input."""
+
+    async def mock_side_effect(session, container_name, query, rpp, page):
+        """Return different mocked responses based on parameters."""
+        if container_name == "ranker_base":
+            return create_return_base()
+        elif container_name == "ranker":
+            return create_return_experimental()
+        else:
+            return {"results": []}
+
+    with patch(
+        "app.services.ranking_service.request_results_from_container",
+        new_callable=AsyncMock,
+    ) as mock_func:
+        mock_func.side_effect = mock_side_effect
+        yield mock_func

@@ -1,8 +1,3 @@
-# import random
-# import time
-# from app.models import Session, Feedback, Result
-# import datetime
-# import json
 from app.models import System, Result, Feedback, Session
 from app.services.session_service import create_new_session
 

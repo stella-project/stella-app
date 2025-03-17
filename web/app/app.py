@@ -28,8 +28,8 @@ def create_app(config_name=None):
         else:
             app.config.from_object(config[config_name])
 
-    if app.config["DEBUG"] and not app.config["TESTING"]:
-        print("Initializing and starting scheduler inside Gunicorn master process")
+    if app.config["DEBUG"] and app.config["SENDFEEDBACK"] and not app.config["TESTING"]:
+        print("Initializing and starting scheduler in app factory process")
         scheduler.init_app(app)
         scheduler.start()
         print("Scheduler started in app factory process")
@@ -38,30 +38,20 @@ def create_app(config_name=None):
     register_extensions(app)
     register_blueprints(app)
     register_commands(app)
+
     return app
 
 
 def configure_logger(app):
     """Configure loggers."""
     if app.config["DEBUG"]:
+        app.logger.handlers.clear()
+        handler = logging.StreamHandler()
+        handler.setLevel(logging.DEBUG)
         log_format = "[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
-
-        logging.basicConfig(level=logging.DEBUG, format=log_format)
-
-        # StreamHandler for logging to console
-        stream_handler = logging.StreamHandler(sys.stdout)
-        stream_handler.setFormatter(logging.Formatter(log_format))
-
-        if not any(isinstance(h, logging.StreamHandler) for h in app.logger.handlers):
-            app.logger.addHandler(stream_handler)
-
-        # FileHandler for logging to a file
-        # file_handler = logging.FileHandler(
-        #     "data/log/stella-app.log"
-        # )  # Define your log file name
-        # file_handler.setFormatter(logging.Formatter(log_format))
-        # if not any(isinstance(h, logging.FileHandler) for h in app.logger.handlers):
-        #     app.logger.addHandler(file_handler)
+        formatter = logging.Formatter(log_format)
+        handler.setFormatter(formatter)
+        app.logger.addHandler(handler)
 
         app.logger.info("Logging setup for debug complete.")
 
@@ -80,6 +70,7 @@ def register_extensions(app):
     migrate.init_app(app, db)
     bootstrap.init_app(app)
     cache.init_app(app)
+
     return app
 
 

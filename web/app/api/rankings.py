@@ -1,8 +1,11 @@
+import asyncio
+
 from app.models import Feedback, Result, Session, db
+from app.services.profile_service import profile_route
 from app.services.ranking_service import make_ranking
 from app.services.session_service import create_new_session
 from app.services.system_service import get_least_served_system
-from flask import jsonify, request
+from flask import current_app, jsonify, request
 from pytz import timezone
 
 from . import api
@@ -72,12 +75,15 @@ def ranking():
 
     container_name = request.args.get("container", None)
     if container_name is None:
+        current_app.logger.debug("No container name provided")
         container_name = get_least_served_system(query)
 
     session_id = request.args.get("sid", None)
-    if session_id is None or db.session.query(Session).filter_by(id=session_id) is None:
+    session_exists = db.session.query(Session).filter_by(id=session_id).first()
+
+    if not session_exists:
         session_id = create_new_session(container_name, type="ranker")
 
-    response = make_ranking(container_name, query, rpp, page, session_id)
+    response = asyncio.run(make_ranking(container_name, query, rpp, page, session_id))
 
     return jsonify(response)

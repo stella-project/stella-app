@@ -80,7 +80,6 @@ class Config:
     DELETE_SENT_SESSION = (
         True if os.environ.get("DELETE_SENT_SESSION") == "True" else False
     )
-    SCHEDULER_API_ENABLED = True
 
     # Stella Server
     STELLA_SERVER_ADDRESS = os.environ.get("STELLA_SERVER_ADDRESS") or "nginx"
@@ -97,16 +96,34 @@ class Config:
     if os.environ.get("SYSTEMS_CONFIG"):
         SYSTEMS_CONFIG = load_from_json("SYSTEMS_CONFIG")
 
-        (
-            RANKING_CONTAINER_NAMES,
-            RANKING_PRECOMPUTED_CONTAINER_NAMES,
-            RANKING_BASELINE_CONTAINER,
-            RECOMMENDER_CONTAINER_NAMES,
-            RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES,
-            RECOMMENDER_BASELINE_CONTAINER,
-            SYSTEMS_CONFIG,
-        ) = parse_systems_config(SYSTEMS_CONFIG)
+        RANKING_CONTAINER_NAMES = []
+        RANKING_PRECOMPUTED_CONTAINER_NAMES = []
+        RANKING_BASELINE_CONTAINER = ""
 
+        RECOMMENDER_CONTAINER_NAMES = []
+        RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES = []
+        RECOMMENDER_BASELINE_CONTAINER = ""
+
+        for system in SYSTEMS_CONFIG.keys():
+            if SYSTEMS_CONFIG[system]["type"] == "recommender":
+                if SYSTEMS_CONFIG[system].get("precomputed"):
+                    RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES.append(system)
+                else:
+                    RECOMMENDER_CONTAINER_NAMES.append(system)
+                if SYSTEMS_CONFIG[system].get("base"):
+                    RECOMMENDER_BASELINE_CONTAINER = system
+            elif SYSTEMS_CONFIG[system]["type"] == "ranker":
+                if SYSTEMS_CONFIG[system].get("precomputed"):
+                    RANKING_PRECOMPUTED_CONTAINER_NAMES.append(system)
+                else:
+                    RANKING_CONTAINER_NAMES.append(system)
+                if SYSTEMS_CONFIG[system].get("base"):
+                    RANKING_BASELINE_CONTAINER = system
+
+            # JSON Path
+            if SYSTEMS_CONFIG[system].get("hits_path"):
+                hits_path = parse(SYSTEMS_CONFIG[system]["hits_path"])
+                SYSTEMS_CONFIG[system]["hits_path"] = hits_path
     else:
         # Ranking
         RANKING_CONTAINER_NAMES = load_as_list("RANKSYS_LIST")  # container_list
@@ -155,7 +172,6 @@ class PostgresConfig(Config):
     SQLALCHEMY_DATABASE_URI = "postgresql://{user}:{pw}@{url}/{db}".format(
         user=POSTGRES_USER, pw=POSTGRES_PW, url=POSTGRES_URL, db=POSTGRES_DB
     )
-
     SCHEDULER_API_ENABLED = True
     JOBS = [
         {
@@ -174,8 +190,6 @@ class TestConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         "DEV_DATABASE_URL"
     ) or "sqlite:///" + os.path.join(basedir, "data-dev.sqlite")
-
-    CONTAINER = "recommender_base"
 
     SYSTEMS_CONFIG = {
         "recommender_base": {"type": "recommender", "base": True},
