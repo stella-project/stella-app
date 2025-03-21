@@ -1,7 +1,7 @@
 from copy import deepcopy
 
-from app.services.interleave_service import tdi, interleave_rankings
-from ..create_test_data import create_results
+from app.services.interleave_service import tdi, interleave_results
+from ..create_test_data import create_results,create_results_recommendation
 
 possible_results = [
     {
@@ -26,6 +26,31 @@ possible_results = [
     },
 ]
 
+
+
+
+possible_results_recommendations = [
+    {
+        "1": {"docid": "doc11", "type": "EXP"},
+        "2": {"docid": "doc1", "type": "BASE"},
+        "3": {"docid": "doc2", "type": "BASE"},
+    },
+    {
+        "1": {"docid": "doc11", "type": "EXP"},
+        "2": {"docid": "doc1", "type": "BASE"},
+        "3": {"docid": "doc12", "type": "EXP"},
+    },
+    {
+        "1": {"docid": "doc1", "type": "BASE"},
+        "2": {"docid": "doc11", "type": "EXP"},
+        "3": {"docid": "doc12", "type": "EXP"},
+    },
+    {
+        "1": {"docid": "doc1", "type": "BASE"},
+        "2": {"docid": "doc11", "type": "EXP"},
+        "3": {"docid": "doc2", "type": "BASE"},
+    },
+]
 
 def test_tdi():
     item_dict_base = {
@@ -62,7 +87,33 @@ def test_interleave_rankings(sessions):
     }
     print(results_base.items.items())
 
-    interleaved_results = interleave_rankings(results_exp, results_base)
+    interleaved_results = interleave_results(results_exp, results_base,type="RANK")
     # The interleaved dict is added to the Result object which is a JSON type. Therefore the keys are konverted from int to str. Here we revert this conversion.
     interleaved_results = {int(k): v for k, v in interleaved_results.items.items()}
     assert interleaved_results in possible_results
+
+
+def test_interleave_recc(sessions):
+    result = create_results_recommendation(sessions)
+
+    results_base = result["recommender_base"]
+    results_base.items = {
+        "1": {"docid": "doc1", "type": "BASE"},
+        "2": {"docid": "doc2", "type": "BASE"},
+        "3": {"docid": "doc3", "type": "BASE"},
+    }
+
+    results_exp = result["recommender"]
+    results_exp.items = {
+        "1": {"docid": "doc11", "type": "EXP"},
+        "2": {"docid": "doc12", "type": "EXP"},
+        "3": {"docid": "doc13", "type": "EXP"},
+    }
+
+    interleaved_results = interleave_results(results_exp, results_base, type="REC")
+
+    # Correct place to print interleaved (mixed) results:
+    print(interleaved_results.items.items())
+
+    interleaved_results_dict = {str(k): v for k, v in interleaved_results.items.items()}
+    assert interleaved_results_dict in possible_results_recommendations

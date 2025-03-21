@@ -5,7 +5,7 @@ from datetime import datetime
 import requests
 from app.extensions import cache
 from app.models import Result, System, db
-from app.services.interleave_service import interleave_rankings
+from app.services.interleave_service import interleave_results
 from flask import current_app
 from pytz import timezone
 
@@ -199,7 +199,7 @@ def make_ranking(container_name, query, rpp, page, session_id):
             type="BASE",
         )
 
-        interleaved_ranking = interleave_rankings(ranking, ranking_base)
+        interleaved_ranking = interleave_results(ranking, ranking_base,type="RANK")
 
         response = build_response(
             ranking,

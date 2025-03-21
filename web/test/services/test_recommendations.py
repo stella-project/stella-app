@@ -1,7 +1,7 @@
 import json
 import os
 import pytest
-from ..create_test_data import create_feedbacks_recommendation, create_return_recommendation_base,create_return_recommendation_experimental,create_results_recommendation
+from ..create_test_data import create_feedbacks_recommendation, create_return_recommendation_base,create_return_recommendation_experimental
 from app.services.recommendation_service import query_system, build_response
 running_in_ci = os.getenv("CI") == "true"
 

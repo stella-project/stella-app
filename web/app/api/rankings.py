@@ -45,33 +45,41 @@ tz = timezone("Europe/Berlin")
 #         db.session.commit()
 
 #         return jsonify({"msg": "Added new feedback with success!"}), 201
-
 @api.route("/ranking/<int:id>/feedback", methods=["POST"])
 def post_feedback(id):
-    """Add user feedback to database"""
-    clicks = request.values.get("clicks", None) or request.json.get("clicks", None)
+    """Add user feedback to database (collect data for statistics)
+    Tested: True
 
+    @param id:  ranking id (int)
+    @return:    HTTP status message
+    """
+    clicks = request.values.get("clicks", None)
     if clicks is None:
-        return jsonify({"error": "Missing 'clicks' parameter"}), 400 
+        clicks = request.json.get("clicks", None)
 
-    ranking = db.session.query(Result).get_or_404(id)
+    if clicks is not None:
+        ranking = db.session.query(Result).get_or_404(id)
 
-    feedback = Feedback(
-        start=ranking.q_date,
-        session_id=ranking.session_id,
-        interleave=ranking.tdi is not None,
-        clicks=clicks,
-    )
+        feedback = Feedback(
+            start=ranking.q_date,
+            session_id=ranking.session_id,
+            interleave=ranking.tdi is not None,
+            clicks=clicks,
+        )
+        db.session.add(feedback)
+        db.session.commit()
 
-    db.session.add(feedback)
-    db.session.commit()
+        ranking.feedback_id = feedback.id
+        db.session.add(ranking)
+        db.session.commit()
 
-    ranking.feedback_id = feedback.id
-    db.session.add(ranking)
-    db.session.commit()
+        rankings = db.session.query(Result).filter_by(tdi=ranking.id).all()
+        for r in rankings:
+            r.feedback_id = feedback.id
+        db.session.add_all(rankings)
+        db.session.commit()
 
-    return jsonify({"msg": "Feedback added successfully!"}), 201
-
+        return jsonify({"msg": "Added new feedback with success!"}), 201
 
 
 @api.route("/ranking/<int:rid>", methods=["GET"])

@@ -1,75 +1,105 @@
-from app.models import System, Result
-from app.services.ranking_service import request_results_from_conatiner, query_system
-import requests_mock
-from ..create_test_data import create_return_experimental, create_return_base
 import os
 import pytest
+from ..create_test_data import create_feedbacks, create_return_experimental
 
 running_in_ci = os.getenv("CI") == "true"
 
 
+def test_ranking_from_db(client, results, sessions):
+    result_id = results["ranker"].id
+    result = client.get(f"/stella/api/v1/ranking/{result_id}")
+
+    data = result.json
+    assert 200 == result.status_code
+    assert data["rid"] == result_id
+
+
+class TestRanking:
+    URL = "/stella/api/v1/ranking"
+
+    def test_ranking_no_query(self, client, systems):
+        result = client.get(self.URL)
+        data = result.json
+        assert 400 == result.status_code
+
+    @pytest.mark.skipif(
+        running_in_ci, reason="Test requires Docker and will not run in CI environment"
+    )
+    def test_ranking(self, client, results, sessions, mock_request_base_system):
+        result = client.get(self.URL + "?query=test query&container=ranker_base")
+        data = result.json
+
+        assert 200 == result.status_code
+        assert "header" in data
+        assert "body" in data
+
+        # only one key since we directly request a container
+        assert data["header"]["container"].keys() == {"exp"}
+        assert data["header"]["container"]["exp"] == "ranker_base"
+
+    @pytest.mark.skipif(
+        running_in_ci, reason="Test requires Docker and will not run in CI environment"
+    )
+    def test_ranking_experimental(
+        self,
+        app,
+        client,
+        db_session,
+        results,
+        sessions,
+        mock_request_experimental_system,
+    ):
+        result = client.get(self.URL + "?query=test query&container=ranker")
+        data = result.json
+
+        response = create_return_experimental()
+
+        assert 200 == result.status_code
+        assert data == response
+
+
 @pytest.mark.skipif(
     running_in_ci, reason="Test requires Docker and will not run in CI environment"
 )
-def test_request_results_from_conatiner(mock_request_base_system):
-    container_name = "ranker_base"
-    result = request_results_from_conatiner(
-        container_name=container_name, query="Test Query", rpp=10, page=1
-    )
-
-    data = create_return_base()
-    assert result == data
-
-
-@pytest.mark.skipif(
-    running_in_ci, reason="Test requires Docker and will not run in CI environment"
-)
-def test_query_base_system(mock_request_base_system, sessions, db_session):
-    container_name = "ranker_base"
-    query = "Test Query"
-    rpp = 10
-    page = 1
-    result = query_system(
-        container_name, query, rpp, page, sessions["ranker_base"].id, type="BASE"
-    )
-
-    system = db_session.query(System).filter_by(name=container_name).first()
-    assert system.num_requests_no_head == 1
-
-    result = (
-        db_session.query(Result)
-        .filter_by(session_id=sessions["ranker_base"].id)
-        .first()
-    )
-    assert result.q == query
-    assert result.rpp == rpp
-    assert result.system_id == system.id
-    for i in range(len(result.items)):
-        assert list(result.items[str(i + 1)].keys()) == ["docid", "type"]
-
-
-@pytest.mark.skipif(
-    running_in_ci, reason="Test requires Docker and will not run in CI environment"
-)
-def test_query_experimental_system(
-    mock_request_experimental_system, sessions, db_session
+def test_ranking_interleaved(
+    app,
+    client,
+    db_session,
+    results,
+    sessions,
+    mock_request_experimental_system,
+    mock_request_base_system,
 ):
-    container_name = "ranker"
-    query = "Test Query"
-    rpp = 10
-    page = 1
-    result = query_system(
-        container_name, query, rpp, page, sessions["ranker"].id, type="EXP"
+    app.config["INTERLEAVE"] = True
+    result = client.get("/stella/api/v1/ranking?query=test query&container=ranker")
+
+    data = result.json
+    print(data)
+    assert 200 == result.status_code
+    assert "body" in data
+    # Given the randomness of the interleaving, we can only check for the keys
+    assert (
+        "_score" in data["body"][0]
+        or "_score" in data["body"][1]
+        or "_score" in data["body"][2]
     )
 
-    system = db_session.query(System).filter_by(name=container_name).first()
-    assert system.num_requests_no_head == 1
 
-    result = (
-        db_session.query(Result).filter_by(session_id=sessions["ranker"].id).first()
-    )
-    assert result.q == query
-    assert result.rpp == rpp
-    assert result.system_id == system.id
-    for i in range(len(result.items)):
-        assert list(result.items[str(i + 1)].keys()) == ["docid", "type"]
+class TestPostFeedback:
+    URL = "/stella/api/v1/ranking/{}/feedback"
+
+    def test_post_feedback(self, client, results, sessions):
+        feedbacks = create_feedbacks(sessions)
+        data = {
+            "clicks": feedbacks["ranker_base"].clicks,
+        }
+        result = client.post(self.URL.format(results["ranker"].id), data=data)
+        assert 201 == result.status_code
+
+    def test_post_feedback_wrong_id(self, client, results, sessions):
+        feedbacks = create_feedbacks(sessions)
+        data = {
+            "clicks": feedbacks["ranker_base"].clicks,
+        }
+        result = client.post(self.URL.format("999"), data=data)
+        assert 404 == result.status_code
