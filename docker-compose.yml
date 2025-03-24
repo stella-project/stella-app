@@ -1,4 +1,4 @@
-name: stella-app
+name: stella
 
 networks:
   stella-shared:
