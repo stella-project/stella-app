@@ -47,7 +47,7 @@ services:
         - POSTGRES_URL=db:5430
     command: gunicorn -w 2 --timeout 60 -b :8000 'app.app:create_app()'
     depends_on:
-      - db
+      - db-app
 
 
   db-app:
