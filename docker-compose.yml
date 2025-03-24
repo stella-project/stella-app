@@ -2,21 +2,22 @@ name: stella-app
 
 networks:
   stella-shared:
-    external:
-      name: stella-server_default
+    external: true
+    name: stella-shared
 
 services:
-  web:
+  app:
     build: ./web
     volumes:
-        - /var/run/docker.sock:/var/run/docker.sock
         - ./data:/data
     expose:
       - "8000"
     ports:
         - "8080:8000"
     networks:
-        - stella-shared
+      stella-shared:
+        aliases:
+          - stella-app
     environment:
       # Config
         - FLASK_APP=app/app
@@ -34,7 +35,7 @@ services:
         - RANKSYS_BASE=gesis_rank_pyserini_base
       
       # Stella Server
-        - STELLA_SERVER_ADDRESS=http://stella-server-web-1:8000
+        - STELLA_SERVER_ADDRESS=http://stella-server:8000
         - STELLA_SERVER_USER=site@stella-project.org
         - STELLA_SERVER_PASS=pass
         - STELLA_SERVER_USERNAME=LIVIVO
@@ -45,13 +46,11 @@ services:
         - POSTGRES_DB=postgres
         - POSTGRES_URL=db:5430
     command: gunicorn -w 2 --timeout 60 -b :8000 'app.app:create_app()'
-    links:
-      - db:db
     depends_on:
-      - db
+      - db-app
 
 
-  db:
+  db-app:
     image: postgres
     ports:
       - 5430:5430
