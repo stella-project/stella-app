@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: C:\ProgramData\chocolatey\lib\kubernetes-kompose\tools\kompose.exe convert
+    kompose.version: 1.35.0 (9532ceef3)
+  labels:
+    io.kompose.service: stella-app
+  name: stella-app
+spec:
+  ports:
+    - name: "8080"
+      port: 8080
+      targetPort: 8000
+  selector:
+    io.kompose.service: stella-app
+  type: LoadBalancer
