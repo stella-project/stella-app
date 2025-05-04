@@ -71,7 +71,7 @@ sqlalchemy[asyncio]
 asyncpg==0.30.0
 stack-data==0.6.3
 tenacity==8.2.3
-tornado==6.4.1
+tornado==6.4.2
 traitlets==5.14.1
 typing_extensions==4.9.0
 tzdata==2024.1
