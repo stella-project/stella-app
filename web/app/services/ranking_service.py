@@ -176,9 +176,6 @@ def build_response(
     id_map.update(build_id_map(container_name, ranking, result))
     hits = [id_map[doc["docid"]] for doc in interleaved_ranking.items.values()]
 
-    # if current_app.config["SYSTEMS_CONFIG"][container_name_base].get("hits_path"):
-    #     return hits
-
     base_path = current_app.config["SYSTEMS_CONFIG"][container_name_base].get(
         "hits_path"
     )
