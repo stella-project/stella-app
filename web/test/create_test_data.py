@@ -1,10 +1,10 @@
-from app.models import System, Result, Feedback, Session
-from app.services.session_service import create_new_session
-
 import datetime
-import random
 import json
+import random
 import time
+
+from app.models import Feedback, Result, Session, System
+from app.services.session_service import create_new_session
 
 
 def random_date(start, end, prop, format="%Y-%m-%d %H:%M:%S"):
@@ -69,7 +69,7 @@ def create_sessions(systems):
             )
         elif system.startswith("recommender"):
             result[system] = create_new_session(
-                container_name=system, sid=None, type="recommender"
+                container_name=system, sid=None, type="recommendation"
             )
     return result
 
@@ -101,7 +101,58 @@ def create_return_base():
     return data
 
 
+def create_return_recommendation_base():
+    page = 0
+    rpp = 10
+    itemlist = [
+        "doc1",
+        "doc2",
+        "doc3",
+        "doc4",
+        "doc5",
+        "doc6",
+        "doc7",
+        "doc8",
+        "doc9",
+        "doc10",
+    ]
+
+    data = {
+        "page": page,
+        "rpp": rpp,
+        "itemlist": itemlist,
+        "num_found": len(itemlist),
+        "item_id": "test_item",
+    }
+    return data
+
+
 def create_return_experimental():
+    return {
+        "hits": {
+            "hits": [
+                [
+                    {"id": "10014322236", "type": "article", "_score": 6.751302},
+                    {"id": "10014446027", "type": "book", "_score": 6.751302},
+                    {"id": "10012813890", "type": "book", "_score": 6.589573},
+                    {"id": "10014564344", "type": "article", "_score": 5.7939076},
+                    {"id": "10001423122", "type": "journal", "_score": 5.7764525},
+                    {"id": "10014505904", "type": "article", "_score": 5.6911764},
+                    {"id": "10014445127", "type": "book", "_score": 5.5197597},
+                    {"id": "10014549633", "type": "book", "_score": 5.5197597},
+                    {"id": "10014549634", "type": "book", "_score": 5.5197597},
+                    {"id": "10014575867", "type": "book", "_score": 5.5196695},
+                ]
+            ],
+            "max_score": 6.751302,
+            "total": 199073,
+        },
+        "status": 200,
+    }
+
+
+def create_return_recommendation_experimental():
+    """Generate a test recommendation response for experimental system (recommender)."""
     return {
         "hits": {
             "hits": [
@@ -172,12 +223,44 @@ def create_results(sessions):
                         "10": "10014575867",
                     }
                 )
+
+        elif system.startswith("recommender"):
+            result_objs[system] = Result(
+                session_id=session.id,
+                system_id=session.system_ranking,
+                type="REC",
+                q="test_item",
+                q_date=session.start,
+                q_time=300,
+                num_found=10,
+                page=0,
+                rpp=10,
+            )
+
+            itemlist = {
+                str(i + 1): {
+                    "docid": f"dataset-{i+1}",
+                    "type": "dataset",
+                    "rank": i + 1,
+                }
+                for i in range(5)
+            }
+            itemlist.update(
+                {
+                    str(i + 6): {
+                        "docid": f"publication-{i+1}",
+                        "type": "publication",
+                        "rank": i + 6,
+                    }
+                    for i in range(5)
+                }
+            )
+            result_objs[system].items = json.dumps(itemlist)
     return result_objs
 
 
 def create_feedbacks(sessions):
     returns = {}
-
     results = create_results(sessions)
 
     for system, session in sessions.items():
@@ -219,4 +302,4 @@ def create_feedbacks(sessions):
             clicks=json.dumps(click_dict),
         )
 
-        return returns
+    return returns

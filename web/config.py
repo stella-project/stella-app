@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import datetime
+
 from jsonpath_ng import parse
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -193,7 +194,11 @@ class TestConfig(Config):
 
     SYSTEMS_CONFIG = {
         "recommender_base": {"type": "recommender", "base": True},
-        "recommender": {"type": "recommender"},
+        "recommender": {
+            "type": "recommender",
+            "docid": "id",
+            "hits_path": "$.hits.hits[*]",
+        },
         "ranker_base": {"type": "ranker", "base": True},
         "ranker": {"type": "ranker", "docid": "id", "hits_path": "$.hits.hits[*]"},
     }

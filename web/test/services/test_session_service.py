@@ -14,7 +14,7 @@ def test_create_new_session_ranker(client, systems, db_session):
 
 def test_create_new_session_recommender(client, systems, db_session):
     session_id = create_new_session(
-        container_name="recommender_base", sid=None, type="recommender"
+        container_name="recommender_base", sid=None, type="recommendation"
     )
 
     session = db_session.query(Session).filter_by(id=session_id).first()
