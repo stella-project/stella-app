@@ -272,7 +272,7 @@ def build_response(
             }
 
 
-async def make_ranking(
+async def make_results(
     container_name: str,
     query: str,
     rpp: int,

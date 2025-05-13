@@ -4,7 +4,7 @@ import aiohttp
 import pytest
 from app.models import Result, System
 from app.services.interleave_service import interleave_rankings
-from app.services.ranking_service import (
+from app.services.result_service import (
     build_response,
     extract_hits,
     query_system,

@@ -2,7 +2,7 @@ import asyncio
 from typing import Tuple
 
 from app.models import Feedback, Result, Session, db
-from app.services.ranking_service import make_ranking
+from app.services.result_service import make_results
 from app.services.session_service import create_new_session
 from app.services.system_service import get_least_served_system
 from flask import Response, current_app, jsonify, request
@@ -91,7 +91,7 @@ def recommendation():
         session_id = create_new_session(container_name, type="recommendation")
 
     response = asyncio.run(
-        make_ranking(
+        make_results(
             container_name,
             itemid,
             rpp,

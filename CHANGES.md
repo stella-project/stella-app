@@ -1,5 +1,10 @@
 # Release notes
-All notable changes to this project will be documented in this file.
+All notable changes to this project will be documented in this file. 
+
+## Generalize Recommender Endpoints
+The stella app differentiates between dataset and publication recommendations. While this was catered to the initial use in the Lilas lab, the goal is to support any type of recommendations. Therefore, the recommender endpoint was simplified so that no specific types are supported. Instead of `recommendations/datasets` and `recommendations/publications` simply the `recommendations` endpoint can now be used. 
+
+Additionally, this helps to maintain the stella-app because the `recommendations` endpoint now also uses the `result_service` like the `ranking` endpoint as well. This means that concurrent requests and custom return formats are also available for recommendations now.
 
 ## Make calls to base and experimental systems concurrently
 The interleaved ranking is created by combining a ranking from an experimental and a baseline system. These two systems were previously called one after another. Now both systems are called simultaneously which provides some speedups for interleaved rankings.
