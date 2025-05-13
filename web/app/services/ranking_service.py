@@ -71,22 +71,25 @@ def extract_hits(
         "docid", "docid"
     )
     hits_path = current_app.config["SYSTEMS_CONFIG"][container_name].get("hits_path")
-
+    current_app.logger.debug(f"Extracting hits from {container_name}: {hits_path}")
     if hits_path is None:
+        current_app.logger.debug("No custom hits path provided")
         hits = result["itemlist"]
+        current_app.logger.debug(hits)
+
     else:
         hits = hits_path.find(result)[0].value
 
-    if isinstance(hits[0], dict):
+    if isinstance(hits[0], dict):  # Custom format
         item_dict = {
             i + 1: {"docid": hits[i][docid_key], "type": system_role}
             for i in range(0, len(hits))
         }
-    else:
+    else:  # Stella fromat
         item_dict = {
             i + 1: {"docid": hits[i], "type": system_role} for i in range(0, len(hits))
         }
-    return item_dict, hits
+    return item_dict, hits  # formatted, original
 
 
 async def query_system(
@@ -251,17 +254,15 @@ def build_response(
             current_app.logger.debug("Interleaved, custom returns")
             # custom returns
             id_map = build_id_map(
-                current_app.config["RANKING_BASELINE_CONTAINER"],
+                container_name_base,
                 ranking_base,
                 result_base,
             )
             id_map.update(build_id_map(container_name, ranking, result))
             hits = [id_map[doc["docid"]] for doc in interleaved_ranking.items.values()]
 
-            matches = base_path.find(result_base)
-            assert len(matches) == 1
-            matches[0].value = hits
-            # TODO: This is a bug and should be fixed in PR: #82
+            base_path.update(result_base, hits)
+            return result_base
         else:
             current_app.logger.debug("Interleaved, no custom returns")
             container_names = {"exp": container_name, "base": container_name_base}

@@ -197,10 +197,10 @@ class TestConfig(Config):
         "recommender": {
             "type": "recommender",
             "docid": "id",
-            "hits_path": "$.hits.hits[*]",
+            "hits_path": "$.hits.hits",
         },
         "ranker_base": {"type": "ranker", "base": True},
-        "ranker": {"type": "ranker", "docid": "id", "hits_path": "$.hits.hits[*]"},
+        "ranker": {"type": "ranker", "docid": "id", "hits_path": "$.hits.hits"},
     }
     (
         RANKING_CONTAINER_NAMES,

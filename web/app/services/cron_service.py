@@ -3,10 +3,10 @@ import time
 from datetime import datetime, timedelta
 
 import requests as req
+from app.extensions import scheduler
 from app.models import Feedback, Result, Session, System, db
 from flask import current_app
 from pytz import timezone
-from app.extensions import scheduler
 
 
 def update_expired_sessions(sessions_not_exited):
@@ -57,9 +57,7 @@ def update_token():
             current_app.config["STELLA_SERVER_PASS"],
         ),
     )
-    print(r)
     r_json = json.loads(r.text)
-    print(r_json)
     delta_exp = r_json.get("expiration")
     # get new token five min (300 s) before expiration
     current_app.config["TOKEN_EXPIRATION"] = datetime.now() + timedelta(
@@ -216,8 +214,9 @@ def post_results(results, feedback_id_server):
 
 def post_feedbacks(session, session_id_server):
     feedbacks = Feedback.query.filter_by(session_id=session.id).all()
-    if current_app.config["DEBUG"]:
-        print("Session with " + str(len(feedbacks)) + " feedbacks")
+    current_app.logger.debug(
+        "There is/are " + str(len(feedbacks)) + " feedback(s) to be sent."
+    )
 
     for feedback in feedbacks:
         # POST feedback

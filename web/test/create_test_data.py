@@ -131,18 +131,16 @@ def create_return_experimental():
     return {
         "hits": {
             "hits": [
-                [
-                    {"id": "10014322236", "type": "article", "_score": 6.751302},
-                    {"id": "10014446027", "type": "book", "_score": 6.751302},
-                    {"id": "10012813890", "type": "book", "_score": 6.589573},
-                    {"id": "10014564344", "type": "article", "_score": 5.7939076},
-                    {"id": "10001423122", "type": "journal", "_score": 5.7764525},
-                    {"id": "10014505904", "type": "article", "_score": 5.6911764},
-                    {"id": "10014445127", "type": "book", "_score": 5.5197597},
-                    {"id": "10014549633", "type": "book", "_score": 5.5197597},
-                    {"id": "10014549634", "type": "book", "_score": 5.5197597},
-                    {"id": "10014575867", "type": "book", "_score": 5.5196695},
-                ]
+                {"id": "10014322236", "type": "article", "_score": 6.751302},
+                {"id": "10014446027", "type": "book", "_score": 6.751302},
+                {"id": "10012813890", "type": "book", "_score": 6.589573},
+                {"id": "10014564344", "type": "article", "_score": 5.7939076},
+                {"id": "10001423122", "type": "journal", "_score": 5.7764525},
+                {"id": "10014505904", "type": "article", "_score": 5.6911764},
+                {"id": "10014445127", "type": "book", "_score": 5.5197597},
+                {"id": "10014549633", "type": "book", "_score": 5.5197597},
+                {"id": "10014549634", "type": "book", "_score": 5.5197597},
+                {"id": "10014575867", "type": "book", "_score": 5.5196695},
             ],
             "max_score": 6.751302,
             "total": 199073,
@@ -156,18 +154,16 @@ def create_return_recommendation_experimental():
     return {
         "hits": {
             "hits": [
-                [
-                    {"id": "10014322236", "type": "article", "_score": 6.751302},
-                    {"id": "10014446027", "type": "book", "_score": 6.751302},
-                    {"id": "10012813890", "type": "book", "_score": 6.589573},
-                    {"id": "10014564344", "type": "article", "_score": 5.7939076},
-                    {"id": "10001423122", "type": "journal", "_score": 5.7764525},
-                    {"id": "10014505904", "type": "article", "_score": 5.6911764},
-                    {"id": "10014445127", "type": "book", "_score": 5.5197597},
-                    {"id": "10014549633", "type": "book", "_score": 5.5197597},
-                    {"id": "10014549634", "type": "book", "_score": 5.5197597},
-                    {"id": "10014575867", "type": "book", "_score": 5.5196695},
-                ]
+                {"id": "10014322236", "type": "article", "_score": 6.751302},
+                {"id": "10014446027", "type": "book", "_score": 6.751302},
+                {"id": "10012813890", "type": "book", "_score": 6.589573},
+                {"id": "10014564344", "type": "article", "_score": 5.7939076},
+                {"id": "10001423122", "type": "journal", "_score": 5.7764525},
+                {"id": "10014505904", "type": "article", "_score": 5.6911764},
+                {"id": "10014445127", "type": "book", "_score": 5.5197597},
+                {"id": "10014549633", "type": "book", "_score": 5.5197597},
+                {"id": "10014549634", "type": "book", "_score": 5.5197597},
+                {"id": "10014575867", "type": "book", "_score": 5.5196695},
             ],
             "max_score": 6.751302,
             "total": 199073,

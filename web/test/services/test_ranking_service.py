@@ -92,7 +92,7 @@ class TestRequestResults:
             )
 
         assert response == create_return_experimental()
-        assert len(response["hits"]["hits"][0]) == 10
+        assert len(response["hits"]["hits"]) == 10
         assert response["status"] == 200
         assert response["hits"]["total"] == 199073
 
@@ -116,7 +116,7 @@ class TestRequestResults:
                 system_type="recommendation",
             )
         assert response == create_return_experimental()
-        assert len(response["hits"]["hits"][0]) == 10
+        assert len(response["hits"]["hits"]) == 10
         assert response["status"] == 200
         assert response["hits"]["total"] == 199073
 
@@ -145,6 +145,7 @@ class TestExtractHits:
         assert item_dict[1]["docid"] == "doc1"
 
     def test_extract_hits_exp(self):
+        """custom response"""
         result = create_return_experimental()
         item_dict, hits = extract_hits(
             result, container_name="ranker", system_role="EXP"
@@ -156,6 +157,7 @@ class TestExtractHits:
         assert item_dict[1]["docid"] == "10014322236"
 
     def test_extract_hits_rec_exp(self):
+        """custom response"""
         result = create_return_recommendation_experimental()
         item_dict, hits = extract_hits(
             result, container_name="recommender", system_role="EXP"
@@ -167,9 +169,6 @@ class TestExtractHits:
         assert item_dict[1]["docid"] == "10014322236"
 
 
-@pytest.mark.skipif(
-    running_in_ci, reason="Test requires Docker and will not run in CI environment"
-)
 class TestQuerySystem:
     @pytest.mark.asyncio
     async def test_query_base_system(
@@ -294,50 +293,62 @@ class TestQuerySystem:
             assert list(result.items[str(i + 1)].keys()) == ["docid", "type"]
 
 
-from aioresponses import aioresponses
-
-
 class TestBuildResponse:
-    # @pytest.mark.asyncio
-    # async def test_build_response_interleaved_custom_return(
-    #     self,
-    #     app,
-    #     mock_request_base_system,
-    #     mock_request_system,
-    #     sessions,
-    #     db_session,
-    # ):
-    #     app.config["INTERLEAVE"] = True
+    @pytest.mark.asyncio
+    async def test_build_response_interleaved_custom_return(
+        self,
+        app,
+        mock_request_base_system,
+        mock_request_system,
+        sessions,
+        db_session,
+    ):
+        """Test interleaved ranking with custom hits path in both systems"""
+        app.config["INTERLEAVE"] = True
 
-    #     ranking_base, result_base = await query_system(
-    #         container_name="ranker",
-    #         query="Test Query",
-    #         rpp=10,
-    #         page=0,
-    #         session_id=sessions["ranker"].id,
-    #         system_role="BASE",
-    #     )
-    #     ranking, result = await query_system(
-    #         container_name="ranker",
-    #         query="Test Query",
-    #         rpp=10,
-    #         page=0,
-    #         session_id=sessions["ranker"].id,
-    #         system_role="EXP",
-    #     )
-    #     interleaved_ranking = interleave_rankings(ranking, ranking_base)
+        # experimental system
+        ranking_base, result_base = await query_system(
+            container_name="ranker",
+            query="Test Query",
+            rpp=10,
+            page=0,
+            session_id=sessions["ranker"].id,
+            system_role="BASE",
+        )
+        # experimental system
+        ranking, result = await query_system(
+            container_name="ranker",
+            query="Test Query",
+            rpp=10,
+            page=0,
+            session_id=sessions["ranker"].id,
+            system_role="EXP",
+        )
+        interleaved_ranking = interleave_rankings(ranking, ranking_base)
 
-    #     response = build_response(
-    #         ranking=ranking,
-    #         container_name="ranker",
-    #         interleaved_ranking=interleaved_ranking,
-    #         ranking_base=ranking_base,
-    #         container_name_base="ranker",
-    #         result=result,
-    #         result_base=result_base,
-    #     )
-    #     assert list(response.keys()) == ["hits", "status"]
-    #     # TODO: add more checks
+        response = build_response(
+            ranking=ranking,
+            container_name="ranker",
+            interleaved_ranking=interleaved_ranking,
+            ranking_base=ranking_base,
+            container_name_base="ranker",
+            result=result,
+            result_base=result_base,
+        )
+        assert list(response.keys()) == ["hits", "status"]
+        for item in response["hits"]["hits"]:
+            assert item["id"] in [
+                "10014322236",
+                "10014446027",
+                "10012813890",
+                "10014564344",
+                "10001423122",
+                "10014505904",
+                "10014445127",
+                "10014549633",
+                "10014549634",
+                "10014575867",
+            ]
 
     @pytest.mark.asyncio
     async def test_build_response(self, mock_request_base_system, sessions, db_session):
@@ -377,7 +388,19 @@ class TestBuildResponse:
             ranking=ranking, container_name="ranker", result=result
         )
         assert list(response.keys()) == ["hits", "status"]
-        # TODO: add more checks
+        for item in response["hits"]["hits"]:
+            assert item["id"] in [
+                "10014322236",
+                "10014446027",
+                "10012813890",
+                "10014564344",
+                "10001423122",
+                "10014505904",
+                "10014445127",
+                "10014549633",
+                "10014549634",
+                "10014575867",
+            ]
 
     @pytest.mark.asyncio
     async def test_build_response_interleaved_rec(
@@ -426,48 +449,60 @@ class TestBuildResponse:
 
         assert len(response["body"]) == 10
 
-    # @pytest.mark.asyncio
-    # async def test_build_response_interleaved_custom_return_rec(
-    #     self,
-    #     app,
-    #     mock_request_base_recommender,
-    #     mock_request_recommender,
-    #     sessions,
-    #     db_session,
-    # ):
-    #     app.config["INTERLEAVE"] = True
+    @pytest.mark.asyncio
+    async def test_build_response_interleaved_custom_return_rec(
+        self,
+        app,
+        mock_request_base_recommender,
+        mock_request_recommender,
+        sessions,
+        db_session,
+    ):
+        app.config["INTERLEAVE"] = True
 
-    #     ranking_base, result_base = await query_system(
-    #         container_name="recommender",
-    #         query="test_item",
-    #         rpp=10,
-    #         page=0,
-    #         session_id=sessions["recommender"].id,
-    #         system_role="BASE",
-    #         system_type="recommendation",
-    #     )
-    #     ranking, result = await query_system(
-    #         container_name="recommender",
-    #         query="test_item",
-    #         rpp=10,
-    #         page=0,
-    #         session_id=sessions["recommender"].id,
-    #         system_role="EXP",
-    #         system_type="recommendation",
-    #     )
-    #     interleaved_ranking = interleave_rankings(ranking, ranking_base)
+        ranking_base, result_base = await query_system(
+            container_name="recommender",
+            query="test_item",
+            rpp=10,
+            page=0,
+            session_id=sessions["recommender"].id,
+            system_role="BASE",
+            system_type="recommendation",
+        )
+        ranking, result = await query_system(
+            container_name="recommender",
+            query="test_item",
+            rpp=10,
+            page=0,
+            session_id=sessions["recommender"].id,
+            system_role="EXP",
+            system_type="recommendation",
+        )
+        interleaved_ranking = interleave_rankings(ranking, ranking_base)
 
-    #     response = build_response(
-    #         ranking=ranking,
-    #         container_name="recommender",
-    #         interleaved_ranking=interleaved_ranking,
-    #         ranking_base=ranking_base,
-    #         container_name_base="recommender",
-    #         result=result,
-    #         result_base=result_base,
-    #     )
-    #     assert list(response.keys()) == ["hits", "status"]
-    #     # TODO: add more checks
+        response = build_response(
+            ranking=ranking,
+            container_name="recommender",
+            interleaved_ranking=interleaved_ranking,
+            ranking_base=ranking_base,
+            container_name_base="recommender",
+            result=result,
+            result_base=result_base,
+        )
+        assert list(response.keys()) == ["hits", "status"]
+        for item in response["hits"]["hits"]:
+            assert item["id"] in [
+                "10014322236",
+                "10014446027",
+                "10012813890",
+                "10014564344",
+                "10001423122",
+                "10014505904",
+                "10014445127",
+                "10014549633",
+                "10014549634",
+                "10014575867",
+            ]
 
     @pytest.mark.asyncio
     async def test_build_response_rec(
@@ -510,4 +545,16 @@ class TestBuildResponse:
             ranking=ranking, container_name="recommender", result=result
         )
         assert list(response.keys()) == ["hits", "status"]
-        # TODO: add more checks
+        for item in response["hits"]["hits"]:
+            assert item["id"] in [
+                "10014322236",
+                "10014446027",
+                "10012813890",
+                "10014564344",
+                "10001423122",
+                "10014505904",
+                "10014445127",
+                "10014549633",
+                "10014549634",
+                "10014575867",
+            ]
