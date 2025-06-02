@@ -180,15 +180,14 @@ def build_response(
         "hits_path"
     )
     if base_path:
-        matches = base_path.find(result_base)
-        assert len(matches) == 1
-        matches[0].value = hits
-
-    container_names = {"exp": container_name, "base": container_name_base}
-    return {
-        "header": build_header(ranking_base, container_names),
-        "body": hits,
-    }
+        base_path.update(result_base, hits)
+        return result_base
+    else:
+        container_names = {"exp": container_name, "base": container_name_base}
+        return {
+            "header": build_header(ranking_base, container_names),
+            "body": hits,
+        }
 
 
 async def make_ranking(container_name, query, rpp, page, session_id):
