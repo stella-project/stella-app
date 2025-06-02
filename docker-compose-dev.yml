@@ -36,10 +36,10 @@ services:
       # Systems
       SYSTEMS_CONFIG: |
         {
-            "gesis_rec_pyterrier": {"type": "recommender", "base": true},
             "gesis_rec_pyserini": {"type": "recommender"},
-            "gesis_rank_pyserini_base": {"type": "ranker", "base": true},
-            "gesis_rank_pyserini": {"type": "ranker"}
+            "gesis_rec_pyterrier": {"type": "recommender", "base": true},
+            "gesis_rank_pyserini": {"type": "ranker"},
+            "gesis_rank_pyserini_base": {"type": "ranker", "base": true}
         }
       # Stella Server
       STELLA_SERVER_ADDRESS: http://stella-server:8000
@@ -95,7 +95,7 @@ services:
       - stella-shared
 
   gesis_rec_pyterrier:
-    build: https://github.com/stella-project/gesis_rec_pyterrier.git#master
+    build: https://github.com/stella-project/gesis_rec_pyterrier.git#main
     container_name: gesis_rec_pyterrier
     volumes:
       - ./data/:/data/
@@ -103,7 +103,7 @@ services:
       - stella-shared
 
   gesis_rec_pyserini:
-    build: https://github.com/stella-project/gesis_rec_pyserini.git#master
+    build: https://github.com/stella-project/gesis_rec_pyserini.git#main
     container_name: gesis_rec_pyserini
     volumes:
       - ./data/:/data/
