@@ -78,7 +78,7 @@ def dataset_recommendations(num=10, print_status_code=False):
             STELLA_APP_API
             + "recommendation/datasets?itemid="
             + itemid
-            + "&container=gesis_rec_precom"
+            + "&container=gesis_rec_pyterrier"
         )
         r_json = r.json()
         rec_id = r_json.get("header").get("rid")

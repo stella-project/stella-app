@@ -1,6 +1,9 @@
 # Release notes
 All notable changes to this project will be documented in this file.
 
+## Update Simulate script
+Initially, there was a issue in running the simulate script fully, issue was there was system name mentioned which is not existing in our system so it is changed to relevant system name and fixes the issue we have with simulate script.
+
 ## Make calls to base and experimental systems concurrently
 The interleaved ranking is created by combining a ranking from an experimental and a baseline system. These two systems were previously called one after another. Now both systems are called simultaneously which provides some speedups for interleaved rankings.
 This applies currently only to the ranking endpoint and not to the recommendation endpoint.
