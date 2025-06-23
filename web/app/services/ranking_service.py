@@ -170,12 +170,28 @@ def build_response(
         return build_simple_response(ranking)
 
     # If interleaved_ranking is provided
-    id_map = build_id_map(
+    base_map = build_id_map(
         current_app.config["RANKING_BASELINE_CONTAINER"], ranking_base, result_base
     )
-    id_map.update(build_id_map(container_name, ranking, result))
-    hits = [id_map[doc["docid"]] for doc in interleaved_ranking.items.values()]
 
+    exp_map = build_id_map(container_name, ranking, result)
+    
+    hits = []
+    for doc in interleaved_ranking.items.values():
+        docid = doc["docid"]
+        doc_type = doc.get("type")
+
+        if doc_type == "BASE":
+            hit = base_map.get(docid)
+        else:
+            hit = exp_map.get(docid)
+        
+        if hit is None:
+            current_app.logger.warning(f"Docid {docid} with type {doc_type} not found in corresponding map.")
+            continue
+
+        hits.append(hit)
+    
     base_path = current_app.config["SYSTEMS_CONFIG"][container_name_base].get(
         "hits_path"
     )
@@ -225,7 +241,7 @@ async def make_ranking(container_name, query, rpp, page, session_id):
         ranking, result = experimental
 
         interleaved_ranking = interleave_rankings(ranking, ranking_base)
-
+       
         response = build_response(
             ranking,
             container_name,
@@ -235,8 +251,9 @@ async def make_ranking(container_name, query, rpp, page, session_id):
             result,
             result_base,
         )
-
-    else:
+       
+    else:   
+       
         ranking, result = await query_system(
             container_name, query, rpp, page, session_id, type="EXP"
         )
