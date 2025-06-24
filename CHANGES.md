@@ -1,5 +1,10 @@
 # Release notes
-All notable changes to this project will be documented in this file.
+All notable changes to this project will be documented in this file. 
+
+## Generalize Recommender Endpoints
+The stella app differentiates between dataset and publication recommendations. While this was catered to the initial use in the Lilas lab, the goal is to support any type of recommendations. Therefore, the recommender endpoint was simplified so that no specific types are supported. Instead of `recommendations/datasets` and `recommendations/publications` simply the `recommendations` endpoint can now be used. 
+
+Additionally, this helps to maintain the stella-app because the `recommendations` endpoint now also uses the `result_service` like the `ranking` endpoint as well. This means that concurrent requests and custom return formats are also available for recommendations now.
 
 ## Update Simulate script
 Initially, there was a issue in running the simulate script fully, issue was there was system name mentioned which is not existing in our system so it is changed to relevant system name and fixes the issue we have with simulate script.

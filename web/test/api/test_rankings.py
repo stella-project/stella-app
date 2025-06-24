@@ -1,9 +1,11 @@
 import os
+
 import pytest
+
 from ..create_test_data import (
     create_feedbacks,
-    create_return_experimental,
     create_return_base,
+    create_return_experimental,
 )
 
 running_in_ci = os.getenv("CI") == "true"
@@ -28,7 +30,7 @@ class TestRanking:
 
     def test_ranking(
         self,
-        mock_request_results,
+        mock_request_system,
         client,
         results,
         sessions,
@@ -47,7 +49,7 @@ class TestRanking:
 
     def test_ranking_fixed_container(
         self,
-        mock_request_results,
+        mock_request_base_system,
         client,
         results,
         sessions,
@@ -68,27 +70,137 @@ class TestRanking:
         ranking = [r["docid"] for r in data["body"].values()]
         assert ranking == response["itemlist"]
 
-
-@pytest.mark.skipif(
-    running_in_ci, reason="Test requires Docker and will not run in CI environment"
-)
-def test_ranking_interleaved(
-    app, client, db_session, results, sessions, mock_request_results
-):
-    app.config["INTERLEAVE"] = True
-    query_params = {"query": "Test Query"}
-    result = client.get("/stella/api/v1/ranking", query_string=query_params)
-
-    print(result)
-    data = result.json
-    assert 200 == result.status_code
-    assert "body" in data
-    # Given the randomness of the interleaving, we can only check for the keys
-    assert (
-        "_score" in data["body"][0]
-        or "_score" in data["body"][1]
-        or "_score" in data["body"][2]
+    @pytest.mark.skipif(
+        running_in_ci, reason="Test requires Docker and will not run in CI environment"
     )
+    def test_ranking_interleaved(
+        self,
+        app,
+        client,
+        db_session,
+        results,
+        sessions,
+        mock_request_system,
+        mock_request_base_system,
+    ):
+        """Test interleaved ranking with custom hits path in the experimental system"""
+        app.config["INTERLEAVE"] = True
+        query_params = {"query": "Test Query"}
+        result = client.get("/stella/api/v1/ranking", query_string=query_params)
+
+        data = result.json
+        assert 200 == result.status_code
+        # Assert that the structure follows the default STELLA response structure because the baseline system is default
+        assert list(data.keys()) == ["body", "header"]
+        assert list(data["header"].keys()) == [
+            "container",
+            "hits",
+            "page",
+            "q",
+            "rid",
+            "rpp",
+            "sid",
+        ]
+        for key, item in data["body"].items():
+            assert list(item.keys()) == ["docid", "type"]
+
+        # Assert we have interleaved results
+        assert len(data["body"].items()) == 10
+        assert len(data["header"]["container"].keys()) == 2
+
+        for key, item in data["body"].items():
+            if item["type"] == "BASE":
+                assert item["docid"] in [
+                    "doc1",
+                    "doc2",
+                    "doc3",
+                    "doc4",
+                    "doc5",
+                    "doc6",
+                    "doc7",
+                    "doc8",
+                    "doc9",
+                    "doc10",
+                ]
+            elif item["type"] == "EXP":
+                assert item["docid"] in [
+                    "10014322236",
+                    "10014446027",
+                    "10012813890",
+                    "10014564344",
+                    "10001423122",
+                    "10014505904",
+                    "10014445127",
+                    "10014549633",
+                    "10014549634",
+                    "10014575867",
+                ] @ pytest.mark.skipif(
+                    running_in_ci,
+                    reason="Test requires Docker and will not run in CI environment",
+                )
+
+    def test_ranking_interleaved(
+        self,
+        app,
+        client,
+        db_session,
+        results,
+        sessions,
+        mock_request_system,
+        mock_request_base_system,
+    ):
+        """Test interleaved ranking with custom hits path in the experimental system"""
+        app.config["INTERLEAVE"] = True
+        query_params = {"query": "Test Query"}
+        result = client.get("/stella/api/v1/ranking", query_string=query_params)
+
+        data = result.json
+        assert 200 == result.status_code
+        # Assert that the structure follows the default STELLA response structure because the baseline system is default
+        assert list(data.keys()) == ["body", "header"]
+        assert list(data["header"].keys()) == [
+            "container",
+            "hits",
+            "page",
+            "q",
+            "rid",
+            "rpp",
+            "sid",
+        ]
+        for key, item in data["body"].items():
+            assert list(item.keys()) == ["docid", "type"]
+
+        # Assert we have interleaved results
+        assert len(data["body"].items()) == 10
+        assert len(data["header"]["container"].keys()) == 2
+
+        for key, item in data["body"].items():
+            if item["type"] == "BASE":
+                assert item["docid"] in [
+                    "doc1",
+                    "doc2",
+                    "doc3",
+                    "doc4",
+                    "doc5",
+                    "doc6",
+                    "doc7",
+                    "doc8",
+                    "doc9",
+                    "doc10",
+                ]
+            elif item["type"] == "EXP":
+                assert item["docid"] in [
+                    "10014322236",
+                    "10014446027",
+                    "10012813890",
+                    "10014564344",
+                    "10001423122",
+                    "10014505904",
+                    "10014445127",
+                    "10014549633",
+                    "10014549634",
+                    "10014575867",
+                ]
 
 
 class TestPostFeedback:

@@ -1,5 +1,6 @@
 import random
-from app.models import db, Result, System
+
+from app.models import Result, System, db
 from flask import current_app
 
 
