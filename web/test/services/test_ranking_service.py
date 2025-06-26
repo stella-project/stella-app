@@ -324,7 +324,7 @@ class TestBuildResponse:
             session_id=sessions["ranker"].id,
             system_role="EXP",
         )
-        interleaved_ranking = interleave_rankings(ranking, ranking_base)
+        interleaved_ranking = interleave_rankings(ranking, ranking_base, 'ranking', rpp=len(ranking_base.items))
 
         response = build_response(
             ranking=ranking,
@@ -431,7 +431,7 @@ class TestBuildResponse:
             system_role="EXP",
             system_type="recommendation",
         )
-        interleaved_ranking = interleave_rankings(ranking, ranking_base)
+        interleaved_ranking = interleave_rankings(ranking, ranking_base, 'recommendation', rpp=len(ranking_base.items))
 
         response = build_response(
             ranking=ranking,
@@ -478,7 +478,7 @@ class TestBuildResponse:
             system_role="EXP",
             system_type="recommendation",
         )
-        interleaved_ranking = interleave_rankings(ranking, ranking_base)
+        interleaved_ranking = interleave_rankings(ranking, ranking_base, 'recommendation', rpp=len(ranking_base.items))
 
         response = build_response(
             ranking=ranking,

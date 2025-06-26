@@ -4,57 +4,51 @@ from app.models import Result, System, db
 from flask import current_app
 
 
-def tdi(item_dict_base, item_dict_exp):
-    # team draft interleaving
-    # implementation taken from https://bitbucket.org/living-labs/ll-api/src/master/ll/core/interleave.py
-    result = {}
-    result_set = set([])
+def team_draft_interleave(result_list_base, result_list_exp, rpp):
+    """
+    Perform Team Draft Interleaving between two ranked lists.
+    
+    Args:
+        result_list_base (List[str]): Ranked list of document IDs from BASE.
+        result_list_exp (List[str]): Ranked list of document IDs from EXP.
 
-    max_length = len(item_dict_exp.values())
+    Returns:
+        interleaved (Dict): The interleaved list of document IDs.
+    """
+    # Initialize state
+    interleaved = {}
+    picked_docs = set()
 
-    pointer_exp = 0
-    pointer_base = 0
+    # Create iterators for both rankers
+    iter_base = iter(result_list_base)
+    iter_exp = iter(result_list_exp)
+    team_iters = {"BASE": iter_base, "EXP": iter_exp}
 
-    ranking_exp = list(item_dict_exp.values())
-    ranking_base = list(item_dict_base.values())
-    length_ranking_exp = len(ranking_exp)
-    length_ranking_base = len(ranking_base)
+    # Randomize who starts
+    teams = ["BASE", "EXP"]
+    random.shuffle(teams)
 
-    length_exp = 0
-    length_base = 0
+    unique_docs = set(result_list_base) | set(result_list_exp)
+    result_limit = min(len(unique_docs), rpp)
+    # Continue drafting until interleaved list is full
+    while len(interleaved) < result_limit:
+        for team in teams:
+            try:
+                # Keep trying to pick a new doc
+                while True:
+                    doc = next(team_iters[team])
+                    if doc not in picked_docs:
+                        interleaved[len(interleaved)+1] = {"docid": doc, "type": team}
+                        picked_docs.add(doc)
+                        break
+            except StopIteration:
+                continue
+            if len(interleaved) >= result_limit:
+                break
 
-    pos = 1
+    return interleaved
 
-    while (
-        pointer_exp < length_ranking_exp
-        and pointer_base < length_ranking_base
-        and len(result) < max_length
-    ):
-        if length_exp < length_base or (
-            length_exp == length_base and bool(random.getrandbits(1))
-        ):
-            result.update({pos: {"docid": ranking_exp[pointer_exp], "type": "EXP"}})
-            result_set.add(ranking_exp[pointer_exp])
-            length_exp += 1
-            pos += 1
-        else:
-            result.update({pos: {"docid": ranking_base[pointer_base], "type": "BASE"}})
-            result_set.add(ranking_base[pointer_base])
-            length_base += 1
-            pos += 1
-        while (
-            pointer_exp < length_ranking_exp and ranking_exp[pointer_exp] in result_set
-        ):
-            pointer_exp += 1
-        while (
-            pointer_base < length_ranking_base
-            and ranking_base[pointer_base] in result_set
-        ):
-            pointer_base += 1
-    return result
-
-
-def interleave_rankings(ranking_exp, ranking_base):
+def interleave_rankings(ranking_exp, ranking_base, system_type, rpp):
     """
     Create interleaved ranking from experimental and baseline system
     Used method: Team-Draft-Interleaving (TDI) [1]
@@ -68,22 +62,22 @@ def interleave_rankings(ranking_exp, ranking_base):
     @return:                interleaved ranking (dict)
     """
     # Extract the IDs of the documents from the rankings for tdi
-    base = {k: v.get("docid") for k, v in ranking_base.items.items()}
-    exp = {k: v.get("docid") for k, v in ranking_exp.items.items()}
+    base = [v.get("docid") for v in ranking_base.items.values()]
+    exp = [v.get("docid") for v in ranking_exp.items.values()]
 
-    item_dict = tdi(base, exp)
+    item_dict = team_draft_interleave(base, exp, rpp)
 
     ranking = Result(
         session_id=ranking_exp.session_id,
         system_id=ranking_exp.system_id,
-        type="RANK",
+        type="RANK" if system_type == "ranking" else "REC",
         q=ranking_exp.q,
         q_date=ranking_exp.q_date,
         q_time=ranking_exp.q_time,
         num_found=ranking_exp.num_found,
         hits=ranking_base.num_found,
         page=ranking_exp.page,
-        rpp=ranking_exp.rpp,
+        rpp=rpp,
         items=item_dict,
     )
 

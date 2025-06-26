@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from app.services.interleave_service import tdi, interleave_rankings
+from app.services.interleave_service import interleave_rankings, team_draft_interleave
 from ..create_test_data import create_results
 
 possible_results = [
@@ -38,7 +38,7 @@ def test_tdi():
         2: "doc12",
         3: "doc13",
     }
-    interleaved_results = tdi(item_dict_base, item_dict_exp)
+    interleaved_results = team_draft_interleave([v for v in item_dict_base.values()], [v for v in item_dict_exp.values()], rpp=len(item_dict_base))
 
     # since the interleaving is random if both systems were utelized the same, there are multiple possible results
     assert interleaved_results in possible_results
@@ -61,7 +61,7 @@ def test_interleave_rankings(sessions):
         3: {"docid": "doc13", "type": "EXP"},
     }
 
-    interleaved_results = interleave_rankings(results_exp, results_base)
+    interleaved_results = interleave_rankings(results_exp, results_base, 'ranking', rpp=len(results_base.items))
     # The interleaved dict is added to the Result object which is a JSON type. Therefore the keys are konverted from int to str. Here we revert this conversion.
     interleaved_results = {int(k): v for k, v in interleaved_results.items.items()}
     assert interleaved_results in possible_results

@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Dict, Optional, Union
 
 import aiohttp
+from aiohttp import ClientError, ClientResponseError
 from app.models import Result, System
 from app.services.interleave_service import interleave_rankings
 from flask import current_app
@@ -42,13 +43,29 @@ async def request_results_from_container(
     assert system_type in ["ranking", "recommendation"], "Invalid system type"
 
     query_key = "item_id" if system_type == "recommendation" else "query"
-    async with session:
-        content = await session.get(
-            f"http://{container_name}:5000/{system_type}",
+
+    url = f"http://{container_name}:5000/{system_type}"
+
+    try:
+        async with session.get(
+            url,
             params={query_key: query, "rpp": rpp, "page": page},
-        )
-        assert content.status == 200, f"Error: {content.status}"
-        return await content.json()
+            timeout=aiohttp.ClientTimeout(total=3)  # optional: set your timeout
+        ) as response:
+            response.raise_for_status()
+            return await response.json()
+
+    except asyncio.TimeoutError:
+        current_app.logger.error(f"Timeout while trying to reach \"{container_name.upper()}\"")
+    except ClientResponseError as e:
+        current_app.logger.error(f"Client error with \"{container_name.upper()}\": {e.status} - {e.message}")
+    except ClientError as e:
+        current_app.logger.error(f"Connection error \"{container_name.upper()}\": {str(e)}")
+    except Exception as e:
+        current_app.logger.exception(f"Unexpected error \"{container_name.upper()}\": {str(e)}")
+
+    return {'item_id': query, 'itemlist': [], 'num_found': 0, 'page': page, 'rpp': rpp}  # fallback return
+
 
 
 def extract_hits(
@@ -65,7 +82,6 @@ def extract_hits(
     Returns:
         Union[Dict, list]: The extracted item dicts in the standardized stella format is returned and the hits list as in the original response.
     """
-
     # How docids are referenced in the result
     docid_key = current_app.config["SYSTEMS_CONFIG"][container_name].get(
         "docid", "docid"
@@ -80,7 +96,7 @@ def extract_hits(
     else:
         hits = hits_path.find(result)[0].value
 
-    if isinstance(hits[0], dict):  # Custom format
+    if len(hits) > 0 and isinstance(hits[0], dict):  # Custom format
         item_dict = {
             i + 1: {"docid": hits[i][docid_key], "type": system_role}
             for i in range(0, len(hits))
@@ -319,7 +335,7 @@ async def make_results(
         ranking_base, result_base = baseline
         ranking, result = experimental
 
-        interleaved_ranking = interleave_rankings(ranking, ranking_base)
+        interleaved_ranking = interleave_rankings(ranking, ranking_base, system_type, rpp)
 
         response = build_response(
             ranking=ranking,
