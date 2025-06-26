@@ -30,9 +30,13 @@ def create_new_session(container_name=None, sid=None, type=None):
     if type == "ranker":
         system_ranking = container_id
         system_recommendation = None
-    elif type == "recommender":
+    elif type == "recommendation":
         system_ranking = None
         system_recommendation = container_id
+    else:
+        raise ValueError(
+            "Invalid type. Must be 'ranker' or 'recommendation'."
+        )
 
     session = Session(
         id=sid,

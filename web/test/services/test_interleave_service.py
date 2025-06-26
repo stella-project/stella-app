@@ -60,7 +60,6 @@ def test_interleave_rankings(sessions):
         2: {"docid": "doc12", "type": "EXP"},
         3: {"docid": "doc13", "type": "EXP"},
     }
-    print(results_base.items.items())
 
     interleaved_results = interleave_rankings(results_exp, results_base)
     # The interleaved dict is added to the Result object which is a JSON type. Therefore the keys are konverted from int to str. Here we revert this conversion.

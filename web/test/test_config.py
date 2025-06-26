@@ -1,9 +1,9 @@
 import importlib
-import config
-import os
 import json
-from app import app
+import os
 
+import config
+from app import app
 
 JSON_CONFIG = {
     "recommender_base": {"type": "recommender", "base": True},
@@ -29,8 +29,6 @@ def test_load_conf_json():
     importlib.reload(app)
 
     app_instance = app.create_app()
-    print(app_instance.config["SYSTEMS_CONFIG"])
-    print(config.parse_systems_config(JSON_CONFIG)[-1])
 
     assert app_instance.config["RANKING_CONTAINER_NAMES"] == ["ranker_base", "ranker"]
     assert app_instance.config["RANKING_PRECOMPUTED_CONTAINER_NAMES"] == []

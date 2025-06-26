@@ -68,12 +68,12 @@ spec:
             - name: SYSTEMS_CONFIG
               value: |
                 {
-                    "gesis-rec-pyterrier": {"type": "recommender", "base": true},
-                    "gesis-rec-pyserini": {"type": "recommender"},
-                    "gesis-rank-pyserini-base": {"type": "ranker", "base": true},
-                    "gesis-rank-pyserini": {"type": "ranker"}
+                    "gesis_rec_pyserini": {"type": "recommender"},
+                    "gesis_rec_pyterrier": {"type": "recommender", "base": true},
+                    "gesis_rank_pyserini": {"type": "ranker"},
+                    "gesis_rank_pyserini_base": {"type": "ranker", "base": true}
                 }
-          image: docker.io/dnztrkmn/stella-app:latest
+          image: stellaproject/stella-app:latest
           name: stella-app
           imagePullPolicy: IfNotPresent
           ports:
