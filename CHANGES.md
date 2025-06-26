@@ -6,6 +6,9 @@ The stella app differentiates between dataset and publication recommendations. W
 
 Additionally, this helps to maintain the stella-app because the `recommendations` endpoint now also uses the `result_service` like the `ranking` endpoint as well. This means that concurrent requests and custom return formats are also available for recommendations now.
 
+## Update Simulate script
+Initially, there was a issue in running the simulate script fully, issue was there was system name mentioned which is not existing in our system so it is changed to relevant system name and fixes the issue we have with simulate script.
+
 ## Make calls to base and experimental systems concurrently
 The interleaved ranking is created by combining a ranking from an experimental and a baseline system. These two systems were previously called one after another. Now both systems are called simultaneously which provides some speedups for interleaved rankings.
 This applies currently only to the ranking endpoint and not to the recommendation endpoint.
