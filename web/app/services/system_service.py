@@ -4,7 +4,13 @@ from flask import current_app
 
 
 def rest_index(container_name):
-    requests.get(f"http://{container_name}:5000/index")
+    if current_app.config["SYSTEMS_CONFIG"][container_name].get("url"):
+        # Use custom URL if provided in the config
+        url = current_app.config["SYSTEMS_CONFIG"][container_name]["url"] + "/index"
+    else:
+        url = f"http://{container_name}:5000/index"
+
+    requests.get(url)
 
 
 def get_least_served_system(query: str = "", type: str = "RANK") -> str:

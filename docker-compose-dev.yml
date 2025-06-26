@@ -36,10 +36,10 @@ services:
       # Systems
       SYSTEMS_CONFIG: |
         {
-            "gesis_rec_pyserini": {"type": "recommender"},
-            "gesis_rec_pyterrier": {"type": "recommender", "base": true},
-            "gesis_rank_pyserini": {"type": "ranker"},
-            "gesis_rank_pyserini_base": {"type": "ranker", "base": true}
+            "gesis_rec_pyserini": {"type": "recommender", "url": "http://gesis_rec_pyserini:5000"},
+            "gesis_rec_pyterrier": {"type": "recommender", "base": true, "url": "http://gesis_rec_pyterrier:5000"},
+            "gesis_rank_pyserini": {"type": "ranker", "url": "http://gesis_rank_pyserini:5000"},
+            "gesis_rank_pyserini_base": {"type": "ranker", "base": true, "url": "http://gesis_rank_pyserini_base:5000"}
         }
       # Stella Server
       STELLA_SERVER_ADDRESS: http://stella-server:8000

@@ -44,7 +44,11 @@ async def request_results_from_container(
 
     query_key = "item_id" if system_type == "recommendation" else "query"
 
-    url = f"http://{container_name}:5000/{system_type}"
+    if current_app.config["SYSTEMS_CONFIG"][container_name].get("url"):
+        # Use custom URL if provided in the config
+        url = current_app.config["SYSTEMS_CONFIG"][container_name]["url"] + f"/{system_type}"
+    else:
+        url = f"http://{container_name}:5000/{system_type}"
 
     try:
         async with session.get(
