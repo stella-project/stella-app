@@ -246,7 +246,7 @@ def build_response(
     else:
         assert interleaved_ranking is not None, "Interleaved ranking is required"
         
-        base_map = build_id_map(current_app.config["RANKING_BASELINE_CONTAINER"], ranking_base, result_base)
+        base_map = build_id_map(container_name_base, ranking_base, result_base)
         exp_map = build_id_map(container_name, ranking, result)
 
         hits = []
