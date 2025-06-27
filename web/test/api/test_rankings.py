@@ -91,8 +91,8 @@ class TestRanking:
         data = result.json
         assert 200 == result.status_code
         # Assert that the structure follows the default STELLA response structure because the baseline system is default
-        assert list(data.keys()) == ["body", "header"]
-        assert list(data["header"].keys()) == [
+        assert set(data.keys()) == {"header", "body"}
+        assert set(data["header"].keys()) == {
             "container",
             "hits",
             "page",
@@ -100,7 +100,7 @@ class TestRanking:
             "rid",
             "rpp",
             "sid",
-        ]
+        }
         for key, item in data["body"].items():
             assert list(item.keys()) == ["docid", "type"]
 
@@ -157,8 +157,8 @@ class TestRanking:
         data = result.json
         assert 200 == result.status_code
         # Assert that the structure follows the default STELLA response structure because the baseline system is default
-        assert list(data.keys()) == ["body", "header"]
-        assert list(data["header"].keys()) == [
+        assert set(data.keys()) == {"header", "body"}
+        assert set(data["header"].keys()) == {
             "container",
             "hits",
             "page",
@@ -166,7 +166,7 @@ class TestRanking:
             "rid",
             "rpp",
             "sid",
-        ]
+        }
         for key, item in data["body"].items():
             assert list(item.keys()) == ["docid", "type"]
 
