@@ -1,6 +1,9 @@
 # Release notes
 All notable changes to this project will be documented in this file. 
 
+## Fix timezone warnings and cleanup dependencies
+The logged timestamps used CET time and relied on different dependencies to set the timezone. The dependencies were removed, and the logged queries now use UTC, which is more conventional. Further unnecessary dependencies were removed. 
+
 ## Generalize Recommender Endpoints
 The stella app differentiates between dataset and publication recommendations. While this was catered to the initial use in the Lilas lab, the goal is to support any type of recommendations. Therefore, the recommender endpoint was simplified so that no specific types are supported. Instead of `recommendations/datasets` and `recommendations/publications` simply the `recommendations` endpoint can now be used. 
 
