@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 from jsonpath_ng import parse
 
@@ -91,7 +91,7 @@ class Config:
     STELLA_SERVER_USERNAME = os.environ.get("STELLA_SERVER_USERNAME") or "GESIS"
 
     STELLA_SERVER_TOKEN = ""
-    TOKEN_EXPIRATION = datetime.now()
+    TOKEN_EXPIRATION = datetime.now(timezone.utc)
 
     # Load registered systems
     if os.environ.get("SYSTEMS_CONFIG"):

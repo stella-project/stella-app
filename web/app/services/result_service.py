@@ -1,17 +1,14 @@
 import asyncio
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Optional, Union
 
 import aiohttp
 from app.models import Result, System
 from app.services.interleave_service import interleave_rankings
 from flask import current_app
-from pytz import timezone
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.future import select
-
-tz = timezone("Europe/Berlin")
 
 
 async def request_results_from_container(
@@ -117,7 +114,7 @@ async def query_system(
     """
     current_app.logger.debug(f'Produce ranking with system: "{container_name}"')
 
-    q_date = datetime.now(tz).replace(tzinfo=None, microsecond=0)
+    q_date = datetime.now(timezone.utc).replace(tzinfo=None, microsecond=0)
     ts_start = time.time()
 
     # Get system ID and check for HEAD request

@@ -1,18 +1,16 @@
 import json
-import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import requests as req
 from app.extensions import scheduler
 from app.models import Feedback, Result, Session, System, db
 from flask import current_app
-from pytz import timezone
 
 
 def update_expired_sessions(sessions_not_exited):
     for session in sessions_not_exited:
-        tz = timezone("Europe/Berlin")
-        delta = datetime.now(tz).replace(tzinfo=None) - session.start
+        delta = datetime.now(timezone.utc) - session.start
+
         if delta.seconds > current_app.config["SESSION_EXPIRATION"]:
             complete = True
             feedbacks = Feedback.query.filter_by(session_id=session.id).all()
@@ -60,7 +58,7 @@ def update_token():
     r_json = json.loads(r.text)
     delta_exp = r_json.get("expiration")
     # get new token five min (300 s) before expiration
-    current_app.config["TOKEN_EXPIRATION"] = datetime.now() + timedelta(
+    current_app.config["TOKEN_EXPIRATION"] = datetime.now(timezone.utc) + timedelta(
         seconds=delta_exp - 300
     )
     current_app.config["STELLA_SERVER_TOKEN"] = r_json.get("token")
@@ -264,10 +262,9 @@ def check_db_sessions():
 
         sessions_exited = Session.query.filter_by(exit=True, sent=False).all()
 
-        if (
-            current_app.config["STELLA_SERVER_TOKEN"] is None
-            or current_app.config["TOKEN_EXPIRATION"] < datetime.now()
-        ):
+        if current_app.config["STELLA_SERVER_TOKEN"] is None or current_app.config[
+            "TOKEN_EXPIRATION"
+        ] < datetime.now(timezone.utc):
             update_token()
 
         if len(sessions_exited) > 0:

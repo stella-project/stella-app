@@ -4,8 +4,8 @@ from app.extensions import db
 class Session(db.Model):
     __tablename__ = "sessions"
     id = db.Column(db.String(64), primary_key=True)
-    start = db.Column(db.DateTime, nullable=True)
-    end = db.Column(db.DateTime, nullable=True)
+    start = db.Column(db.DateTime(timezone=True), nullable=True)
+    end = db.Column(db.DateTime(timezone=True), nullable=True)
     site_user = db.Column(db.String(64), index=True)
     system_ranking = db.Column(db.Integer, db.ForeignKey("systems.id"))
     system_recommendation = db.Column(db.Integer, db.ForeignKey("systems.id"))
@@ -22,7 +22,7 @@ class Result(db.Model):
     feedback_id = db.Column(db.Integer, db.ForeignKey("feedbacks.id"))
     type = db.Column(db.String(64), index=True)
     q = db.Column(db.String(512), index=True)
-    q_date = db.Column(db.DateTime, nullable=True)
+    q_date = db.Column(db.DateTime(timezone=True), nullable=True)
     q_time = db.Column(db.Integer)  # which datatype?
     num_found = db.Column(db.Integer)
     page = db.Column(db.Integer)
@@ -54,8 +54,8 @@ class Result(db.Model):
 class Feedback(db.Model):
     __tablename__ = "feedbacks"
     id = db.Column(db.Integer, primary_key=True)
-    start = db.Column(db.DateTime, nullable=True)
-    end = db.Column(db.DateTime, nullable=True)
+    start = db.Column(db.DateTime(timezone=True), nullable=True)
+    end = db.Column(db.DateTime(timezone=True), nullable=True)
     session_id = db.Column(db.String(64), db.ForeignKey("sessions.id"))
     interleave = db.Column(db.Boolean)
     results = db.relationship("Result", backref="feedback", lazy="dynamic")
