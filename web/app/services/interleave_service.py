@@ -5,6 +5,7 @@ from flask import current_app
 
 
 def team_draft_interleave(result_list_base, result_list_exp, rpp):
+    # implementation based on https://bitbucket.org/living-labs/ll-api/src/master/ll/core/interleave.py
     """
     Perform Team Draft Interleaving between two ranked lists.
     
