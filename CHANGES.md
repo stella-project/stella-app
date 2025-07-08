@@ -3,7 +3,17 @@ All notable changes to this project will be documented in this file.
 
 ## Configure System URLs
 
-Previously, the Stella-App accessed ranker/recommender systems using a fixed URL format: `http://{container_name}:5000`. Now, system URLs can be configured through the `SYSTEMS` environment variable in the docker-compose files. If the system URL is specified, the application will default to using `http://{container_name}:5000`.
+Previously, the Stella-App accessed ranker/recommender systems using a fixed URL format: `http://{container_name}:5000`. Now, system URLs can be configured through the `SYSTEMS` environment variable in the docker-compose files. If the system URL is not specified, the application will default to using `http://{container_name}:5000`.
+
+Example URL definition:
+
+SYSTEMS_CONFIG: |
+        {
+            "gesis_rec_pyserini": {"type": "recommender", "url": "http://gesis_rec_pyserini:5000"},
+            "gesis_rec_pyterrier": {"type": "recommender", "base": true, "url": "http://gesis_rec_pyterrier:5000"},
+            "gesis_rank_pyserini": {"type": "ranker", "url": "http://gesis_rank_pyserini:5000"},
+            "gesis_rank_pyserini_base": {"type": "ranker", "base": true, "url": "http://gesis_rank_pyserini_base:5000"}
+        }
 
 ## Generalize Recommender Endpoints
 The stella app differentiates between dataset and publication recommendations. While this was catered to the initial use in the Lilas lab, the goal is to support any type of recommendations. Therefore, the recommender endpoint was simplified so that no specific types are supported. Instead of `recommendations/datasets` and `recommendations/publications` simply the `recommendations` endpoint can now be used. 
