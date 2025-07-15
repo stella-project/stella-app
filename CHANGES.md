@@ -15,6 +15,14 @@ SYSTEMS_CONFIG: |
             "gesis_rank_pyserini_base": {"type": "ranker", "base": true, "url": "http://gesis_rank_pyserini_base:5000"}
         }
 
+
+## Interleaving made resilient
+Team draft interlaving has been updated so the Stella-App returns a result list even when a system:
+- is down or return an empty list
+- returns fewer results than expected
+- responds late 
+
+
 ## Generalize Recommender Endpoints
 The stella app differentiates between dataset and publication recommendations. While this was catered to the initial use in the Lilas lab, the goal is to support any type of recommendations. Therefore, the recommender endpoint was simplified so that no specific types are supported. Instead of `recommendations/datasets` and `recommendations/publications` simply the `recommendations` endpoint can now be used. 
 

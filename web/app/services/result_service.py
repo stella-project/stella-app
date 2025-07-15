@@ -249,15 +249,14 @@ def build_response(
         }
 
     if not current_app.config["INTERLEAVE"]:
-        # Not interleaved
+        # Not interleaved and custom returns
         if current_app.config["SYSTEMS_CONFIG"][container_name].get("hits_path"):
             current_app.logger.debug("Not interleaved, custom returns")
-            # custom returns
-
             return result
+        
         else:
+            # Not interleaved and no custom returns
             current_app.logger.debug("Not interleaved, no custom returns")
-            # no custom returns
             # TODO: this will always state the system type as EXP even if its a BASE system.
             # This can be a problem for A/B test configurations.
             return {
@@ -266,24 +265,28 @@ def build_response(
             }
     else:
         assert interleaved_ranking is not None, "Interleaved ranking is required"
-        # Interleaved
-        base_path = current_app.config["SYSTEMS_CONFIG"][container_name_base].get(
-            "hits_path"
-        )
-        if base_path:
-            current_app.logger.debug("Interleaved, custom returns")
-            # custom returns
-            id_map = build_id_map(
-                container_name_base,
-                ranking_base,
-                result_base,
-            )
-            id_map.update(build_id_map(container_name, ranking, result))
-            hits = [id_map[doc["docid"]] for doc in interleaved_ranking.items.values()]
+        
+        base_map = build_id_map(container_name_base, ranking_base, result_base)
+        exp_map = build_id_map(container_name, ranking, result)
 
+        hits = []
+        for doc in interleaved_ranking.items.values():
+            docid = doc["docid"]
+            doc_type = doc.get("type")
+            hit = (base_map if doc_type == "BASE" else exp_map).get(docid)
+            if hit: hits.append(hit)
+            else: current_app.logger.warning(f"Docid '{docid}' not found in {doc_type} map.")
+                
+        base_path = current_app.config["SYSTEMS_CONFIG"][container_name_base].get("hits_path")
+        
+        if base_path:
+            # Interleaved and custom returns
+            current_app.logger.debug("Interleaved, custom returns")
             base_path.update(result_base, hits)
             return result_base
+
         else:
+            # Interleaved and no custom returns
             current_app.logger.debug("Interleaved, no custom returns")
             container_names = {"exp": container_name, "base": container_name_base}
             return {

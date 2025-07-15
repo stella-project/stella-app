@@ -5,7 +5,7 @@ from app.models import Feedback, Result, Session, db
 from app.services.result_service import make_results
 from app.services.session_service import create_new_session
 from app.services.system_service import get_least_served_system
-from flask import Response, current_app, jsonify, request
+from flask import Response, current_app, jsonify, request, json
 from pytz import timezone
 
 from . import api
@@ -65,7 +65,7 @@ def ranking_from_db_rec(id: str) -> Tuple[Response, int]:
         Tuple[Response, int]: A tuple where the first element is a Flask JSON response containing a status message, and the second is the HTTP status code (201 or 400).
     """
     ranking = db.session.query(Result).get_or_404(id)
-    return jsonify(ranking.serialize)
+    return Response(json.dumps(ranking.serialize, sort_keys=False, ensure_ascii=False, indent=2), mimetype='application/json')
 
 
 @api.route("/recommendation", methods=["GET"])
@@ -101,4 +101,4 @@ def recommendation():
         )
     )
 
-    return jsonify(response)
+    return Response(json.dumps(response, sort_keys=False, ensure_ascii=False, indent=2), mimetype='application/json')
