@@ -1,6 +1,10 @@
 # Release notes
 All notable changes to this project will be documented in this file. 
 
+## Add Proxy Endpoint for Ranking
+The current ranking and recommendation endpoints demand a pre defined structure. The changes made to allow the "passthrough" of results are only one directional. They allow the systems to return arbitrary results. However, requests still needed to follow the "stella" structure with fixed fields for the query, rpp and page. The proxy endpoint enables to use the stella-app as a proxy that directly forwards all get parameters to the retrieval systems.
+
+
 ## Configure System URLs
 
 Previously, the Stella-App accessed ranker/recommender systems using a fixed URL format: `http://{container_name}:5000`. Now, system URLs can be configured through the `SYSTEMS` environment variable in the docker-compose files. If the system URL is not specified, the application will default to using `http://{container_name}:5000`.
