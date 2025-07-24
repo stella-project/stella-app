@@ -163,6 +163,30 @@ def mock_request_system(aio_mock):
 
 
 @pytest.fixture
+def mock_request_proxy_base_system(aio_mock):
+    """Fixture to mock aiohttp requests with predefined attributes."""
+    query = "{'fulltext': 'true', 'spellcheck': 'true', 'hl': 'on', 'q': 'subject:\"Literature review\"'}"
+    container_name = "ranker_base"
+    mock_url = f"http://{container_name}:5000/ranking?{query}"
+    mock_response = create_return_base()
+
+    aio_mock.get(mock_url, payload=mock_response, repeat=True)
+    return mock_response
+
+
+@pytest.fixture
+def mock_request_proxy_system(aio_mock):
+    """Fixture to mock aiohttp requests with non standard attributes."""
+    container_name = "ranker"
+    query = "{'fulltext': 'true', 'spellcheck': 'true', 'hl': 'on', 'q': 'subject:\"Literature review\"'}"
+    mock_url = f"http://{container_name}:5000/ranking?{query}"
+    mock_response = create_return_experimental()
+
+    aio_mock.get(mock_url, payload=mock_response, repeat=True)
+    return mock_response
+
+
+@pytest.fixture
 def mock_request_base_recommender(aio_mock):
     """Mock request to the baseline recommendation system."""
     container_name = "recommender_base"

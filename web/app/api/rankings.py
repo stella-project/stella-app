@@ -5,7 +5,7 @@ from app.services.profile_service import profile_route
 from app.services.result_service import make_results
 from app.services.session_service import create_new_session
 from app.services.system_service import get_least_served_system
-from flask import current_app, jsonify, request, json, Response
+from flask import Response, current_app, json, jsonify, request
 from pytz import timezone
 
 from . import api
@@ -55,7 +55,10 @@ def ranking_from_db(rid):
     """Get a ranking by its result id from the database.
     Tested: true"""
     ranking = db.session.query(Result).get_or_404(rid)
-    return Response(json.dumps(ranking.serialize, sort_keys=False, ensure_ascii=False, indent=2), mimetype='application/json')
+    return Response(
+        json.dumps(ranking.serialize, sort_keys=False, ensure_ascii=False, indent=2),
+        mimetype="application/json",
+    )
 
 
 @api.route("/ranking", methods=["GET"])
@@ -86,4 +89,40 @@ def ranking():
 
     response = asyncio.run(make_results(container_name, query, rpp, page, session_id))
 
-    return Response(json.dumps(response, sort_keys=False, ensure_ascii=False, indent=2), mimetype='application/json')
+    return Response(
+        json.dumps(response, sort_keys=False, ensure_ascii=False, indent=2),
+        mimetype="application/json",
+    )
+
+
+@api.route("/ranking/proxy", methods=["GET"])
+def proxy_request():
+    """Ranking proxy endpoint. The endpoint passes the request including all query parameters to the systems that are compared. The parameters `page`, `rpp`, `sid`, and `container` are used to control the experiment if available. If they are not available, the default values `page=0` and `rpp=10` are used `container` falls back to the least served system and a new session is created for `sid`.
+
+    TODO: The control parameters could be mapped by the system config so that, for example, existing session IDs could be reused.
+    """
+    # Use default values for page and rpp
+    page = request.args.get("page", default=0, type=int)
+    rpp = request.args.get("rpp", default=10, type=int)
+
+    query = str(request.args.to_dict())  # for logging only
+
+    container_name = request.args.get("container", None)
+    if container_name is None:
+        current_app.logger.debug("No container name provided")
+        container_name = get_least_served_system(query)
+
+    session_id = request.args.get("sid", None)
+    session_exists = db.session.query(Session).filter_by(id=session_id).first()
+
+    if not session_exists:
+        session_id = create_new_session(container_name, type="ranker")
+
+    response = asyncio.run(
+        make_results(container_name, query, rpp, page, session_id, params=request.args)
+    )
+
+    return Response(
+        json.dumps(response, sort_keys=False, ensure_ascii=False, indent=2),
+        mimetype="application/json",
+    )
