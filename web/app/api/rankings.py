@@ -4,7 +4,8 @@ from app.models import Feedback, Result, Session, db
 from app.services.result_service import make_results
 from app.services.session_service import create_new_session
 from app.services.system_service import get_least_served_system
-from flask import current_app, jsonify, request
+from flask import current_app, jsonify, request, json, Response
+from pytz import timezone
 
 from . import api
 
@@ -51,7 +52,7 @@ def ranking_from_db(rid):
     """Get a ranking by its result id from the database.
     Tested: true"""
     ranking = db.session.query(Result).get_or_404(rid)
-    return jsonify(ranking.serialize)
+    return Response(json.dumps(ranking.serialize, sort_keys=False, ensure_ascii=False, indent=2), mimetype='application/json')
 
 
 @api.route("/ranking", methods=["GET"])
@@ -82,4 +83,4 @@ def ranking():
 
     response = asyncio.run(make_results(container_name, query, rpp, page, session_id))
 
-    return jsonify(response)
+    return Response(json.dumps(response, sort_keys=False, ensure_ascii=False, indent=2), mimetype='application/json')
