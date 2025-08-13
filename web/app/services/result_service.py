@@ -306,7 +306,7 @@ async def make_results(
     """Produce a ranking for the given query and container."""
     # Check cache first
     # ignore session_id for caching because it may not be available
-    cache_key = f"ranking:{container_name}:{query}:{rpp}:{page}"
+    cache_key = f"{system_type}:{container_name}:{query}:{rpp}:{page}"
     cached_result = await current_app.cache.get(cache_key)
     if cached_result:
         current_app.logger.debug("Ranking cache hit")
