@@ -96,7 +96,7 @@ def ranking():
 
 
 @api.route("/ranking/proxy", methods=["GET"])
-def proxy_request():
+def ranking_proxy_request():
     """Ranking proxy endpoint. The endpoint passes the request including all query parameters to the systems that are compared. The parameters `page`, `rpp`, `sid`, and `container` are used to control the experiment if available. If they are not available, the default values `page=0` and `rpp=10` are used `container` falls back to the least served system and a new session is created for `sid`.
 
     TODO: The control parameters could be mapped by the system config so that, for example, existing session IDs could be reused.
