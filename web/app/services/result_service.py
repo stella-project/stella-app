@@ -120,6 +120,7 @@ async def query_system(
     session_id: int,
     system_role: str = "EXP",
     system_type: str = "ranking",
+    cachedResult: int = None,
 ) -> Union[Result, Dict]:
     """Handle the requesting of a system container. This function increments the request counter for the system, gets the results from the container, extracts the hits, and saves the results to the database.
 
@@ -161,17 +162,24 @@ async def query_system(
             system.num_requests_no_head += 1
         await session.commit()
 
-    # Get the results from the container
-    async with aiohttp.ClientSession() as session:
-        result = await request_results_from_container(
-            session, container_name, query, rpp, page, system_type=system_type
-        )
+    
+    if cachedResult: 
+        # If there is a cached result, use it
+        result = cachedResult
+        item_dict, hits = extract_hits(result, container_name, system_role)
+        q_time = 0
+    else:
+        # Get the results from the container
+        async with aiohttp.ClientSession() as session:
+            result = await request_results_from_container(
+                session, container_name, query, rpp, page, system_type=system_type
+            )
 
-    item_dict, hits = extract_hits(result, container_name, system_role)
-
-    # calc query execution time in ms
-    ts_end = time.time()
-    q_time = round((ts_end - ts_start) * 1000)
+        item_dict, hits = extract_hits(result, container_name, system_role)
+        current_app.logger.debug(f'ITEM DICT: {item_dict}')
+        # calc query execution time in ms
+        ts_end = time.time()
+        q_time = round((ts_end - ts_start) * 1000)
 
     # Save the ranking to the database
     async with AsyncSessionLocal() as session:
@@ -309,14 +317,14 @@ async def make_results(
     cache_key = f"{system_type}:{container_name}:{query}:{rpp}:{page}"
     cached_result = await current_app.cache.get(cache_key)
     if cached_result:
-        current_app.logger.debug("Ranking cache hit")
-        return cached_result
+        current_app.logger.debug(f"Cache hit for {container_name.upper()}")
 
     if current_app.config["INTERLEAVE"]:
         if system_type == "ranking":
             container_name_base = current_app.config["RANKING_BASELINE_CONTAINER"]
         elif system_type == "recommendation":
             container_name_base = current_app.config["RECOMMENDER_BASELINE_CONTAINER"]
+
         current_app.logger.debug("Started gathering")
 
         baseline, experimental = await asyncio.gather(
@@ -328,6 +336,7 @@ async def make_results(
                 session_id,
                 system_role="BASE",
                 system_type=system_type,
+                cachedResult=cached_result[container_name_base] if cached_result and container_name_base else None,
             ),
             query_system(
                 container_name,
@@ -337,6 +346,7 @@ async def make_results(
                 session_id,
                 system_role="EXP",
                 system_type=system_type,
+                cachedResult=cached_result[container_name] if cached_result and container_name_base else None,
             ),
         )
         ranking_base, result_base = baseline
@@ -354,6 +364,12 @@ async def make_results(
             result_base=result_base,
         )
 
+        if len(ranking_base.items) > 0 and len(ranking.items) > 0:
+            # Cache the result for the container
+            current_app.logger.debug(f"Caching the result for {container_name.upper()}")
+            await current_app.cache.set(cache_key, {container_name: result, container_name_base: result_base}, ttl=current_app.config["SESSION_EXPIRATION"])
+
+
     else:
         ranking, result = await query_system(
             container_name,
@@ -363,10 +379,14 @@ async def make_results(
             session_id,
             system_role="EXP",
             system_type=system_type,
+            cachedResult=cached_result[container_name] if cached_result else None,
+
         )
         response = build_response(ranking, container_name, result=result)
 
-    await current_app.cache.set(
-        cache_key, response, ttl=current_app.config["SESSION_EXPIRATION"]
-    )
+        if len(ranking.items) > 0:
+            # Cache the result for the container
+            current_app.logger.debug(f"Caching the result for {container_name.upper()}")
+            await current_app.cache.set(cache_key, {container_name: result}, ttl=current_app.config["SESSION_EXPIRATION"])
+
     return response
