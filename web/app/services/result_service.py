@@ -76,13 +76,8 @@ async def request_results_from_container(
             f'Unexpected error "{container_name.upper()}": {str(e)}'
         )
 
-    return {
-        "itemid": query,
-        "itemlist": [],
-        "num_found": 0,
-        "page": page,
-        "rpp": rpp,
-    }  # fallback return
+    return {'itemid': query, 'itemlist': [], 'num_found': 0, 'page': page, 'rpp': rpp}  # fallback return
+
 
 
 def extract_hits(
