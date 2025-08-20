@@ -42,7 +42,7 @@ async def request_results_from_container(
 
     assert system_type in ["ranking", "recommendation"], "Invalid system type"
 
-    query_key = "item_id" if system_type == "recommendation" else "query"
+    query_key = "itemid" if system_type == "recommendation" else "query"
 
     if current_app.config["SYSTEMS_CONFIG"][container_name].get("url"):
         # Use custom URL if provided in the config
@@ -68,7 +68,7 @@ async def request_results_from_container(
     except Exception as e:
         current_app.logger.exception(f"Unexpected error \"{container_name.upper()}\": {str(e)}")
 
-    return {'item_id': query, 'itemlist': [], 'num_found': 0, 'page': page, 'rpp': rpp}  # fallback return
+    return {'itemid': query, 'itemlist': [], 'num_found': 0, 'page': page, 'rpp': rpp}  # fallback return
 
 
 
