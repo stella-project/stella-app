@@ -133,7 +133,7 @@ def create_return_recommendation_base():
         "rpp": rpp,
         "itemlist": itemlist,
         "num_found": len(itemlist),
-        "item_id": "test_item",
+        "itemid": "test_item",
     }
     return data
 
