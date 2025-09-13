@@ -165,7 +165,7 @@ class TestRankingProxy:
         sessions,
     ):
         """Test the ranking endpoint with a specified system."""
-        query_params = "{'fulltext': 'true', 'spellcheck': 'true', 'hl': 'on', 'q': 'subject:\"Literature review\", 'container': 'ranker_base'}"
+        query_params = "{'fulltext': 'true', 'spellcheck': 'true', 'hl': 'on', 'q': 'subject:\"Literature review\"', 'container': 'ranker_base'}"
         result = client.get(self.URL, query_string=query_params)
         data = result.json
 
