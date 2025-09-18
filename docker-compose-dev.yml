@@ -31,7 +31,7 @@ services:
       INTERVAL_DB_CHECK: 3
       SESSION_EXPIRATION: 6
       SESSION_KILL: 120
-      SENDFEEDBACK: "True"
+      SENDFEEDBACK: "False"
 
       # Systems
       SYSTEMS_CONFIG: |
@@ -85,6 +85,8 @@ services:
       - ./data/:/data/
     networks:
       - stella-shared
+    ports:
+      - "5000:5000"
 
   gesis_rank_pyserini:
     build: https://github.com/stella-project/gesis_rank_pyserini.git#main
@@ -93,6 +95,8 @@ services:
       - ./data/:/data/
     networks:
       - stella-shared
+    ports:
+      - "5001:5000"
 
   gesis_rec_pyterrier:
     build: https://github.com/stella-project/gesis_rec_pyterrier.git#main
@@ -101,6 +105,8 @@ services:
       - ./data/:/data/
     networks:
       - stella-shared
+    ports:
+      - "5002:5000"
 
   gesis_rec_pyserini:
     build: https://github.com/stella-project/gesis_rec_pyserini.git#main
@@ -109,3 +115,5 @@ services:
       - ./data/:/data/
     networks:
       - stella-shared
+    ports:
+      - "5003:5000"
