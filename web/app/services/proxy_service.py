@@ -167,6 +167,8 @@ async def make_results(
     if cached_result:
         current_app.logger.debug("Cache hit")
         return cached_result
+    else:
+        current_app.logger.debug("Cache misssssssssssssssssssss")
 
     if current_app.config["INTERLEAVE"]:
         # get the base system
@@ -221,7 +223,7 @@ async def make_results(
         )
         response = build_response(ranking, container_name, result=result)
 
-    if response.get("stella-hits"):
+    if response.get("hits"):
         await current_app.cache.set(
             cache_key, response, ttl=current_app.config["SESSION_EXPIRATION"]
         )
