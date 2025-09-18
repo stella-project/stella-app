@@ -89,3 +89,4 @@ aiohttp==3.11.12
 aiosqlite==0.20.0
 aiocache==0.12.3
 aioresponses==0.7.8
+pytest-asyncio==1.2.0
