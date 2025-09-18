@@ -39,8 +39,6 @@ def proxy(url):
     response = asyncio.run(
         make_results(container_name, session_id, url, params, system_type=system_type)
     )
-    current_app.logger.debug(f"Params: {params}")
-    current_app.logger.debug(f"Type of params: {type(params)}")
 
     return Response(
         json.dumps(response, sort_keys=False, ensure_ascii=False, indent=2),

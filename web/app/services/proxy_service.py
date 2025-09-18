@@ -38,21 +38,13 @@ async def request_results_from_container(
         f'Start getting results from container: "{container_name}"'
     )
 
-    # Dummy for test
-    # current_app.config["SYSTEMS_CONFIG"][container_name]["docid"] = "id"
-    # current_app.config["SYSTEMS_CONFIG"][container_name]["hits_path"] = parse(
-    #     "$.hits.hits"
-    # )
-
     if current_app.config["SYSTEMS_CONFIG"][container_name].get("url"):
         # Use custom URL if provided in the config
         url = current_app.config["SYSTEMS_CONFIG"][container_name]["url"]
     else:
 
         url = f"http://{container_name}:5000/{url}"
-        # url = f"https://api.econbiz.de/{url}"
 
-    current_app.logger.debug(f"URL: {url}")
     try:
 
         async with session.get(
@@ -168,13 +160,12 @@ async def make_results(
 ):
     """Produce a ranking for the given query and container."""
     # Check cache first
-    # ignore session_id for caching because it may not be available
     # we can only ensure that the same user gets the same results if we have a session_id
     cache_key = f"result:{session_id}:{url}:{params.to_dict(flat=True)}"
     current_app.logger.debug(f"Cache key: {cache_key}")
     cached_result = await current_app.cache.get(cache_key)
     if cached_result:
-        current_app.logger.debug("Ranking cache hit")
+        current_app.logger.debug("Cache hit")
         return cached_result
 
     if current_app.config["INTERLEAVE"]:
