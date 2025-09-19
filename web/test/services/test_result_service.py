@@ -292,6 +292,33 @@ class TestQuerySystem:
         for i in range(len(result.items)):
             assert list(result.items[str(i + 1)].keys()) == ["docid", "type"]
 
+    @pytest.mark.asyncio
+    async def test_query_system_long_query(
+        self, mock_request_system_long_query, sessions, db_session
+    ):
+        container_name = "ranker"
+        query = "a" * (Result.q.property.columns[0].type.length + 1)
+        rpp = 10
+        page = 0
+        result = await query_system(
+            container_name,
+            query,
+            rpp,
+            page,
+            sessions["ranker"].id,
+            system_role="EXP",
+            system_type="ranking",
+        )
+
+        result = (
+            db_session.query(Result).filter_by(session_id=sessions["ranker"].id).first()
+        )
+
+        # sqlite that is used for testing does not enforce length limits
+        # we need to compare to the actual length of the query
+        assert len(result.q) != len(query)
+        assert len(result.q) == Result.q.property.columns[0].type.length
+
 
 class TestBuildResponse:
     @pytest.mark.asyncio
@@ -324,7 +351,9 @@ class TestBuildResponse:
             session_id=sessions["ranker"].id,
             system_role="EXP",
         )
-        interleaved_ranking = interleave_rankings(ranking, ranking_base, 'ranking', rpp=len(ranking_base.items))
+        interleaved_ranking = interleave_rankings(
+            ranking, ranking_base, "ranking", rpp=len(ranking_base.items)
+        )
 
         response = build_response(
             ranking=ranking,
@@ -431,7 +460,9 @@ class TestBuildResponse:
             system_role="EXP",
             system_type="recommendation",
         )
-        interleaved_ranking = interleave_rankings(ranking, ranking_base, 'recommendation', rpp=len(ranking_base.items))
+        interleaved_ranking = interleave_rankings(
+            ranking, ranking_base, "recommendation", rpp=len(ranking_base.items)
+        )
 
         response = build_response(
             ranking=ranking,
@@ -478,7 +509,9 @@ class TestBuildResponse:
             system_role="EXP",
             system_type="recommendation",
         )
-        interleaved_ranking = interleave_rankings(ranking, ranking_base, 'recommendation', rpp=len(ranking_base.items))
+        interleaved_ranking = interleave_rankings(
+            ranking, ranking_base, "recommendation", rpp=len(ranking_base.items)
+        )
 
         response = build_response(
             ranking=ranking,
