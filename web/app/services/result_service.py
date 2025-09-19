@@ -255,13 +255,13 @@ def build_response(
     def build_header(ranking_obj, container_names):
         """Helper function to build the response header."""
         return {
-            "sid": ranking_obj.session_id,
-            "rid": ranking_obj.tdi,
-            "q": ranking_obj.q,
-            "page": ranking_obj.page,
-            "rpp": ranking_obj.rpp,
-            "hits": ranking_obj.num_found,
-            "container": container_names,
+            "stella-sid": ranking_obj.session_id,
+            "stella-rid": ranking_obj.tdi,
+            "stella-q": ranking_obj.q,
+            "stella-page": ranking_obj.page,
+            "stella-rpp": ranking_obj.rpp,
+            "stella-hits": ranking_obj.num_found,
+            "stella-container": container_names,
         }
 
     if not current_app.config["INTERLEAVE"]:
@@ -313,10 +313,7 @@ def build_response(
         else:
             # Interleaved and no custom returns
             current_app.logger.debug("Interleaved, no custom returns")
-            return {
-                "header": header,
-                "body": interleaved_ranking.items,
-            }
+            return {"header": header, "body": interleaved_ranking.items}
 
 
 async def make_results(
