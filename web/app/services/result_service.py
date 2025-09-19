@@ -46,7 +46,10 @@ async def request_results_from_container(
 
     if current_app.config["SYSTEMS_CONFIG"][container_name].get("url"):
         # Use custom URL if provided in the config
-        url = current_app.config["SYSTEMS_CONFIG"][container_name]["url"] + f"/{system_type}"
+        url = (
+            current_app.config["SYSTEMS_CONFIG"][container_name]["url"]
+            + f"/{system_type}"
+        )
     else:
         url = f"http://{container_name}:5000/{system_type}"
 
@@ -54,22 +57,35 @@ async def request_results_from_container(
         async with session.get(
             url,
             params={query_key: query, "rpp": rpp, "page": page},
-            timeout=aiohttp.ClientTimeout(total=3)  # optional: set your timeout
+            timeout=aiohttp.ClientTimeout(total=3),  # optional: set your timeout
         ) as response:
             response.raise_for_status()
             return await response.json()
 
     except asyncio.TimeoutError:
-        current_app.logger.error(f"Timeout while trying to reach \"{container_name.upper()}\"")
+        current_app.logger.error(
+            f'Timeout while trying to reach "{container_name.upper()}"'
+        )
     except ClientResponseError as e:
-        current_app.logger.error(f"Client error with \"{container_name.upper()}\": {e.status} - {e.message}")
+        current_app.logger.error(
+            f'Client error with "{container_name.upper()}": {e.status} - {e.message}'
+        )
     except ClientError as e:
-        current_app.logger.error(f"Connection error \"{container_name.upper()}\": {str(e)}")
+        current_app.logger.error(
+            f'Connection error "{container_name.upper()}": {str(e)}'
+        )
     except Exception as e:
-        current_app.logger.exception(f"Unexpected error \"{container_name.upper()}\": {str(e)}")
+        current_app.logger.exception(
+            f'Unexpected error "{container_name.upper()}": {str(e)}'
+        )
 
-    return {'item_id': query, 'itemlist': [], 'num_found': 0, 'page': page, 'rpp': rpp}  # fallback return
-
+    return {
+        "item_id": query,
+        "itemlist": [],
+        "num_found": 0,
+        "page": page,
+        "rpp": rpp,
+    }  # fallback return
 
 
 def extract_hits(
@@ -173,6 +189,9 @@ async def query_system(
     ts_end = time.time()
     q_time = round((ts_end - ts_start) * 1000)
 
+    # truncate long queries to fit in the database
+    query = query[: Result.q.property.columns[0].type.length]
+
     # Save the ranking to the database
     async with AsyncSessionLocal() as session:
         system_id = (
@@ -253,7 +272,7 @@ def build_response(
         if current_app.config["SYSTEMS_CONFIG"][container_name].get("hits_path"):
             current_app.logger.debug("Not interleaved, custom returns")
             return result
-        
+
         else:
             # Not interleaved and no custom returns
             current_app.logger.debug("Not interleaved, no custom returns")
@@ -265,7 +284,7 @@ def build_response(
             }
     else:
         assert interleaved_ranking is not None, "Interleaved ranking is required"
-        
+
         base_map = build_id_map(container_name_base, ranking_base, result_base)
         exp_map = build_id_map(container_name, ranking, result)
 
@@ -274,11 +293,17 @@ def build_response(
             docid = doc["docid"]
             doc_type = doc.get("type")
             hit = (base_map if doc_type == "BASE" else exp_map).get(docid)
-            if hit: hits.append(hit)
-            else: current_app.logger.warning(f"Docid '{docid}' not found in {doc_type} map.")
-                
-        base_path = current_app.config["SYSTEMS_CONFIG"][container_name_base].get("hits_path")
-        
+            if hit:
+                hits.append(hit)
+            else:
+                current_app.logger.warning(
+                    f"Docid '{docid}' not found in {doc_type} map."
+                )
+
+        base_path = current_app.config["SYSTEMS_CONFIG"][container_name_base].get(
+            "hits_path"
+        )
+
         if base_path:
             # Interleaved and custom returns
             current_app.logger.debug("Interleaved, custom returns")
@@ -342,7 +367,9 @@ async def make_results(
         ranking_base, result_base = baseline
         ranking, result = experimental
 
-        interleaved_ranking = interleave_rankings(ranking, ranking_base, system_type, rpp)
+        interleaved_ranking = interleave_rankings(
+            ranking, ranking_base, system_type, rpp
+        )
 
         response = build_response(
             ranking=ranking,
