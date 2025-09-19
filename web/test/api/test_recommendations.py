@@ -4,6 +4,7 @@ import os
 import pytest
 
 from ..create_test_data import (
+    STELLA_RETURN_PARAMETER,
     create_feedbacks,
     create_results,
     create_return_recommendation_base,
@@ -39,9 +40,18 @@ class TestRecommendation:
         assert data["hits"].keys() == {"hits", "max_score", "total"}
 
         response = create_return_recommendation_experimental()
-        assert data == response
 
-    def test_ranking_fixed_container(
+        # all data from the retrieval system should be in the final response
+        for key in response.keys():
+            assert data[key] == response[key]
+
+        # additionally the response should contain the standard STELLA return parameters
+        assert data.keys() == response.keys() | STELLA_RETURN_PARAMETER
+        assert data["stella-container"] == {"exp": "recommender"}
+        assert data["stella-hits"] == 10
+        assert data["stella-q"] == query_params["itemid"]
+
+    def test_recommendation_fixed_container(
         self, mock_request_base_recommender, client, results, sessions
     ):
         """Test the ranking endpoint with a specified system."""
@@ -51,10 +61,10 @@ class TestRecommendation:
         data = result.json
 
         assert 200 == result.status_code
-        assert data["header"]["q"] == query_params["itemid"]
-        assert data["header"]["container"].keys() == {"exp"}  # Only one system
+        assert data["header"]["stella-q"] == query_params["itemid"]
+        assert data["header"]["stella-container"].keys() == {"exp"}  # Only one system
         # System is base system
-        assert data["header"]["container"]["exp"] == "recommender_base"
+        assert data["header"]["stella-container"]["exp"] == "recommender_base"
 
         assert data["body"].keys() == {
             "1",

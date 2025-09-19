@@ -15,6 +15,7 @@ from app.services.result_service import (
 )
 
 from ..create_test_data import (
+    STELLA_RETURN_PARAMETER,
     create_return_base,
     create_return_experimental,
     create_return_recommendation_base,
@@ -340,7 +341,7 @@ class TestBuildResponse:
             result=result,
             result_base=result_base,
         )
-        assert list(response.keys()) == ["hits", "status"]
+        assert set(response.keys()) == {"hits", "status"} | STELLA_RETURN_PARAMETER
         for item in response["hits"]["hits"]:
             assert item["id"] in [
                 "10014322236",
@@ -370,8 +371,8 @@ class TestBuildResponse:
             ranking,
             "ranker_base",
         )
-        assert response["header"]["q"] == "Test Query"
-        assert response["header"]["rpp"] == 10
+        assert response["header"]["stella-q"] == "Test Query"
+        assert response["header"]["stella-rpp"] == 10
         for i in range(len(response["body"])):
             assert list(response["body"][i + 1].keys()) == ["docid", "type"]
 
@@ -392,7 +393,7 @@ class TestBuildResponse:
         response = build_response(
             ranking=ranking, container_name="ranker", result=result
         )
-        assert list(response.keys()) == ["hits", "status"]
+        assert set(response.keys()) == {"hits", "status"} | STELLA_RETURN_PARAMETER
         for item in response["hits"]["hits"]:
             assert item["id"] in [
                 "10014322236",
@@ -449,10 +450,10 @@ class TestBuildResponse:
             result=result,
             result_base=result_base,
         )
-        assert response["header"]["q"] == "test_item"
-        assert response["header"]["rpp"] == 10
-        assert response["header"]["container"]["base"] == "recommender_base"
-        assert response["header"]["container"]["exp"] == "recommender_base"
+        assert response["header"]["stella-q"] == "test_item"
+        assert response["header"]["stella-rpp"] == 10
+        assert response["header"]["stella-container"]["base"] == "recommender_base"
+        assert response["header"]["stella-container"]["exp"] == "recommender_base"
 
         assert len(response["body"]) == 10
 
@@ -498,7 +499,7 @@ class TestBuildResponse:
             result=result,
             result_base=result_base,
         )
-        assert list(response.keys()) == ["hits", "status"]
+        assert set(response.keys()) == {"hits", "status"} | STELLA_RETURN_PARAMETER
         for item in response["hits"]["hits"]:
             assert item["id"] in [
                 "10014322236",
@@ -531,8 +532,8 @@ class TestBuildResponse:
             ranking,
             "recommender_base",
         )
-        assert response["header"]["q"] == "test_item"
-        assert response["header"]["rpp"] == 10
+        assert response["header"]["stella-q"] == "test_item"
+        assert response["header"]["stella-rpp"] == 10
         for i in range(len(response["body"])):
             assert list(response["body"][i + 1].keys()) == ["docid", "type"]
 
@@ -553,7 +554,7 @@ class TestBuildResponse:
         response = build_response(
             ranking=ranking, container_name="recommender", result=result
         )
-        assert list(response.keys()) == ["hits", "status"]
+        assert set(response.keys()) == {"hits", "status"} | STELLA_RETURN_PARAMETER
         for item in response["hits"]["hits"]:
             assert item["id"] in [
                 "10014322236",

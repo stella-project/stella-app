@@ -345,10 +345,7 @@ def build_response(
         else:
             # Interleaved and no custom returns
             current_app.logger.debug("Interleaved, no custom returns")
-            return {
-                "header": header,
-                "body": interleaved_ranking.items,
-            }
+            return {"header": header, "body": interleaved_ranking.items}
 
 
 async def make_results(
