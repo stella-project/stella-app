@@ -286,6 +286,7 @@ def build_response(
         return id_map
 
     if not current_app.config["INTERLEAVE"]:
+        header = build_header(ranking, {"exp": container_name})
         # Not interleaved and custom returns
         if current_app.config["SYSTEMS_CONFIG"][container_name].get("hits_path"):
             current_app.logger.debug("Not interleaved, custom returns")
@@ -294,20 +295,19 @@ def build_response(
             ranking.custom_response = result
             db.session.add(ranking)
             db.session.commit()
-            return result
+            result["_stella"] = header
+            return result  # add header parameters directly to response
 
         else:
             # Not interleaved and no custom returns
             current_app.logger.debug("Not interleaved, no custom returns")
             # TODO: this will always state the system type as EXP even if its a BASE system.
             # This can be a problem for A/B test configurations.
-            return {
-                "header": build_header(ranking, experimental_system=container_name),
-                "body": ranking.items,
-            }
+            return {"header": header, "body": ranking.items}
     else:
         assert interleaved_ranking is not None, "Interleaved ranking is required"
 
+        # parse hits from both systems
         base_map = build_id_map(container_name_base, ranking_base, result_base)
         exp_map = build_id_map(container_name, ranking, result)
 
@@ -327,11 +327,14 @@ def build_response(
             "hits_path"
         )
 
+        container_names = {"exp": container_name, "base": container_name_base}
+        header = build_header(interleaved_ranking, container_names)
         if base_path:
             # Interleaved and custom returns
             current_app.logger.debug("Interleaved, custom returns")
             base_path.update(result_base, hits)
             result = result_base
+            result["_stella"] = header
 
             # add result to db object for consistency based on session_id,
             interleaved_ranking.custom_response = result
@@ -343,9 +346,7 @@ def build_response(
             # Interleaved and no custom returns
             current_app.logger.debug("Interleaved, no custom returns")
             return {
-                "header": build_header(
-                    interleaved_ranking, experimental_system=container_name
-                ),
+                "header": header,
                 "body": interleaved_ranking.items,
             }
 
