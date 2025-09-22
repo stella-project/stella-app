@@ -11,7 +11,7 @@ from app.services.proxy_service import (
 )
 from werkzeug.datastructures.structures import MultiDict
 
-from ..create_test_data import create_return_experimental
+from ..create_test_data import STELLA_RETURN_PARAMETER, create_return_experimental
 
 
 class TestRequestResults:
@@ -94,4 +94,11 @@ class TestMakeResults:
             system_type=system_type,
         )
 
-        assert result == create_return_experimental()
+        response = create_return_experimental()
+
+        for key in response.keys():
+            assert result[key] == response[key]
+
+        assert result.keys() == response.keys() | STELLA_RETURN_PARAMETER
+        assert result["stella-container"] == {"exp": "ranker"}
+        assert result["stella-hits"] == 10

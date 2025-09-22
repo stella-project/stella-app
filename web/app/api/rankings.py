@@ -85,7 +85,7 @@ def ranking():
     session_exists = db.session.query(Session).filter_by(id=session_id).first()
 
     if not session_exists:
-        session_id = create_new_session(container_name, session_id, type="ranker")
+        session_id = create_new_session(container_name, type="ranker")
 
     response = asyncio.run(make_results(container_name, query, rpp, page, session_id))
 
