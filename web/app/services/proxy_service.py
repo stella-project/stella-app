@@ -1,6 +1,9 @@
+##### Proxy service
+
+
 import asyncio
 import time
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, Optional
 
 import aiohttp
@@ -10,9 +13,12 @@ from app.services.interleave_service import interleave_rankings
 from app.services.result_service import build_response, extract_hits
 from flask import current_app
 from jsonpath_ng import parse
+from pytz import timezone
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.future import select
 from werkzeug.datastructures.structures import MultiDict
+
+tz = timezone("Europe/Berlin")
 
 
 async def request_results_from_container(
@@ -93,7 +99,7 @@ async def forward_request(
     """
     current_app.logger.debug(f'Produce ranking with system: "{container_name}"')
 
-    q_date = datetime.now(timezone.utc).replace(tzinfo=None, microsecond=0)
+    q_date = datetime.now(tz).replace(tzinfo=None, microsecond=0)
     ts_start = time.time()
 
     # Get system ID
@@ -159,24 +165,13 @@ async def make_results(
     system_type: str,
 ):
     """Produce a ranking for the given query and container."""
-    # Check cache first
-    # we can only ensure that the same user gets the same results if we have a session_id
-    cache_key = f"result:{session_id}:{url}:{params.to_dict(flat=True)}"
-    current_app.logger.debug(f"Cache key: {cache_key}")
-    cached_result = await current_app.cache.get(cache_key)
-    if cached_result:
-        current_app.logger.debug("Cache hit")
-        return cached_result
-
     if current_app.config["INTERLEAVE"]:
-        # get the base system
         if system_type == "ranking":
             container_name_base = current_app.config["RANKING_BASELINE_CONTAINER"]
         elif system_type == "recommendation":
             container_name_base = current_app.config["RECOMMENDER_BASELINE_CONTAINER"]
         current_app.logger.debug("Started gathering")
 
-        # Get results from base system
         baseline, experimental = await asyncio.gather(
             forward_request(
                 container_name=container_name_base,
@@ -220,9 +215,4 @@ async def make_results(
             system_role="EXP",
         )
         response = build_response(ranking, container_name, result=result)
-
-    if response.get("hits"):
-        await current_app.cache.set(
-            cache_key, response, ttl=current_app.config["SESSION_EXPIRATION"]
-        )
     return response
