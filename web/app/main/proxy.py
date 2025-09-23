@@ -1,4 +1,5 @@
 ########## proxy
+########## proxy
 
 
 import asyncio
@@ -43,7 +44,7 @@ def proxy(url):
     # without a session ID we can not guarantee consistency and avoid showing different users the same results
     if session_exists:
         current_app.logger.debug(f"Session {session_id} exists, try to get cached")
-        response = get_cached_response(query, page, session_id, container_name)
+        response = get_cached_response(query, page, session_id)
         if response:
             return Response(
                 json.dumps(response, sort_keys=False, ensure_ascii=False, indent=2),
