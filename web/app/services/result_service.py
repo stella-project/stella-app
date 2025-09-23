@@ -410,15 +410,31 @@ def get_cached_response(query, page, rpp, session_id, container_name):
     )
 
     if result and not expired:
+
         current_app.logger.debug("Found cached result, return it")
-        # update timestamp and add new record to db
-        result.q_date = datetime.now(tz).replace(tzinfo=None, microsecond=0)
-        db.session.add(result)
-        db.session.commit()
 
         if result.tdi:
             # get the interleaved ranking
             result = db.session.query(Result).filter_by(id=result.tdi).first()
+
+        # update timestamp and add as a new record to db
+        result_new = Result(
+            session_id=session_id,
+            system_id=result.system_id,
+            feedback_id=result.feedback_id,
+            type=result.type,
+            q=query,
+            q_date=datetime.now(tz).replace(tzinfo=None, microsecond=0),
+            q_time=result.q_time,
+            num_found=result.num_found,
+            page=page,
+            rpp=rpp,
+            items=result.items,
+            tdi=result.tdi,
+            custom_response=result.custom_response,
+        )
+        db.session.add(result_new)
+        db.session.commit()
 
         # Get container name
         system_id = (
@@ -433,20 +449,20 @@ def get_cached_response(query, page, rpp, session_id, container_name):
             "hits_path"
         ) or current_app.config["SYSTEMS_CONFIG"][baseline_container].get("hits_path"):
             # Custom response logic here
-            response = result.custom_response
+            response = result_new.custom_response
 
         else:
             response = {
                 "header": {
-                    "sid": result.session_id,
-                    "rid": result.id,
+                    "sid": result_new.session_id,
+                    "rid": result_new.id,
                     "q": query,
-                    "page": result.page,
-                    "rpp": result.rpp,
-                    "hits": result.hits,
+                    "page": result_new.page,
+                    "rpp": result_new.rpp,
+                    "hits": result_new.hits,
                     "container": {"exp": container_name},
                 },
-                "body": result.items,
+                "body": result_new.items,
             }
 
         return response
