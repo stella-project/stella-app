@@ -87,5 +87,4 @@ jsonpath-ng==1.6.1
 Flask-Caching==2.3.0
 aiohttp==3.11.12
 aiosqlite==0.20.0
-aiocache==0.12.3
 aioresponses==0.7.8

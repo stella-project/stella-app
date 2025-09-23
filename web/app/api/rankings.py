@@ -1,11 +1,12 @@
 import asyncio
+from datetime import datetime
 
-from app.models import Feedback, Result, Session, db
+from app.models import Feedback, Result, Session, System, db
 from app.services.profile_service import profile_route
-from app.services.result_service import make_results
+from app.services.result_service import get_cached_response, make_results
 from app.services.session_service import create_new_session
 from app.services.system_service import get_least_served_system
-from flask import current_app, jsonify, request, json, Response
+from flask import Response, current_app, json, jsonify, request
 from pytz import timezone
 
 from . import api
@@ -55,7 +56,10 @@ def ranking_from_db(rid):
     """Get a ranking by its result id from the database.
     Tested: true"""
     ranking = db.session.query(Result).get_or_404(rid)
-    return Response(json.dumps(ranking.serialize, sort_keys=False, ensure_ascii=False, indent=2), mimetype='application/json')
+    return Response(
+        json.dumps(ranking.serialize, sort_keys=False, ensure_ascii=False, indent=2),
+        mimetype="application/json",
+    )
 
 
 @api.route("/ranking", methods=["GET"])
@@ -74,16 +78,31 @@ def ranking():
         return "Missing query string", 400
 
     container_name = request.args.get("container", None)
+
+    # fetch result from db if it exists
+    session_id = request.args.get("sid", None)
+    session_exists = db.session.query(Session).filter_by(id=session_id).first()
+
+    # without a session ID we can not guarantee consistency and avoid showing different users the same results
+    if session_exists:
+        current_app.logger.debug(f"Session {session_id} exists, try to get cached")
+        response = get_cached_response(query, page, rpp, session_id, container_name)
+        if response:
+            return Response(
+                json.dumps(response, sort_keys=False, ensure_ascii=False, indent=2),
+                mimetype="application/json",
+            )
+
     if container_name is None:
         current_app.logger.debug("No container name provided")
         container_name = get_least_served_system(query)
 
-    session_id = request.args.get("sid", None)
-    session_exists = db.session.query(Session).filter_by(id=session_id).first()
-
-    if not session_exists:
-        session_id = create_new_session(container_name, type="ranker")
+    if not session_exists and session_id:
+        current_app.logger.debug(f"Session {session_id} does not exist, create new")
+        session_id = create_new_session(container_name, sid=session_id, type="ranker")
 
     response = asyncio.run(make_results(container_name, query, rpp, page, session_id))
-
-    return Response(json.dumps(response, sort_keys=False, ensure_ascii=False, indent=2), mimetype='application/json')
+    return Response(
+        json.dumps(response, sort_keys=False, ensure_ascii=False, indent=2),
+        mimetype="application/json",
+    )

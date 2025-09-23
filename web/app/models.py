@@ -23,13 +23,14 @@ class Result(db.Model):
     type = db.Column(db.String(64), index=True)
     q = db.Column(db.String(512), index=True)
     q_date = db.Column(db.DateTime, nullable=True)
-    q_time = db.Column(db.Integer)  # which datatype?
+    q_time = db.Column(db.Integer)
     num_found = db.Column(db.Integer)
     page = db.Column(db.Integer)
     rpp = db.Column(db.Integer)
     hits = db.Column(db.Integer)
     items = db.Column(db.JSON)
     tdi = db.Column(db.Integer, db.ForeignKey("results.id"))
+    custom_response = db.Column(db.JSON, nullable=True)
 
     @property
     def serialize(self):
@@ -48,6 +49,7 @@ class Result(db.Model):
             "hits": self.hits,
             "items": self.items,
             "tdi": self.tdi,
+            "custom_response": self.custom_response,
         }
 
 

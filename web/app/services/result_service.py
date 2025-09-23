@@ -5,7 +5,7 @@ from typing import Dict, Optional, Union
 
 import aiohttp
 from aiohttp import ClientError, ClientResponseError
-from app.models import Result, System
+from app.models import Result, Session, System, db
 from app.services.interleave_service import interleave_rankings
 from flask import current_app
 from pytz import timezone
@@ -46,7 +46,10 @@ async def request_results_from_container(
 
     if current_app.config["SYSTEMS_CONFIG"][container_name].get("url"):
         # Use custom URL if provided in the config
-        url = current_app.config["SYSTEMS_CONFIG"][container_name]["url"] + f"/{system_type}"
+        url = (
+            current_app.config["SYSTEMS_CONFIG"][container_name]["url"]
+            + f"/{system_type}"
+        )
     else:
         url = f"http://{container_name}:5000/{system_type}"
 
@@ -54,22 +57,35 @@ async def request_results_from_container(
         async with session.get(
             url,
             params={query_key: query, "rpp": rpp, "page": page},
-            timeout=aiohttp.ClientTimeout(total=3)  # optional: set your timeout
+            timeout=aiohttp.ClientTimeout(total=3),  # optional: set your timeout
         ) as response:
             response.raise_for_status()
             return await response.json()
 
     except asyncio.TimeoutError:
-        current_app.logger.error(f"Timeout while trying to reach \"{container_name.upper()}\"")
+        current_app.logger.error(
+            f'Timeout while trying to reach "{container_name.upper()}"'
+        )
     except ClientResponseError as e:
-        current_app.logger.error(f"Client error with \"{container_name.upper()}\": {e.status} - {e.message}")
+        current_app.logger.error(
+            f'Client error with "{container_name.upper()}": {e.status} - {e.message}'
+        )
     except ClientError as e:
-        current_app.logger.error(f"Connection error \"{container_name.upper()}\": {str(e)}")
+        current_app.logger.error(
+            f'Connection error "{container_name.upper()}": {str(e)}'
+        )
     except Exception as e:
-        current_app.logger.exception(f"Unexpected error \"{container_name.upper()}\": {str(e)}")
+        current_app.logger.exception(
+            f'Unexpected error "{container_name.upper()}": {str(e)}'
+        )
 
-    return {'item_id': query, 'itemlist': [], 'num_found': 0, 'page': page, 'rpp': rpp}  # fallback return
-
+    return {
+        "item_id": query,
+        "itemlist": [],
+        "num_found": 0,
+        "page": page,
+        "rpp": rpp,
+    }  # fallback return
 
 
 def extract_hits(
@@ -252,8 +268,13 @@ def build_response(
         # Not interleaved and custom returns
         if current_app.config["SYSTEMS_CONFIG"][container_name].get("hits_path"):
             current_app.logger.debug("Not interleaved, custom returns")
+
+            # add result to db object for consistency based on session_id,
+            ranking.custom_response = result
+            db.session.add(ranking)
+            db.session.commit()
             return result
-        
+
         else:
             # Not interleaved and no custom returns
             current_app.logger.debug("Not interleaved, no custom returns")
@@ -265,7 +286,7 @@ def build_response(
             }
     else:
         assert interleaved_ranking is not None, "Interleaved ranking is required"
-        
+
         base_map = build_id_map(container_name_base, ranking_base, result_base)
         exp_map = build_id_map(container_name, ranking, result)
 
@@ -274,16 +295,28 @@ def build_response(
             docid = doc["docid"]
             doc_type = doc.get("type")
             hit = (base_map if doc_type == "BASE" else exp_map).get(docid)
-            if hit: hits.append(hit)
-            else: current_app.logger.warning(f"Docid '{docid}' not found in {doc_type} map.")
-                
-        base_path = current_app.config["SYSTEMS_CONFIG"][container_name_base].get("hits_path")
-        
+            if hit:
+                hits.append(hit)
+            else:
+                current_app.logger.warning(
+                    f"Docid '{docid}' not found in {doc_type} map."
+                )
+
+        base_path = current_app.config["SYSTEMS_CONFIG"][container_name_base].get(
+            "hits_path"
+        )
+
         if base_path:
             # Interleaved and custom returns
             current_app.logger.debug("Interleaved, custom returns")
             base_path.update(result_base, hits)
-            return result_base
+            result = result_base
+
+            # add result to db object for consistency based on session_id,
+            interleaved_ranking.custom_response = result
+            db.session.add(interleaved_ranking)
+            db.session.commit()
+            return result
 
         else:
             # Interleaved and no custom returns
@@ -304,14 +337,6 @@ async def make_results(
     system_type: str = "ranking",
 ):
     """Produce a ranking for the given query and container."""
-    # Check cache first
-    # ignore session_id for caching because it may not be available
-    cache_key = f"ranking:{container_name}:{query}:{rpp}:{page}"
-    cached_result = await current_app.cache.get(cache_key)
-    if cached_result:
-        current_app.logger.debug("Ranking cache hit")
-        return cached_result
-
     if current_app.config["INTERLEAVE"]:
         if system_type == "ranking":
             container_name_base = current_app.config["RANKING_BASELINE_CONTAINER"]
@@ -342,7 +367,9 @@ async def make_results(
         ranking_base, result_base = baseline
         ranking, result = experimental
 
-        interleaved_ranking = interleave_rankings(ranking, ranking_base, system_type, rpp)
+        interleaved_ranking = interleave_rankings(
+            ranking, ranking_base, system_type, rpp
+        )
 
         response = build_response(
             ranking=ranking,
@@ -366,7 +393,62 @@ async def make_results(
         )
         response = build_response(ranking, container_name, result=result)
 
-    await current_app.cache.set(
-        cache_key, response, ttl=current_app.config["SESSION_EXPIRATION"]
-    )
     return response
+
+
+def get_cached_response(query, page, rpp, session_id, container_name):
+    # get the previous ranking
+    result = (
+        db.session.query(Result)
+        .filter_by(q=query, page=page, rpp=rpp, session_id=session_id)
+        .first()
+    )
+    delta = datetime.now(tz).replace(tzinfo=None) - result.q_date
+    expired = delta.seconds > current_app.config["SESSION_EXPIRATION"]
+    current_app.logger.debug(
+        f"Cached result expired: {expired}. Delta: {delta.seconds}s and limit is {current_app.config['SESSION_EXPIRATION']}s"
+    )
+
+    if result and not expired:
+        current_app.logger.debug("Found cached result, return it")
+        # update timestamp and add new record to db
+        result.q_date = datetime.now(tz).replace(tzinfo=None, microsecond=0)
+        db.session.add(result)
+        db.session.commit()
+
+        if result.tdi:
+            # get the interleaved ranking
+            result = db.session.query(Result).filter_by(id=result.tdi).first()
+
+        # Get container name
+        system_id = (
+            db.session.query(Session).filter_by(id=session_id).first().system_ranking
+        )
+        container_name_exp = (
+            db.session.query(System).filter_by(id=system_id).first().name
+        )
+        # check if we need a custom response
+        baseline_container = current_app.config["RANKING_BASELINE_CONTAINER"]
+        if current_app.config["SYSTEMS_CONFIG"][container_name_exp].get(
+            "hits_path"
+        ) or current_app.config["SYSTEMS_CONFIG"][baseline_container].get("hits_path"):
+            # Custom response logic here
+            response = result.custom_response
+
+        else:
+            response = {
+                "header": {
+                    "sid": result.session_id,
+                    "rid": result.id,
+                    "q": query,
+                    "page": result.page,
+                    "rpp": result.rpp,
+                    "hits": result.hits,
+                    "container": {"exp": container_name},
+                },
+                "body": result.items,
+            }
+
+        return response
+    else:
+        return None
