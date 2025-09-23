@@ -396,11 +396,11 @@ async def make_results(
     return response
 
 
-def get_cached_response(query, page, rpp, session_id, container_name):
+def get_cached_response(query, page, session_id):
     # get the previous ranking
     result = (
         db.session.query(Result)
-        .filter_by(q=query, page=page, rpp=rpp, session_id=session_id)
+        .filter_by(q=query, page=page, session_id=session_id)
         .first()
     )
     delta = datetime.now(tz).replace(tzinfo=None) - result.q_date
@@ -428,7 +428,7 @@ def get_cached_response(query, page, rpp, session_id, container_name):
             q_time=result.q_time,
             num_found=result.num_found,
             page=page,
-            rpp=rpp,
+            rpp=result.rpp,
             items=result.items,
             tdi=result.tdi,
             custom_response=result.custom_response,
@@ -460,7 +460,7 @@ def get_cached_response(query, page, rpp, session_id, container_name):
                     "page": result_new.page,
                     "rpp": result_new.rpp,
                     "hits": result_new.hits,
-                    "container": {"exp": container_name},
+                    "container": {"exp": container_name_exp},
                 },
                 "body": result_new.items,
             }
