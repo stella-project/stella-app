@@ -21,7 +21,7 @@ class Result(db.Model):
     system_id = db.Column(db.Integer, db.ForeignKey("systems.id"))
     feedback_id = db.Column(db.Integer, db.ForeignKey("feedbacks.id"))
     type = db.Column(db.String(64), index=True)
-    q = db.Column(db.String(512), index=True)
+    q = db.Column(db.String(4096), index=True)
     q_date = db.Column(db.DateTime, nullable=True)
     q_time = db.Column(db.Integer)  # which datatype?
     num_found = db.Column(db.Integer)
