@@ -1,9 +1,8 @@
 name: stella-dev
 
 networks:
-  stella-shared:
+  mlentory_network:
     external: true
-    name: stella-shared
 
 services:
   app:
@@ -14,13 +13,11 @@ services:
       - ./data:/data
       - ./web:/app
     expose:
-      - "8000"
+      - "8005"
     ports:
-      - "8080:8000"
+      - "8080:8005"
     networks:
-      stella-shared:
-        aliases:
-          - stella-app
+      - mlentory_network
     environment:
       # Config
       FLASK_APP: app/app
@@ -36,13 +33,13 @@ services:
       # Systems
       SYSTEMS_CONFIG: |
         {
-          "gesis_rec_pyserini": {"type": "recommender"},
-          "gesis_rec_pyterrier": {"type": "recommender", "base": true},
-          "gesis_rank_pyserini": {"type": "ranker"},
-          "gesis_rank_pyserini_base": {"type": "ranker", "base": true}
+            "mlentory_base": {"type": "ranker", "base": true, "docid": "db_identifier", "hits_path": "$.models"},
+            "mlentory_experiment": {"type": "ranker", "docid": "db_identifier", "hits_path": "$.models"}
         }
+
+
       # Stella Server
-      STELLA_SERVER_ADDRESS: http://stella-server:8000
+      STELLA_SERVER_ADDRESS: http://server:8000
       STELLA_SERVER_USER: site@stella-project.org
       STELLA_SERVER_PASS: pass
       STELLA_SERVER_USERNAME: site
@@ -53,13 +50,11 @@ services:
       POSTGRES_DB: postgres
       POSTGRES_URL: db-app:5430
 
-    command: flask run --host=0.0.0.0 --port=8000 --reload --debug
+    command: flask run --host=0.0.0.0 --port=8005 --reload --debug
     depends_on:
       - db-app
-      - gesis_rec_pyterrier
-      - gesis_rec_pyserini
-      - gesis_rank_pyserini_base
-      - gesis_rank_pyserini
+      - mlentory_base
+      - mlentory_experiment
 
   db-app:
     image: postgres
@@ -71,49 +66,29 @@ services:
     ports:
       - "5430:5430"
     networks:
-      - stella-shared
+      - mlentory_network
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: change-me
       POSTGRES_DB: postgres
     command: -p 5430
 
-  gesis_rank_pyserini_base:
-    build: https://github.com/stella-project/gesis_rank_pyserini_base.git#main
-    container_name: gesis_rank_pyserini_base
+  mlentory_base:
+    build: ../mlentory_base
+    container_name: mlentory_base
     volumes:
       - ./data/:/data/
     networks:
-      - stella-shared
+      - mlentory_network
     ports:
       - "5000:5000"
 
-  gesis_rank_pyserini:
-    build: https://github.com/stella-project/gesis_rank_pyserini.git#main
-    container_name: gesis_rank_pyserini
+  mlentory_experiment:
+    build: ../mlentory_experiment
+    container_name: mlentory_experiment
     volumes:
       - ./data/:/data/
     networks:
-      - stella-shared
+      - mlentory_network
     ports:
       - "5001:5000"
-
-  gesis_rec_pyterrier:
-    build: https://github.com/stella-project/gesis_rec_pyterrier.git#main
-    container_name: gesis_rec_pyterrier
-    volumes:
-      - ./data/:/data/
-    networks:
-      - stella-shared
-    ports:
-      - "5002:5000"
-
-  gesis_rec_pyserini:
-    build: https://github.com/stella-project/gesis_rec_pyserini.git#main
-    container_name: gesis_rec_pyserini
-    volumes:
-      - ./data/:/data/
-    networks:
-      - stella-shared
-    ports:
-      - "5003:5000"
