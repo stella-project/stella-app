@@ -7,13 +7,13 @@ from app.models import Feedback, Result, Session, System
 from app.services.session_service import create_new_session
 
 STELLA_RETURN_PARAMETER = {
-    "stella-sid",
-    "stella-rid",
-    "stella-q",
-    "stella-page",
-    "stella-rpp",
-    "stella-hits",
-    "stella-container",
+    "sid",
+    "rid",
+    "q",
+    "page",
+    "rpp",
+    "hits",
+    "container",
 }
 
 
