@@ -8,7 +8,7 @@ def team_draft_interleave(result_list_base, result_list_exp, rpp):
     # implementation based on https://bitbucket.org/living-labs/ll-api/src/master/ll/core/interleave.py
     """
     Perform Team Draft Interleaving between two ranked lists.
-    
+
     Args:
         result_list_base (List[str]): Ranked list of document IDs from BASE.
         result_list_exp (List[str]): Ranked list of document IDs from EXP.
@@ -39,7 +39,7 @@ def team_draft_interleave(result_list_base, result_list_exp, rpp):
                 while True:
                     doc = next(team_iters[team])
                     if doc not in picked_docs:
-                        interleaved[len(interleaved)+1] = {"docid": doc, "type": team}
+                        interleaved[len(interleaved) + 1] = {"docid": doc, "type": team}
                         picked_docs.add(doc)
                         break
             except StopIteration:
@@ -48,6 +48,7 @@ def team_draft_interleave(result_list_base, result_list_exp, rpp):
                 break
 
     return interleaved
+
 
 def interleave_rankings(ranking_exp, ranking_base, system_type, rpp):
     """
@@ -78,7 +79,7 @@ def interleave_rankings(ranking_exp, ranking_base, system_type, rpp):
         num_found=ranking_exp.num_found,
         hits=ranking_base.num_found,
         page=ranking_exp.page,
-        rpp=rpp,
+        rpp=ranking_exp.rpp,
         items=item_dict,
     )
 

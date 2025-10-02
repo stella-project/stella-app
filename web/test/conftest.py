@@ -203,3 +203,24 @@ def mock_request_recommender(aio_mock):
         "mock_url": mock_url,
         "mock_response": mock_response,
     }
+
+
+@pytest.fixture
+def mock_request_custom_system(aio_mock):
+    """Fixture to mock aiohttp requests for a system that does not follows the standard API."""
+    container_name = "system"
+    custom_query = "Test Query"
+    custom_rpp = 10
+    custom_page = 0
+    mock_url = f"http://ranker:5000/custom/path?custom-page={custom_page}&custom-query={custom_query}&custom-rpp={custom_rpp}"
+    mock_response = create_return_experimental()
+
+    aio_mock.get(mock_url, payload=mock_response, repeat=True)
+    return {
+        "container_name": container_name,
+        "custom-query": custom_query,
+        "custom-rpp": custom_rpp,
+        "custom-page": custom_page,
+        "mock_url": mock_url,
+        "mock_response": mock_response,
+    }
