@@ -21,6 +21,7 @@ async def request_results_from_container(
     query: str,
     rpp: int,
     page: int,
+    params: Optional[Dict] = None,
     system_type: str = "ranking",
 ) -> dict:
     """Request results from a system docker container. This is used for both ranking and recommendation systems.
@@ -50,10 +51,14 @@ async def request_results_from_container(
     else:
         url = f"http://{container_name}:5000/{system_type}"
 
+    if params:
+        request_params = params
+    else:
+        request_params = {query_key: query, "rpp": rpp, "page": page}
     try:
         async with session.get(
             url,
-            params={query_key: query, "rpp": rpp, "page": page},
+            params=request_params,
             timeout=aiohttp.ClientTimeout(total=3)  # optional: set your timeout
         ) as response:
             response.raise_for_status()
@@ -120,6 +125,7 @@ async def query_system(
     session_id: int,
     system_role: str = "EXP",
     system_type: str = "ranking",
+    params: Optional[Dict] = None,
 ) -> Union[Result, Dict]:
     """Handle the requesting of a system container. This function increments the request counter for the system, gets the results from the container, extracts the hits, and saves the results to the database.
 
@@ -164,7 +170,7 @@ async def query_system(
     # Get the results from the container
     async with aiohttp.ClientSession() as session:
         result = await request_results_from_container(
-            session, container_name, query, rpp, page, system_type=system_type
+            session, container_name, query, rpp, page, system_type=system_type, params=params
         )
 
     item_dict, hits = extract_hits(result, container_name, system_role)
@@ -302,6 +308,7 @@ async def make_results(
     page: str,
     session_id: int,
     system_type: str = "ranking",
+    params: Optional[Dict] = None,
 ):
     """Produce a ranking for the given query and container."""
     # Check cache first
@@ -328,6 +335,7 @@ async def make_results(
                 session_id,
                 system_role="BASE",
                 system_type=system_type,
+                params=params,
             ),
             query_system(
                 container_name,
@@ -337,6 +345,7 @@ async def make_results(
                 session_id,
                 system_role="EXP",
                 system_type=system_type,
+                params=params,
             ),
         )
         ranking_base, result_base = baseline
@@ -363,6 +372,7 @@ async def make_results(
             session_id,
             system_role="EXP",
             system_type=system_type,
+            params=params,
         )
         response = build_response(ranking, container_name, result=result)
 
