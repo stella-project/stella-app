@@ -27,11 +27,13 @@ jobs:
     - name: Generate coverage badge
       run: genbadge coverage -i coverage.xml -o coverage-badge.svg
     - name: Commit coverage badge
+      if: matrix.python-version == '3.12'
       uses: EndBug/add-and-commit@v9
       with:
           add: 'coverage-badge.svg coverage.xml'
           message: 'Update coverage badge and coverage XML [skip ci]'
           default_author: github_actions
+          force: true
     # - name: Test with pytest
     #   env:
     #     CI: true
