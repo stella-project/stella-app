@@ -4,7 +4,7 @@ import sys
 
 from app.api import api as api_blueprint
 from app.commands import index_systems, init_db_command, seed_db_command
-from app.extensions import bootstrap, cache, db, migrate, scheduler
+from app.extensions import bootstrap, db, migrate, scheduler
 from app.main import main as main_blueprint
 from config import config
 from flask import Flask
@@ -69,8 +69,6 @@ def register_extensions(app):
     db.init_app(app)
     migrate.init_app(app, db)
     bootstrap.init_app(app)
-    cache.init_app(app)
-
     return app
 
 

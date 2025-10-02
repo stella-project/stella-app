@@ -1,8 +1,11 @@
 # Release notes
 All notable changes to this project will be documented in this file. 
 
-## Configure System URLs
 
+## Move result caching to DB
+The caching that ensures that the same results are presented to the same user for the same session_id-query combination is moved to the DB. This avoids potential memory problems and allows us to log side reloads as an action. 
+
+## Configure System URLs
 Previously, the Stella-App accessed ranker/recommender systems using a fixed URL format: `http://{container_name}:5000`. Now, system URLs can be configured through the `SYSTEMS` environment variable in the docker-compose files. If the system URL is not specified, the application will default to using `http://{container_name}:5000`.
 
 Example URL definition:
