@@ -255,13 +255,13 @@ def build_response(
     def build_header(ranking_obj, container_names):
         """Helper function to build the response header."""
         return {
-            "stella-sid": ranking_obj.session_id,
-            "stella-rid": ranking_obj.tdi,
-            "stella-q": ranking_obj.q,
-            "stella-page": ranking_obj.page,
-            "stella-rpp": ranking_obj.rpp,
-            "stella-hits": ranking_obj.num_found,
-            "stella-container": container_names,
+            "sid": ranking_obj.session_id,
+            "rid": ranking_obj.tdi,
+            "q": ranking_obj.q,
+            "page": ranking_obj.page,
+            "rpp": ranking_obj.rpp,
+            "hits": ranking_obj.num_found,
+            "container": container_names,
         }
 
     if not current_app.config["INTERLEAVE"]:
@@ -269,7 +269,8 @@ def build_response(
         # Not interleaved and custom returns
         if current_app.config["SYSTEMS_CONFIG"][container_name].get("hits_path"):
             current_app.logger.debug("Not interleaved, custom returns")
-            return result | header  # add header parameters directly to response
+            result["_stella"] = header
+            return result
 
         else:
             # Not interleaved and no custom returns
@@ -305,11 +306,11 @@ def build_response(
         container_names = {"exp": container_name, "base": container_name_base}
         header = build_header(interleaved_ranking, container_names)
         if base_path:
-
             # Interleaved and custom returns
             current_app.logger.debug("Interleaved, custom returns")
             base_path.update(result_base, hits)
-            return result_base | header  # add header parameters directly to response
+            result_base["_stella"] = header
+            return result_base
         else:
             # Interleaved and no custom returns
             current_app.logger.debug("Interleaved, no custom returns")
