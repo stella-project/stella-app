@@ -46,10 +46,12 @@ class TestRecommendation:
             assert data[key] == response[key]
 
         # additionally the response should contain the standard STELLA return parameters
-        assert data.keys() == response.keys() | STELLA_RETURN_PARAMETER
-        assert data["stella-container"] == {"exp": "recommender"}
-        assert data["stella-hits"] == 10
-        assert data["stella-q"] == query_params["itemid"]
+        assert data.keys() == response.keys() | {"_stella"}
+        assert data["_stella"].keys() == STELLA_RETURN_PARAMETER
+        print(data)
+        assert data["_stella"]["container"] == {"exp": "recommender"}
+        assert data["_stella"]["hits"] == 10
+        assert data["_stella"]["q"] == query_params["itemid"]
 
     def test_recommendation_fixed_container(
         self, mock_request_base_recommender, client, results, sessions
@@ -61,10 +63,10 @@ class TestRecommendation:
         data = result.json
 
         assert 200 == result.status_code
-        assert data["header"]["stella-q"] == query_params["itemid"]
-        assert data["header"]["stella-container"].keys() == {"exp"}  # Only one system
+        assert data["header"]["q"] == query_params["itemid"]
+        assert data["header"]["container"].keys() == {"exp"}  # Only one system
         # System is base system
-        assert data["header"]["stella-container"]["exp"] == "recommender_base"
+        assert data["header"]["container"]["exp"] == "recommender_base"
 
         assert data["body"].keys() == {
             "1",
