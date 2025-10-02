@@ -12,13 +12,12 @@ from app.services.result_service import (
 )
 
 from ..create_test_data import (
+    STELLA_RETURN_PARAMETER,
     create_return_base,
     create_return_experimental,
     create_return_recommendation_base,
     create_return_recommendation_experimental,
 )
-
-running_in_ci = os.getenv("CI") == "true"
 
 
 class TestRequestResults:
@@ -233,9 +232,6 @@ class TestQuerySystem:
         for i in range(len(result.items)):
             assert list(result.items[str(i + 1)].keys()) == ["docid", "type"]
 
-    @pytest.mark.skipif(
-        running_in_ci, reason="Test requires Docker and will not run in CI environment"
-    )
     @pytest.mark.asyncio
     async def test_query_experimental_system(
         self, mock_request_system, sessions, db_session
@@ -324,7 +320,9 @@ class TestBuildResponse:
             session_id=sessions["ranker"].id,
             system_role="EXP",
         )
-        interleaved_ranking = interleave_rankings(ranking, ranking_base, 'ranking', rpp=len(ranking_base.items))
+        interleaved_ranking = interleave_rankings(
+            ranking, ranking_base, "ranking", rpp=len(ranking_base.items)
+        )
 
         response = build_response(
             ranking=ranking,
@@ -335,7 +333,8 @@ class TestBuildResponse:
             result=result,
             result_base=result_base,
         )
-        assert list(response.keys()) == ["hits", "status"]
+        assert set(response.keys()) == {"hits", "status", "_stella"}
+        assert set(response["_stella"].keys()) == STELLA_RETURN_PARAMETER
         for item in response["hits"]["hits"]:
             assert item["id"] in [
                 "10014322236",
@@ -387,7 +386,8 @@ class TestBuildResponse:
         response = build_response(
             ranking=ranking, container_name="ranker", result=result
         )
-        assert list(response.keys()) == ["hits", "status"]
+        assert set(response.keys()) == {"hits", "status", "_stella"}
+        assert set(response["_stella"].keys()) == STELLA_RETURN_PARAMETER
         for item in response["hits"]["hits"]:
             assert item["id"] in [
                 "10014322236",
@@ -431,7 +431,9 @@ class TestBuildResponse:
             system_role="EXP",
             system_type="recommendation",
         )
-        interleaved_ranking = interleave_rankings(ranking, ranking_base, 'recommendation', rpp=len(ranking_base.items))
+        interleaved_ranking = interleave_rankings(
+            ranking, ranking_base, "recommendation", rpp=len(ranking_base.items)
+        )
 
         response = build_response(
             ranking=ranking,
@@ -478,7 +480,9 @@ class TestBuildResponse:
             system_role="EXP",
             system_type="recommendation",
         )
-        interleaved_ranking = interleave_rankings(ranking, ranking_base, 'recommendation', rpp=len(ranking_base.items))
+        interleaved_ranking = interleave_rankings(
+            ranking, ranking_base, "recommendation", rpp=len(ranking_base.items)
+        )
 
         response = build_response(
             ranking=ranking,
@@ -489,7 +493,8 @@ class TestBuildResponse:
             result=result,
             result_base=result_base,
         )
-        assert list(response.keys()) == ["hits", "status"]
+        assert set(response.keys()) == {"hits", "status", "_stella"}
+        assert set(response["_stella"].keys()) == STELLA_RETURN_PARAMETER
         for item in response["hits"]["hits"]:
             assert item["id"] in [
                 "10014322236",
@@ -544,7 +549,8 @@ class TestBuildResponse:
         response = build_response(
             ranking=ranking, container_name="recommender", result=result
         )
-        assert list(response.keys()) == ["hits", "status"]
+        assert set(response.keys()) == {"hits", "status", "_stella"}
+        assert set(response["_stella"].keys()) == STELLA_RETURN_PARAMETER
         for item in response["hits"]["hits"]:
             assert item["id"] in [
                 "10014322236",
