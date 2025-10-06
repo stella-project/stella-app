@@ -214,6 +214,39 @@ async def query_system(
     return ranking, result
 
 
+def build_header(ranking: Result, experimental_system: Optional[str] = None) -> Dict:
+    """Build the header for the response including the stella specific arguments.
+
+    Args:
+        ranking (Result): The ranking result object for which the response should be created.
+        experimental_system (Optional[str], optional): The name of the experimental system can be directly provided if it is available. This saves a database call. Defaults to None.
+
+    Returns:
+        Dict: A dictionary containing the header information for the response.
+    """
+    if not experimental_system:
+        experimental_system = (
+            db.session.query(System).filter_by(id=ranking.system_id).first().name
+        )
+    if not current_app.config["INTERLEAVE"]:
+        container = {"exp": experimental_system}
+    else:
+        if ranking.type == "RANK":
+            container_name_base = current_app.config["RANKING_BASELINE_CONTAINER"]
+        elif ranking.type == "REC":
+            container_name_base = current_app.config["RECOMMENDER_BASELINE_CONTAINER"]
+        container = {"exp": experimental_system, "base": container_name_base}
+    return {
+        "sid": ranking.session_id,
+        "rid": ranking.tdi,
+        "q": ranking.q,
+        "page": ranking.page,
+        "rpp": ranking.rpp,
+        "hits": ranking.num_found,
+        "container": container,
+    }
+
+
 def build_response(
     ranking: Result,
     container_name: str,
@@ -252,18 +285,6 @@ def build_response(
             id_map = {hit[docid_name]: hit for hit in ranking.items.values()}
         return id_map
 
-    def build_header(ranking_obj, container_names):
-        """Helper function to build the response header."""
-        return {
-            "sid": ranking_obj.session_id,
-            "rid": ranking_obj.tdi,
-            "q": ranking_obj.q,
-            "page": ranking_obj.page,
-            "rpp": ranking_obj.rpp,
-            "hits": ranking_obj.num_found,
-            "container": container_names,
-        }
-
     if not current_app.config["INTERLEAVE"]:
         # Not interleaved and custom returns
         if current_app.config["SYSTEMS_CONFIG"][container_name].get("hits_path"):
@@ -281,7 +302,7 @@ def build_response(
             # TODO: this will always state the system type as EXP even if its a BASE system.
             # This can be a problem for A/B test configurations.
             return {
-                "header": build_header(ranking, {"exp": container_name}),
+                "header": build_header(ranking, experimental_system=container_name),
                 "body": ranking.items,
             }
     else:
@@ -321,9 +342,10 @@ def build_response(
         else:
             # Interleaved and no custom returns
             current_app.logger.debug("Interleaved, no custom returns")
-            container_names = {"exp": container_name, "base": container_name_base}
             return {
-                "header": build_header(ranking_base, container_names),
+                "header": build_header(
+                    interleaved_ranking, experimental_system=container_name
+                ),
                 "body": interleaved_ranking.items,
             }
 
@@ -414,72 +436,50 @@ def get_cached_response(query: str, page: int, session_id: str) -> Optional[Dict
         .first()
     )
     if not result:
-        current_app.logger.debug("No cached result found")
         return None
 
-    delta = datetime.now(tz).replace(tzinfo=None) - result.q_date
-    expired = (
-        delta.seconds > current_app.config["SESSION_EXPIRATION"]
-    )  # check if the result is expired
+    # check if the result is expired
+    delta = datetime.now() - result.q_date
+    expired = delta.total_seconds() > current_app.config["SESSION_EXPIRATION"]
     current_app.logger.debug(
-        f"Cached result expired: {expired}. Delta: {delta.seconds}s and limit is {current_app.config['SESSION_EXPIRATION']}s"
+        f"Cached result expired: {expired}. Delta: {delta.total_seconds()}s and limit is {current_app.config['SESSION_EXPIRATION']}s"
     )
-
-    if result and not expired:
+    if expired:
         current_app.logger.debug("Found cached result, return it")
-
-        if result.tdi:
-            # get the interleaved ranking
-            result = db.session.query(Result).filter_by(id=result.tdi).first()
-
-        # update timestamp and add as a new record to db
-        result_new = Result(
-            session_id=session_id,
-            system_id=result.system_id,
-            feedback_id=result.feedback_id,
-            type=result.type,
-            q=query,
-            q_date=datetime.now(tz).replace(tzinfo=None, microsecond=0),
-            q_time=result.q_time,
-            num_found=result.num_found,
-            page=page,
-            rpp=result.rpp,
-            items=result.items,
-            tdi=result.tdi,
-            custom_response=result.custom_response,
-        )
-        db.session.add(result_new)
-        db.session.commit()
-
-        # Get container name
-        system_id = (
-            db.session.query(Session).filter_by(id=session_id).first().system_ranking
-        )
-        container_name_exp = (
-            db.session.query(System).filter_by(id=system_id).first().name
-        )
-        # check if we need a custom response
-        baseline_container = current_app.config["RANKING_BASELINE_CONTAINER"]
-        if current_app.config["SYSTEMS_CONFIG"][container_name_exp].get(
-            "hits_path"
-        ) or current_app.config["SYSTEMS_CONFIG"][baseline_container].get("hits_path"):
-            # Custom response logic here
-            response = result_new.custom_response
-
-        else:
-            response = {
-                "header": {
-                    "sid": result_new.session_id,
-                    "rid": result_new.id,
-                    "q": query,
-                    "page": result_new.page,
-                    "rpp": result_new.rpp,
-                    "hits": result_new.hits,
-                    "container": {"exp": container_name_exp},
-                },
-                "body": result_new.items,
-            }
-
-        return response
-    else:
         return None
+
+    # get the interleaved ranking
+    if result.tdi:
+        result = db.session.query(Result).filter_by(id=result.tdi).first()
+        if not result:
+            current_app.logger.warning("Interleaved ranking not found")
+            return None
+
+    # update timestamp and add as a new record to db
+    result_new = Result(
+        session_id=session_id,
+        system_id=result.system_id,
+        feedback_id=result.feedback_id,
+        type=result.type,
+        q=query,
+        q_date=datetime.now(tz).replace(tzinfo=None, microsecond=0),
+        q_time=result.q_time,
+        num_found=result.num_found,
+        page=page,
+        rpp=result.rpp,
+        items=result.items,
+        tdi=result.tdi,
+        custom_response=result.custom_response,
+    )
+    db.session.add(result_new)
+    db.session.commit()
+
+    # Check if we need a custom response. Base system dictates if custom response is needed.
+    if result_new.custom_response:
+        response = result_new.custom_response
+    else:
+        response = {
+            "header": build_header(result_new),
+            "body": result_new.items,
+        }
+    return response
