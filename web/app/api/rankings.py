@@ -86,7 +86,7 @@ def ranking():
     # without a session ID we can not guarantee consistency and avoid showing different users the same results
     if session_exists:
         current_app.logger.debug(f"Session {session_id} exists, try to get cached")
-        response = get_cached_response(query, page, rpp, session_id, container_name)
+        response = get_cached_response(query, page, session_id)
         if response:
             return Response(
                 json.dumps(response, sort_keys=False, ensure_ascii=False, indent=2),
@@ -97,7 +97,7 @@ def ranking():
         current_app.logger.debug("No container name provided")
         container_name = get_least_served_system(query)
 
-    if not session_exists and session_id:
+    if not session_exists:
         current_app.logger.debug(f"Session {session_id} does not exist, create new")
         session_id = create_new_session(container_name, sid=session_id, type="ranker")
 
