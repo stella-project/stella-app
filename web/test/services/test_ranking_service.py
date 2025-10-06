@@ -576,6 +576,11 @@ class TestCachedResponse:
         )
         assert cached_result is None
 
+    # skip in CI because it relies on timezone settings of the machine running the test.
+    @pytest.mark.skipif(
+        running_in_ci,
+        reason="Test depends on the timezone settings of the machine running the test",
+    )
     def test_get_cached_response_valid(self, db_session, sessions, results, app):
         app.config["SESSION_EXPIRATION"] = 10  # 10 seconds for testing
 
