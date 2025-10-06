@@ -396,21 +396,36 @@ async def make_results(
     return response
 
 
-def get_cached_response(query, page, session_id):
+def get_cached_response(query: str, page: int, session_id: str) -> Optional[Dict]:
+    """Get a cached response for the given query, page, and session ID. Cached results are only returned if they are not older than the session expiration time. The cached result is returned with a new ranking ID and updated timestamp and the updated result is saved to the database. This is done to ensure consistent results throughout a session but still track when a user requests the ranking again.
+
+    Args:
+        query (str): Query string for the ranking.
+        page (int): Page number of the ranking.
+        session_id (str): Session ID for the ranking.
+
+    Returns:
+        Optional[Dict]: Cached response from the database if found, else None.
+    """
     # get the previous ranking
     result = (
         db.session.query(Result)
         .filter_by(q=query, page=page, session_id=session_id)
         .first()
     )
+    if not result:
+        current_app.logger.debug("No cached result found")
+        return None
+
     delta = datetime.now(tz).replace(tzinfo=None) - result.q_date
-    expired = delta.seconds > current_app.config["SESSION_EXPIRATION"]
+    expired = (
+        delta.seconds > current_app.config["SESSION_EXPIRATION"]
+    )  # check if the result is expired
     current_app.logger.debug(
         f"Cached result expired: {expired}. Delta: {delta.seconds}s and limit is {current_app.config['SESSION_EXPIRATION']}s"
     )
 
     if result and not expired:
-
         current_app.logger.debug("Found cached result, return it")
 
         if result.tdi:
