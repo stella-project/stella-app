@@ -2,10 +2,10 @@ import asyncio
 from typing import Tuple
 
 from app.models import Feedback, Result, Session, db
-from app.services.result_service import make_results
+from app.services.result_service import get_cached_response, make_results
 from app.services.session_service import create_new_session
 from app.services.system_service import get_least_served_system
-from flask import Response, current_app, jsonify, request, json
+from flask import Response, current_app, json, jsonify, request
 from pytz import timezone
 
 from . import api
@@ -65,7 +65,10 @@ def ranking_from_db_rec(id: str) -> Tuple[Response, int]:
         Tuple[Response, int]: A tuple where the first element is a Flask JSON response containing a status message, and the second is the HTTP status code (201 or 400).
     """
     ranking = db.session.query(Result).get_or_404(id)
-    return Response(json.dumps(ranking.serialize, sort_keys=False, ensure_ascii=False, indent=2), mimetype='application/json')
+    return Response(
+        json.dumps(ranking.serialize, sort_keys=False, ensure_ascii=False, indent=2),
+        mimetype="application/json",
+    )
 
 
 @api.route("/recommendation", methods=["GET"])
@@ -80,15 +83,27 @@ def recommendation():
 
     # System
     container_name = request.args.get("container", None)
+
+    # fetch result from db if it exists
+    session_id = request.args.get("sid", None)
+    session_exists = db.session.query(Session).filter_by(id=session_id).first()
+
+    if session_exists:
+        current_app.logger.debug(f"Session {session_id} exists, try to get cached")
+        response = get_cached_response(itemid, page, session_id)
+        if response:
+            return Response(
+                json.dumps(response, sort_keys=False, ensure_ascii=False, indent=2),
+                mimetype="application/json",
+            )
+
     if container_name is None:
         current_app.logger.debug("No container name provided")
         container_name = get_least_served_system(query=itemid, type="REC")
 
-    # Session
-    session_id = request.args.get("sid", None)
-    session_exists = db.session.query(Session).filter_by(id=session_id).first()
     if not session_exists:
-        session_id = create_new_session(container_name, type="recommendation")
+        current_app.logger.debug(f"Session {session_id} does not exist, create new")
+        session_id = create_new_session(container_name, sid=session_id, type="ranker")
 
     response = asyncio.run(
         make_results(
@@ -101,4 +116,7 @@ def recommendation():
         )
     )
 
-    return Response(json.dumps(response, sort_keys=False, ensure_ascii=False, indent=2), mimetype='application/json')
+    return Response(
+        json.dumps(response, sort_keys=False, ensure_ascii=False, indent=2),
+        mimetype="application/json",
+    )
