@@ -291,11 +291,12 @@ def build_response(
         if current_app.config["SYSTEMS_CONFIG"][container_name].get("hits_path"):
             current_app.logger.debug("Not interleaved, custom returns")
 
+            result["_stella"] = header
+
             # add result to db object for consistency based on session_id,
             ranking.custom_response = result
             db.session.add(ranking)
             db.session.commit()
-            result["_stella"] = header
             return result  # add header parameters directly to response
 
         else:
