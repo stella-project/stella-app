@@ -16,7 +16,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
@@ -39,7 +39,7 @@ jobs:
         genbadge coverage -i coverage.xml -o htmlcov/coverage-badge.svg
 
         COVERAGE=$(python -c "import xml.etree.ElementTree as ET; tree = ET.parse('coverage.xml'); root = tree.getroot(); print(f\"{float(root.attrib['line-rate']) * 100:.1f}\")")
-        echo "{\"schemaVersion\": 1, \"label\": \"coverage\", \"message\": \"${COVERAGE}%\", \"color\": \"brightgreen\"}" > htmlcov/coverage-badge.json
+        echo "{\"schemaVersion\": 1, \"label\": \"coverage\", \"message\": \"${COVERAGE}%\"}" > htmlcov/coverage-badge.json
 
     - name: Upload Pages artifact
       if: matrix.python-version == '3.10' && github.ref == 'refs/heads/docs/shields'

@@ -5,7 +5,7 @@
 [![Commit activity](https://img.shields.io/github/commit-activity/m/stella-project/stella-app?style=flat-square)](https://github.com/stella-project/stella-app/commits)
 [![Maintenance](https://img.shields.io/maintenance/yes/2025?style=flat-square)](https://github.com/stella-project/stella-app/graphs/contributors)
 [![License](https://img.shields.io/github/license/stella-project/stella-app?style=flat-square)](LICENSE)
-[![Coverage](https://img.shields.io/endpoint?url=https://stella-project.org/stella-app/coverage-badge.json)](https://stella-project.org/stella-app/coverage-badge.svg)
+[![Coverage](https://img.shields.io/endpoint?url=https://stella-project.org/stella-app/coverage-badge.json&style=flat-square)](https://stella-project.org/stella-app/coverage-badge.svg)
 
 The `stella-app` will be deployed at sites that want to conduct IR and recommender experiments and have them evaluated with real-world user interactions. The `stella-app` is a multi-container application composed of several experimental micro-services that are built with the [`stella-micro-template`](https://github.com/stella-project/stella-micro-template). It provides experimental rankings and recommendations and receives feedback data that will be posted to the central [`stella-server`](https://github.com/stella-project/stella-server).
 
