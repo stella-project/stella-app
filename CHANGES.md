@@ -1,6 +1,8 @@
 # Release notes
 All notable changes to this project will be documented in this file. 
 
+## Move STELLA Return Parameters to `_stella`
+The established parameters to control the experiments, e.g., `sid`, `container`, or `system-type` are moved to the `_stella` parameter in the response of the ranking and recommendation endpoints that use custom response formats.
 
 ## Move result caching to DB
 The caching that ensures that the same results are presented to the same user for the same session_id-query combination is moved to the DB. This avoids potential memory problems and allows us to log side reloads as an action. 
