@@ -22,6 +22,8 @@ from ..create_test_data import (
     create_return_recommendation_experimental,
 )
 
+running_in_ci = os.getenv("CI") == "true"
+
 
 class TestRequestResults:
     """Test the request_results_from_container function."""
@@ -426,11 +428,11 @@ class TestBuildResponse:
             system_type="recommendation",
         )
         ranking, result = await query_system(
-            container_name="recommender_base",
+            container_name="recommender",
             query="test_item",
             rpp=10,
             page=0,
-            session_id=sessions["recommender_base"].id,
+            session_id=sessions["recommender"].id,
             system_role="EXP",
             system_type="recommendation",
         )
@@ -440,17 +442,18 @@ class TestBuildResponse:
 
         response = build_response(
             ranking=ranking,
-            container_name="recommender_base",
+            container_name="recommender",
             interleaved_ranking=interleaved_ranking,
             ranking_base=ranking_base,
             container_name_base="recommender_base",
             result=result,
             result_base=result_base,
         )
+        print(response["header"]["container"])
         assert response["header"]["q"] == "test_item"
         assert response["header"]["rpp"] == 10
         assert response["header"]["container"]["base"] == "recommender_base"
-        assert response["header"]["container"]["exp"] == "recommender_base"
+        assert response["header"]["container"]["exp"] == "recommender"
 
         assert len(response["body"]) == 10
 
