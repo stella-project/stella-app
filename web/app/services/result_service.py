@@ -286,7 +286,7 @@ def build_response(
         return id_map
 
     if not current_app.config["INTERLEAVE"]:
-        header = build_header(ranking, {"exp": container_name})
+        header = build_header(ranking, container_name)
         # Not interleaved and custom returns
         if current_app.config["SYSTEMS_CONFIG"][container_name].get("hits_path"):
             current_app.logger.debug("Not interleaved, custom returns")
@@ -327,8 +327,7 @@ def build_response(
             "hits_path"
         )
 
-        container_names = {"exp": container_name, "base": container_name_base}
-        header = build_header(interleaved_ranking, container_names)
+        header = build_header(interleaved_ranking, container_name)
         if base_path:
             # Interleaved and custom returns
             current_app.logger.debug("Interleaved, custom returns")
