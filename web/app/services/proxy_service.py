@@ -40,10 +40,11 @@ async def request_results_from_container(
 
     if current_app.config["SYSTEMS_CONFIG"][container_name].get("url"):
         # Use custom URL if provided in the config
-        url = current_app.config["SYSTEMS_CONFIG"][container_name]["url"]
+        system_url = current_app.config["SYSTEMS_CONFIG"][container_name]["url"]
     else:
+        system_url = f"http://{container_name}:5000"
 
-        url = f"http://{container_name}:5000/{url}"
+    url = f"{system_url}/{url}"
 
     try:
 

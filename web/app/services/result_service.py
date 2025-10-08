@@ -444,7 +444,9 @@ def get_cached_response(query: str, page: int, session_id: str) -> Optional[Dict
         f"Cached result expired: {expired}. Delta: {delta.total_seconds()}s and limit is {current_app.config['SESSION_EXPIRATION']}s"
     )
     if expired:
-        current_app.logger.debug("Found cached result, return it")
+        current_app.logger.debug(
+            "Found cached result, but it is expired. Returning None."
+        )
         return None
 
     # get the interleaved ranking

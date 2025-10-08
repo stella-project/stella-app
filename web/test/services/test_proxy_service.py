@@ -29,7 +29,6 @@ class TestRequestResults:
                 url="custom/path",
                 params={"custom-query": query, "custom-rpp": rpp, "custom-page": page},
             )
-        print(response)
         assert response == create_return_experimental()
 
 
@@ -62,7 +61,6 @@ class TestForwardRequest:
         )
         assert result.rpp == None
         assert result.system_id == system.id
-        print(result.items)
         for i in range(len(result.items)):
             assert list(result.items[str(i + 1)].keys()) == ["docid", "type"]
 
