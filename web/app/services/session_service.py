@@ -1,10 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
-from app.models import db, Session, System
 
-from pytz import timezone
-
-tz = timezone("Europe/Berlin")
+from app.models import Session, System, db
 
 
 def create_new_session(container_name=None, sid=None, type=None):
@@ -34,13 +31,11 @@ def create_new_session(container_name=None, sid=None, type=None):
         system_ranking = None
         system_recommendation = container_id
     else:
-        raise ValueError(
-            "Invalid type. Must be 'ranker' or 'recommendation'."
-        )
+        raise ValueError("Invalid type. Must be 'ranker' or 'recommendation'.")
 
     session = Session(
         id=sid,
-        start=datetime.now(tz).replace(tzinfo=None),
+        start=datetime.now(timezone.utc).replace(tzinfo=None),
         system_ranking=system_ranking,
         system_recommendation=system_recommendation,
         site_user="unknown",
