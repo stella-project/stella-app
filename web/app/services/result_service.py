@@ -202,7 +202,7 @@ async def query_system(
             q=query,
             q_date=q_date,
             q_time=q_time,
-            num_found=len(hits),
+            num_found=result.get("num_found"),
             page=page,
             rpp=rpp,
             items=item_dict,
