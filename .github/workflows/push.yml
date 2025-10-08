@@ -33,7 +33,7 @@ jobs:
           pytest --cov=web --cov-report=html --cov-report=xml --cov-report=json:coverage-files.json
     
     - name: Generate coverage badge
-      if: matrix.python-version == '3.10'
+      if: matrix.python-version == '3.10' && github.ref == 'refs/heads/main'
       run: |
         mkdir -p htmlcov
         genbadge coverage -i coverage.xml -o htmlcov/coverage-badge.svg
@@ -42,13 +42,13 @@ jobs:
         echo "{\"schemaVersion\": 1, \"label\": \"coverage\", \"message\": \"${COVERAGE}%\"}" > htmlcov/coverage-badge.json
 
     - name: Upload Pages artifact
-      if: matrix.python-version == '3.10' && github.ref == 'refs/heads/docs/shields'
+      if: matrix.python-version == '3.10' && github.ref == 'refs/heads/main'
       uses: actions/upload-pages-artifact@v3
       with:
         path: ./htmlcov
 
   deploy:
-    if: github.ref == 'refs/heads/docs/shields'
+    if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     
