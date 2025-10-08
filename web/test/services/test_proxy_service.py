@@ -1,9 +1,6 @@
-import os
-
 import aiohttp
 import pytest
 from app.models import Result, System
-from app.services.interleave_service import interleave_rankings
 from app.services.proxy_service import (
     forward_request,
     make_results,
@@ -11,7 +8,7 @@ from app.services.proxy_service import (
 )
 from werkzeug.datastructures.structures import MultiDict
 
-from ..create_test_data import create_return_experimental
+from ..create_test_data import STELLA_RETURN_PARAMETER, create_return_experimental
 
 
 class TestRequestResults:
@@ -32,7 +29,6 @@ class TestRequestResults:
                 url="custom/path",
                 params={"custom-query": query, "custom-rpp": rpp, "custom-page": page},
             )
-        print(response)
         assert response == create_return_experimental()
 
 
@@ -61,11 +57,10 @@ class TestForwardRequest:
         )
         assert (
             result.q
-            == "custom/path{'custom-query': 'Test Query', 'custom-rpp': 10, 'custom-page': 0}"
+            == "custom/path?custom-query=Test Query&custom-rpp=10&custom-page=0"
         )
         assert result.rpp == None
         assert result.system_id == system.id
-        print(result.items)
         for i in range(len(result.items)):
             assert list(result.items[str(i + 1)].keys()) == ["docid", "type"]
 
@@ -93,5 +88,7 @@ class TestMakeResults:
             params=params,
             system_type=system_type,
         )
+        assert set(result["_stella"].keys()) == STELLA_RETURN_PARAMETER
 
+        result.pop("_stella", None)
         assert result == create_return_experimental()

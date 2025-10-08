@@ -1,10 +1,7 @@
-##### Proxy service
-
-
 import asyncio
 import time
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 from aiohttp import ClientError, ClientResponseError
@@ -12,7 +9,6 @@ from app.models import Result, System
 from app.services.interleave_service import interleave_rankings
 from app.services.result_service import build_response, extract_hits
 from flask import current_app
-from jsonpath_ng import parse
 from pytz import timezone
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.future import select
@@ -28,7 +24,6 @@ async def request_results_from_container(
     params: str,
 ) -> dict:
     """Request results from a system docker container. This is used for both ranking and recommendation systems.
-
     Args:
         session (aiohttp.ClientSession): Concurrent session object.
         container_name (str): Name of the container results are requested from.
@@ -36,7 +31,6 @@ async def request_results_from_container(
         rpp (int): Results Per Page (rpp).
         page (int): Page ID for pagination.
         system_type (str, optional): Type of the system (ranking or recommendation). Defaults to "ranking".
-
     Returns:
         dict: Dictionary containing the results from the system.
     """
@@ -46,10 +40,11 @@ async def request_results_from_container(
 
     if current_app.config["SYSTEMS_CONFIG"][container_name].get("url"):
         # Use custom URL if provided in the config
-        url = current_app.config["SYSTEMS_CONFIG"][container_name]["url"]
+        system_url = current_app.config["SYSTEMS_CONFIG"][container_name]["url"]
     else:
+        system_url = f"http://{container_name}:5000"
 
-        url = f"http://{container_name}:5000/{url}"
+    url = f"{system_url}/{url}"
 
     try:
 
@@ -85,6 +80,11 @@ async def request_results_from_container(
         "page": "page",
         "rpp": "rpp",
     }  # fallback return
+
+
+def build_query_string(url: str, params: MultiDict) -> str:
+    """Build a query string from a MultiDict of parameters."""
+    return url + "?" + "&".join(f"{k}={v}" for k, v in params.items())
 
 
 async def forward_request(
@@ -131,7 +131,8 @@ async def forward_request(
     ts_end = time.time()
     q_time = round((ts_end - ts_start) * 1000)
 
-    query = url + str(params)
+    query = build_query_string(url, params)
+
     # Save the ranking to the database
     async with AsyncSessionLocal() as session:
         system_id = (
