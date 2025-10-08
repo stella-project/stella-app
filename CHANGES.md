@@ -1,8 +1,19 @@
 # Release notes
 All notable changes to this project will be documented in this file. 
 
-## Configure System URLs
+## Improve Proxy Endpoint
+The new proxy endpoint is directly available by `/proxy`. This means it is not part of the standard stella-app API.
+The proxy directly forwards all requests directly to the systems registered to the stella app. The established parameters to control the experiments, e.g., `sid`, `container`, or `system-type` can still be used but need to be prefixed with `stella`.
 
+For interleaved experiments, this endpoint redirects the same request path and parameters to the experimental and baseline systems.
+
+## Move STELLA Return Parameters to `_stella`
+The established parameters to control the experiments, e.g., `sid`, `container`, or `system-type` are moved to the `_stella` parameter in the response of the ranking and recommendation endpoints that use custom response formats.
+
+## Move Result Caching to DB
+The caching that ensures that the same results are presented to the same user for the same session_id-query combination is moved to the DB. This avoids potential memory problems and allows us to log side reloads as an action. 
+
+## Configure System URLs
 Previously, the Stella-App accessed ranker/recommender systems using a fixed URL format: `http://{container_name}:5000`. Now, system URLs can be configured through the `SYSTEMS` environment variable in the docker-compose files. If the system URL is not specified, the application will default to using `http://{container_name}:5000`.
 
 Example URL definition:
@@ -16,7 +27,7 @@ SYSTEMS_CONFIG: |
         }
 
 
-## Interleaving made resilient
+## Interleaving Made Resilient
 Team draft interlaving has been updated so the Stella-App returns a result list even when a system:
 - is down or return an empty list
 - returns fewer results than expected

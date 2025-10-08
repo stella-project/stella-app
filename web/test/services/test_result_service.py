@@ -1,4 +1,6 @@
+import json
 import os
+import time
 
 import aiohttp
 import pytest
@@ -7,11 +9,13 @@ from app.services.interleave_service import interleave_rankings
 from app.services.result_service import (
     build_response,
     extract_hits,
+    get_cached_response,
     query_system,
     request_results_from_container,
 )
 
 from ..create_test_data import (
+    STELLA_RETURN_PARAMETER,
     create_return_base,
     create_return_experimental,
     create_return_recommendation_base,
@@ -233,9 +237,6 @@ class TestQuerySystem:
         for i in range(len(result.items)):
             assert list(result.items[str(i + 1)].keys()) == ["docid", "type"]
 
-    @pytest.mark.skipif(
-        running_in_ci, reason="Test requires Docker and will not run in CI environment"
-    )
     @pytest.mark.asyncio
     async def test_query_experimental_system(
         self, mock_request_system, sessions, db_session
@@ -324,7 +325,9 @@ class TestBuildResponse:
             session_id=sessions["ranker"].id,
             system_role="EXP",
         )
-        interleaved_ranking = interleave_rankings(ranking, ranking_base, 'ranking', rpp=len(ranking_base.items))
+        interleaved_ranking = interleave_rankings(
+            ranking, ranking_base, "ranking", rpp=len(ranking_base.items)
+        )
 
         response = build_response(
             ranking=ranking,
@@ -335,7 +338,8 @@ class TestBuildResponse:
             result=result,
             result_base=result_base,
         )
-        assert list(response.keys()) == ["hits", "status"]
+        assert set(response.keys()) == {"hits", "status", "_stella"}
+        assert set(response["_stella"].keys()) == STELLA_RETURN_PARAMETER
         for item in response["hits"]["hits"]:
             assert item["id"] in [
                 "10014322236",
@@ -387,7 +391,8 @@ class TestBuildResponse:
         response = build_response(
             ranking=ranking, container_name="ranker", result=result
         )
-        assert list(response.keys()) == ["hits", "status"]
+        assert set(response.keys()) == {"hits", "status", "_stella"}
+        assert set(response["_stella"].keys()) == STELLA_RETURN_PARAMETER
         for item in response["hits"]["hits"]:
             assert item["id"] in [
                 "10014322236",
@@ -423,19 +428,21 @@ class TestBuildResponse:
             system_type="recommendation",
         )
         ranking, result = await query_system(
-            container_name="recommender_base",
+            container_name="recommender",
             query="test_item",
             rpp=10,
             page=0,
-            session_id=sessions["recommender_base"].id,
+            session_id=sessions["recommender"].id,
             system_role="EXP",
             system_type="recommendation",
         )
-        interleaved_ranking = interleave_rankings(ranking, ranking_base, 'recommendation', rpp=len(ranking_base.items))
+        interleaved_ranking = interleave_rankings(
+            ranking, ranking_base, "recommendation", rpp=len(ranking_base.items)
+        )
 
         response = build_response(
             ranking=ranking,
-            container_name="recommender_base",
+            container_name="recommender",
             interleaved_ranking=interleaved_ranking,
             ranking_base=ranking_base,
             container_name_base="recommender_base",
@@ -445,7 +452,7 @@ class TestBuildResponse:
         assert response["header"]["q"] == "test_item"
         assert response["header"]["rpp"] == 10
         assert response["header"]["container"]["base"] == "recommender_base"
-        assert response["header"]["container"]["exp"] == "recommender_base"
+        assert response["header"]["container"]["exp"] == "recommender"
 
         assert len(response["body"]) == 10
 
@@ -478,7 +485,9 @@ class TestBuildResponse:
             system_role="EXP",
             system_type="recommendation",
         )
-        interleaved_ranking = interleave_rankings(ranking, ranking_base, 'recommendation', rpp=len(ranking_base.items))
+        interleaved_ranking = interleave_rankings(
+            ranking, ranking_base, "recommendation", rpp=len(ranking_base.items)
+        )
 
         response = build_response(
             ranking=ranking,
@@ -489,7 +498,8 @@ class TestBuildResponse:
             result=result,
             result_base=result_base,
         )
-        assert list(response.keys()) == ["hits", "status"]
+        assert set(response.keys()) == {"hits", "status", "_stella"}
+        assert set(response["_stella"].keys()) == STELLA_RETURN_PARAMETER
         for item in response["hits"]["hits"]:
             assert item["id"] in [
                 "10014322236",
@@ -544,7 +554,8 @@ class TestBuildResponse:
         response = build_response(
             ranking=ranking, container_name="recommender", result=result
         )
-        assert list(response.keys()) == ["hits", "status"]
+        assert set(response.keys()) == {"hits", "status", "_stella"}
+        assert set(response["_stella"].keys()) == STELLA_RETURN_PARAMETER
         for item in response["hits"]["hits"]:
             assert item["id"] in [
                 "10014322236",
@@ -558,3 +569,52 @@ class TestBuildResponse:
                 "10014549634",
                 "10014575867",
             ]
+
+
+class TestCachedResponse:
+    def test_get_cached_response_no_result(self, db_session):
+        cached_result = get_cached_response(
+            query="no result", page=0, session_id="no session"
+        )
+        assert cached_result is None
+
+    def test_get_cached_response_valid(self, db_session, sessions, results, app):
+        app.config["SESSION_EXPIRATION"] = 10  # 10 seconds for testing
+
+        session_id = sessions["ranker_base"].id
+        cached_result = get_cached_response(query="test", page=0, session_id=session_id)
+
+        assert cached_result is not None
+        assert cached_result["header"]["q"] == "test"
+        assert cached_result["header"]["page"] == 0
+        assert cached_result["header"]["sid"] == session_id
+        assert len(json.loads(cached_result["body"]).keys()) == 10
+
+    # skip in CI because it relies on timezone settings of the machine running the test.
+    @pytest.mark.skipif(
+        running_in_ci,
+        reason="Test depends on the timezone settings of the machine running the test",
+    )
+    def test_get_cached_response_expired(self, db_session, sessions, results, app):
+        app.config["SESSION_EXPIRATION"] = 1  # 1 second for testing
+
+        session_id = sessions["ranker_base"].id
+
+        time.sleep(2)  # wait for expiration
+
+        cached_result = get_cached_response(query="test", page=0, session_id=session_id)
+        assert cached_result is None
+
+    def test_get_cached_response_valid_custom_response(
+        self, db_session, sessions, results, app
+    ):
+        app.config["SESSION_EXPIRATION"] = 10  # 10 seconds for testing
+
+        session_id = sessions["ranker"].id
+
+        cached_result = get_cached_response(query="test", page=0, session_id=session_id)
+        assert cached_result is not None
+        cached_result = json.loads(cached_result)
+
+        assert cached_result["hits"]["hits"][0]["id"] == "10014322236"
+        assert cached_result["hits"]["total"] == 199073
