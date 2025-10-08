@@ -202,7 +202,7 @@ async def query_system(
             q=query,
             q_date=q_date,
             q_time=q_time,
-            num_found=len(hits),
+            num_found=result.get("num_found"),
             page=page,
             rpp=rpp,
             items=item_dict,
@@ -290,7 +290,8 @@ def build_response(
         # Not interleaved and custom returns
         if current_app.config["SYSTEMS_CONFIG"][container_name].get("hits_path"):
             current_app.logger.debug("Not interleaved, custom returns")
-
+            
+            header["body"] = ranking.items
             result["_stella"] = header
 
             # add result to db object for consistency based on session_id,
@@ -334,6 +335,7 @@ def build_response(
             current_app.logger.debug("Interleaved, custom returns")
             base_path.update(result_base, hits)
             result = result_base
+            header["body"] = interleaved_ranking.items
             result["_stella"] = header
 
             # add result to db object for consistency based on session_id,
@@ -434,6 +436,7 @@ def get_cached_response(query: str, page: int, session_id: str) -> Optional[Dict
         .first()
     )
     if not result:
+        current_app.logger.debug("No cached result found")
         return None
 
     # check if the result is expired
@@ -443,7 +446,9 @@ def get_cached_response(query: str, page: int, session_id: str) -> Optional[Dict
         f"Cached result expired: {expired}. Delta: {delta.total_seconds()}s and limit is {current_app.config['SESSION_EXPIRATION']}s"
     )
     if expired:
-        current_app.logger.debug("Found cached result, return it")
+        current_app.logger.debug(
+            "Found cached result, but it is expired. Returning None."
+        )
         return None
 
     # get the interleaved ranking

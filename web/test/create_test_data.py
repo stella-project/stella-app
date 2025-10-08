@@ -14,6 +14,7 @@ STELLA_RETURN_PARAMETER = {
     "rpp",
     "hits",
     "container",
+    "body"
 }
 
 

@@ -56,7 +56,7 @@ class TestRanking:
         assert data.keys() == response.keys() | {"_stella"}  # STELLA return parameters are in _stella key
         assert data["_stella"].keys() == STELLA_RETURN_PARAMETER
         assert data["_stella"]["container"] == {"exp": "ranker"}
-        assert data["_stella"]["hits"] == 10
+        assert data["_stella"]["hits"] == None
         assert data["_stella"]["q"] == query_params["query"]
 
     def test_ranking_fixed_container(

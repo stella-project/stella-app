@@ -48,9 +48,8 @@ class TestRecommendation:
         # additionally the response should contain the standard STELLA return parameters
         assert data.keys() == response.keys() | {"_stella"}
         assert data["_stella"].keys() == STELLA_RETURN_PARAMETER
-        print(data)
         assert data["_stella"]["container"] == {"exp": "recommender"}
-        assert data["_stella"]["hits"] == 10
+        assert data["_stella"]["hits"] == None
         assert data["_stella"]["q"] == query_params["itemid"]
 
     def test_recommendation_fixed_container(
