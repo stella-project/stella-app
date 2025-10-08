@@ -6,6 +6,16 @@ import time
 from app.models import Feedback, Result, Session, System
 from app.services.session_service import create_new_session
 
+STELLA_RETURN_PARAMETER = {
+    "sid",
+    "rid",
+    "q",
+    "page",
+    "rpp",
+    "hits",
+    "container",
+}
+
 
 def random_date(start, end, prop, format="%Y-%m-%d %H:%M:%S"):
     """Get a time at a proportion of a range of two formatted times.
