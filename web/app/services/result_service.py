@@ -290,7 +290,8 @@ def build_response(
         # Not interleaved and custom returns
         if current_app.config["SYSTEMS_CONFIG"][container_name].get("hits_path"):
             current_app.logger.debug("Not interleaved, custom returns")
-
+            
+            header["body"] = ranking.items
             result["_stella"] = header
 
             # add result to db object for consistency based on session_id,
@@ -334,6 +335,7 @@ def build_response(
             current_app.logger.debug("Interleaved, custom returns")
             base_path.update(result_base, hits)
             result = result_base
+            header["body"] = interleaved_ranking.items
             result["_stella"] = header
 
             # add result to db object for consistency based on session_id,
