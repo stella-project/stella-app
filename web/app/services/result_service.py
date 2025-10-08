@@ -434,6 +434,7 @@ def get_cached_response(query: str, page: int, session_id: str) -> Optional[Dict
         .first()
     )
     if not result:
+        current_app.logger.debug("No cached result found")
         return None
 
     # check if the result is expired
