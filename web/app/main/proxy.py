@@ -1,7 +1,7 @@
 import asyncio
 
 from app.models import Session, db
-from app.services.proxy_service import make_results
+from app.services.proxy_service import build_query_string, make_results
 from app.services.result_service import get_cached_response
 from app.services.session_service import create_new_session
 from app.services.system_service import get_least_served_system
@@ -30,7 +30,7 @@ def proxy(url):
     session_id = params.pop("stella-sid", None)
     session_exists = db.session.query(Session).filter_by(id=session_id).first()
 
-    query = url + str(params)
+    query = build_query_string(url, params)
 
     # without a session ID we can not guarantee consistency and avoid showing different users the same results
     if session_exists:

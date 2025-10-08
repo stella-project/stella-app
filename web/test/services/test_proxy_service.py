@@ -58,7 +58,7 @@ class TestForwardRequest:
         )
         assert (
             result.q
-            == "custom/path{'custom-query': 'Test Query', 'custom-rpp': 10, 'custom-page': 0}"
+            == "custom/path?custom-query=Test Query&custom-rpp=10&custom-page=0"
         )
         assert result.rpp == None
         assert result.system_id == system.id

@@ -81,6 +81,11 @@ async def request_results_from_container(
     }  # fallback return
 
 
+def build_query_string(url: str, params: MultiDict) -> str:
+    """Build a query string from a MultiDict of parameters."""
+    return url + "?" + "&".join(f"{k}={v}" for k, v in params.items())
+
+
 async def forward_request(
     container_name: str,
     url: str,
@@ -125,7 +130,8 @@ async def forward_request(
     ts_end = time.time()
     q_time = round((ts_end - ts_start) * 1000)
 
-    query = url + str(params)
+    query = build_query_string(url, params)
+
     # Save the ranking to the database
     async with AsyncSessionLocal() as session:
         system_id = (
