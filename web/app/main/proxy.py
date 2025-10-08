@@ -23,14 +23,14 @@ def proxy(url):
     """
     # extract stella specific parameters
     params = request.args.copy()  # copy to make them mutable
-    system_type = params.pop("stella-system-type", "ranker")
+    system_type = params.pop("stella-system-type", "ranking")
     page = params.pop("stella-page", None)
     container_name = params.pop("stella-container", None)
 
-    query = url + str(params)
-
     session_id = params.pop("stella-sid", None)
     session_exists = db.session.query(Session).filter_by(id=session_id).first()
+
+    query = url + str(params)
 
     # without a session ID we can not guarantee consistency and avoid showing different users the same results
     if session_exists:
@@ -47,10 +47,10 @@ def proxy(url):
         container_name = get_least_served_system()
 
     if not session_exists:
+        # TODO: `create_new_session` and `make_results` use different identifiers to distinguish ranking and recommendation systems. This should be unified.
+        type = "ranker" if system_type == "ranking" else "recommendation"
         current_app.logger.debug(f"Session {session_id} does not exist, create new")
-        session_id = create_new_session(
-            container_name, sid=session_id, type=system_type
-        )
+        session_id = create_new_session(container_name, sid=session_id, type=type)
 
     response = asyncio.run(
         make_results(container_name, session_id, url, params, system_type)
