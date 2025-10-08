@@ -146,7 +146,7 @@ async def forward_request(
             q=query,
             q_date=q_date,
             q_time=q_time,
-            num_found=len(hits),
+            num_found=None,
             page=None,
             rpp=None,
             items=item_dict,
