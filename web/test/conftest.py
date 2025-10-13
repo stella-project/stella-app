@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from aioresponses import aioresponses
 from app.app import create_app, db
-from app.models import Session
+from app.models import Result, Session
 
 from .create_test_data import (
     create_feedbacks,

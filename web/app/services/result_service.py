@@ -50,6 +50,10 @@ async def request_results_from_container(
             current_app.config["SYSTEMS_CONFIG"][container_name]["url"]
             + f"/{system_type}"
         )
+        url = (
+            current_app.config["SYSTEMS_CONFIG"][container_name]["url"]
+            + f"/{system_type}"
+        )
     else:
         url = f"http://{container_name}:5000/{system_type}"
 
@@ -57,6 +61,7 @@ async def request_results_from_container(
         async with session.get(
             url,
             params={query_key: query, "rpp": rpp, "page": page},
+            timeout=aiohttp.ClientTimeout(total=3),  # optional: set your timeout
             timeout=aiohttp.ClientTimeout(total=3),  # optional: set your timeout
         ) as response:
             response.raise_for_status()
@@ -66,7 +71,13 @@ async def request_results_from_container(
         current_app.logger.error(
             f'Timeout while trying to reach "{container_name.upper()}"'
         )
+        current_app.logger.error(
+            f'Timeout while trying to reach "{container_name.upper()}"'
+        )
     except ClientResponseError as e:
+        current_app.logger.error(
+            f'Client error with "{container_name.upper()}": {e.status} - {e.message}'
+        )
         current_app.logger.error(
             f'Client error with "{container_name.upper()}": {e.status} - {e.message}'
         )
@@ -74,11 +85,24 @@ async def request_results_from_container(
         current_app.logger.error(
             f'Connection error "{container_name.upper()}": {str(e)}'
         )
+        current_app.logger.error(
+            f'Connection error "{container_name.upper()}": {str(e)}'
+        )
     except Exception as e:
         current_app.logger.exception(
             f'Unexpected error "{container_name.upper()}": {str(e)}'
         )
+        current_app.logger.exception(
+            f'Unexpected error "{container_name.upper()}": {str(e)}'
+        )
 
+    return {
+        "item_id": query,
+        "itemlist": [],
+        "num_found": 0,
+        "page": page,
+        "rpp": rpp,
+    }  # fallback return
     return {
         "item_id": query,
         "itemlist": [],
@@ -188,6 +212,13 @@ async def query_system(
     # calc query execution time in ms
     ts_end = time.time()
     q_time = round((ts_end - ts_start) * 1000)
+
+    # truncate long queries to fit in the database
+    query = query[: Result.q.property.columns[0].type.length]
+    if len(query) > Result.q.property.columns[0].type.length:
+        current_app.logger.warning(
+            f"Query truncated to {Result.q.property.columns[0].type.length} characters."
+        )
 
     # Save the ranking to the database
     async with AsyncSessionLocal() as session:
