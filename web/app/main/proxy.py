@@ -44,7 +44,7 @@ def proxy(url):
 
     if container_name is None:
         current_app.logger.debug("No container name provided")
-        container_name = get_least_served_system()
+        container_name = get_least_served_system(type="RANK" if system_type == "ranking" else "REC")
 
     if not session_exists:
         # TODO: `create_new_session` and `make_results` use different identifiers to distinguish ranking and recommendation systems. This should be unified.
