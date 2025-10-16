@@ -1,6 +1,6 @@
 import asyncio
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Optional, Union
 
 import aiohttp
@@ -8,11 +8,8 @@ from aiohttp import ClientError, ClientResponseError
 from app.models import Result, Session, System, db
 from app.services.interleave_service import interleave_rankings
 from flask import current_app
-from pytz import timezone
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.future import select
-
-tz = timezone("Europe/Berlin")
 
 
 async def request_results_from_container(
@@ -153,7 +150,7 @@ async def query_system(
     """
     current_app.logger.debug(f'Produce ranking with system: "{container_name}"')
 
-    q_date = datetime.now(tz).replace(tzinfo=None, microsecond=0)
+    q_date = datetime.now(timezone.utc).replace(tzinfo=None, microsecond=0)
     ts_start = time.time()
 
     # Get system ID and check for HEAD request
@@ -290,7 +287,7 @@ def build_response(
         # Not interleaved and custom returns
         if current_app.config["SYSTEMS_CONFIG"][container_name].get("hits_path"):
             current_app.logger.debug("Not interleaved, custom returns")
-            
+
             header["body"] = ranking.items
             result["_stella"] = header
 
@@ -440,7 +437,9 @@ def get_cached_response(query: str, page: int, session_id: str) -> Optional[Dict
         return None
 
     # check if the result is expired
-    delta = datetime.now() - result.q_date
+    delta = (
+        datetime.now(timezone.utc).replace(tzinfo=None, microsecond=0) - result.q_date
+    )
     expired = delta.total_seconds() > current_app.config["SESSION_EXPIRATION"]
     current_app.logger.debug(
         f"Cached result expired: {expired}. Delta: {delta.total_seconds()}s and limit is {current_app.config['SESSION_EXPIRATION']}s"
@@ -465,7 +464,7 @@ def get_cached_response(query: str, page: int, session_id: str) -> Optional[Dict
         feedback_id=result.feedback_id,
         type=result.type,
         q=query,
-        q_date=datetime.now(tz).replace(tzinfo=None, microsecond=0),
+        q_date=datetime.now(timezone.utc).replace(tzinfo=None, microsecond=0),
         q_time=result.q_time,
         num_found=result.num_found,
         page=page,

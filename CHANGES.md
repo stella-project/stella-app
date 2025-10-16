@@ -1,6 +1,9 @@
 # Release notes
 All notable changes to this project will be documented in this file. 
 
+## Fix timezone warnings and cleanup dependencies
+The logged timestamps used CET time and relied on different dependencies to set the timezone. The dependencies were removed, and the logged queries now use UTC, which is more conventional. Further unnecessary dependencies were removed. 
+
 ## Improve Proxy Endpoint
 The new proxy endpoint is directly available by `/proxy`. This means it is not part of the standard stella-app API.
 The proxy directly forwards all requests directly to the systems registered to the stella app. The established parameters to control the experiments, e.g., `sid`, `container`, or `system-type` can still be used but need to be prefixed with `stella`.
@@ -26,13 +29,11 @@ SYSTEMS_CONFIG: |
             "gesis_rank_pyserini_base": {"type": "ranker", "base": true, "url": "http://gesis_rank_pyserini_base:5000"}
         }
 
-
 ## Interleaving Made Resilient
 Team draft interlaving has been updated so the Stella-App returns a result list even when a system:
 - is down or return an empty list
 - returns fewer results than expected
 - responds late 
-
 
 ## Generalize Recommender Endpoints
 The stella app differentiates between dataset and publication recommendations. While this was catered to the initial use in the Lilas lab, the goal is to support any type of recommendations. Therefore, the recommender endpoint was simplified so that no specific types are supported. Instead of `recommendations/datasets` and `recommendations/publications` simply the `recommendations` endpoint can now be used. 
