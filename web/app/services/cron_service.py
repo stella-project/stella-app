@@ -248,16 +248,18 @@ def post_sessions(sessions_exited):
         if current_app.config["DELETE_SENT_SESSION"]:
             delete_exited_session(session)
 
+sessions_not_exited_prev = 0
 
 def check_db_sessions():
+    global sessions_not_exited_prev
     with scheduler.app.app_context():
-        scheduler.app.logger.info("Scheduler enters task.")
 
         sessions_not_exited = Session.query.filter_by(exit=False, sent=False).all()
 
-        scheduler.app.logger.info(
-            "There is/are " + str(len(sessions_not_exited)) + " running session(s)."
-        )
+        if len(sessions_not_exited) != sessions_not_exited_prev:
+            scheduler.app.logger.info("There is/are " + str(len(sessions_not_exited)) + " running session(s).")
+
+        sessions_not_exited_prev = len(sessions_not_exited)
 
         # set expired sessions to 'exit'
         update_expired_sessions(sessions_not_exited)
@@ -271,4 +273,5 @@ def check_db_sessions():
             update_token()
 
         if len(sessions_exited) > 0:
+            scheduler.app.logger.info("Posting " + str(len(sessions_exited)) + " session(s).")
             post_sessions(sessions_exited)
