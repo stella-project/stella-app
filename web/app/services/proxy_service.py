@@ -136,7 +136,7 @@ async def forward_request(
         current_app.logger.warning(
             f"Query truncated to {Result.q.property.columns[0].type.length} characters."
         )
-
+        
     # Save the ranking to the database
     async with AsyncSessionLocal() as session:
         system_id = (

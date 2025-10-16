@@ -11,6 +11,7 @@ from flask.cli import with_appcontext
 
 def init_db():
     """Use this function to setup a database with set of pre-registered users."""
+    db.drop_all()
     db.create_all()
 
 

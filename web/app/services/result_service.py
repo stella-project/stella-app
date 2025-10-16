@@ -59,7 +59,6 @@ async def request_results_from_container(
             url,
             params={query_key: query, "rpp": rpp, "page": page},
             timeout=aiohttp.ClientTimeout(total=3),  # optional: set your timeout
-            timeout=aiohttp.ClientTimeout(total=3),  # optional: set your timeout
         ) as response:
             response.raise_for_status()
             return await response.json()
@@ -68,13 +67,7 @@ async def request_results_from_container(
         current_app.logger.error(
             f'Timeout while trying to reach "{container_name.upper()}"'
         )
-        current_app.logger.error(
-            f'Timeout while trying to reach "{container_name.upper()}"'
-        )
     except ClientResponseError as e:
-        current_app.logger.error(
-            f'Client error with "{container_name.upper()}": {e.status} - {e.message}'
-        )
         current_app.logger.error(
             f'Client error with "{container_name.upper()}": {e.status} - {e.message}'
         )
@@ -82,24 +75,11 @@ async def request_results_from_container(
         current_app.logger.error(
             f'Connection error "{container_name.upper()}": {str(e)}'
         )
-        current_app.logger.error(
-            f'Connection error "{container_name.upper()}": {str(e)}'
-        )
     except Exception as e:
         current_app.logger.exception(
             f'Unexpected error "{container_name.upper()}": {str(e)}'
         )
-        current_app.logger.exception(
-            f'Unexpected error "{container_name.upper()}": {str(e)}'
-        )
 
-    return {
-        "item_id": query,
-        "itemlist": [],
-        "num_found": 0,
-        "page": page,
-        "rpp": rpp,
-    }  # fallback return
     return {
         "item_id": query,
         "itemlist": [],
@@ -128,7 +108,7 @@ def extract_hits(
         "docid", "docid"
     )
     hits_path = current_app.config["SYSTEMS_CONFIG"][container_name].get("hits_path")
-    current_app.logger.debug(f"Extracting hits from {container_name}: {hits_path}")
+    current_app.logger.debug(f"Extracting hitsssss from {container_name}: {hits_path}")
     if hits_path is None:
         current_app.logger.debug("No custom hits path provided")
         hits = result["itemlist"]
@@ -136,6 +116,7 @@ def extract_hits(
 
     else:
         hits = hits_path.find(result)[0].value
+        current_app.logger.debug(f"Custom hits path provided: {hits_path}")
 
     if len(hits) > 0 and isinstance(hits[0], dict):  # Custom format
         item_dict = {
@@ -146,6 +127,7 @@ def extract_hits(
         item_dict = {
             i + 1: {"docid": hits[i], "type": system_role} for i in range(0, len(hits))
         }
+    current_app.logger.debug(f"Extracted {len(item_dict)} hittttts from {container_name}")
     return item_dict, hits  # formatted, original
 
 
@@ -387,6 +369,12 @@ async def make_results(
     system_type: str = "ranking",
 ):
     """Produce a ranking for the given query and container."""
+    MAX_QUERY_LENGTH = 4096
+    if len(query) > MAX_QUERY_LENGTH:
+        current_app.logger.warning(
+            f"Query truncated from {len(query)} to {MAX_QUERY_LENGTH} characters"
+        )
+        query = query[:MAX_QUERY_LENGTH]
     if current_app.config["INTERLEAVE"]:
         if system_type == "ranking":
             container_name_base = current_app.config["RANKING_BASELINE_CONTAINER"]

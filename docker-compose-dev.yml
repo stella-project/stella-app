@@ -26,9 +26,9 @@ services:
       INTERLEAVE: "True"
       BULK_INDEX: "False"
       INTERVAL_DB_CHECK: 3
-      SESSION_EXPIRATION: 6
+      SESSION_EXPIRATION: 10
       SESSION_KILL: 120
-      SENDFEEDBACK: "False"
+      SENDFEEDBACK: "True"
 
       # Systems
       SYSTEMS_CONFIG: |
