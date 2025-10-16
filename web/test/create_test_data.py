@@ -6,6 +6,17 @@ import time
 from app.models import Feedback, Result, Session, System
 from app.services.session_service import create_new_session
 
+STELLA_RETURN_PARAMETER = {
+    "sid",
+    "rid",
+    "q",
+    "page",
+    "rpp",
+    "hits",
+    "container",
+    "body"
+}
+
 
 def random_date(start, end, prop, format="%Y-%m-%d %H:%M:%S"):
     """Get a time at a proportion of a range of two formatted times.
@@ -219,6 +230,8 @@ def create_results(sessions):
                         "10": "10014575867",
                     }
                 )
+                original_response = create_return_experimental()
+                result_objs[system].custom_response = json.dumps(original_response)
 
         elif system.startswith("recommender"):
             result_objs[system] = Result(
@@ -252,6 +265,9 @@ def create_results(sessions):
                 }
             )
             result_objs[system].items = json.dumps(itemlist)
+            if system == "recommender":
+                original_response = create_return_recommendation_experimental()
+                result_objs[system].custom_response = json.dumps(original_response)
     return result_objs
 
 
