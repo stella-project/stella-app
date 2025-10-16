@@ -103,7 +103,9 @@ def recommendation():
 
     if not session_exists:
         current_app.logger.debug(f"Session {session_id} does not exist, create new")
-        session_id = create_new_session(container_name, sid=session_id, type="recommendation")
+        session_id = create_new_session(
+            container_name, sid=session_id, type="recommendation"
+        )
 
     response = asyncio.run(
         make_results(

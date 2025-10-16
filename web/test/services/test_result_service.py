@@ -449,7 +449,6 @@ class TestBuildResponse:
             result=result,
             result_base=result_base,
         )
-        print(response["header"]["container"])
         assert response["header"]["q"] == "test_item"
         assert response["header"]["rpp"] == 10
         assert response["header"]["container"]["base"] == "recommender_base"
@@ -613,7 +612,6 @@ class TestCachedResponse:
 
         session_id = sessions["ranker"].id
 
-        print(results["ranker"])
         cached_result = get_cached_response(query="test", page=0, session_id=session_id)
         assert cached_result is not None
         cached_result = json.loads(cached_result)
