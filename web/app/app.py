@@ -8,6 +8,7 @@ from app.extensions import bootstrap, db, migrate, scheduler
 from app.main import main as main_blueprint
 from config import config
 from flask import Flask
+from flasgger import Swagger
 
 
 def create_app(config_name=None):
@@ -38,6 +39,36 @@ def create_app(config_name=None):
     register_extensions(app)
     register_blueprints(app)
     register_commands(app)
+
+    swagger_config = {
+        "headers": [],
+        "specs": [
+            {
+                "endpoint": "apispec",
+                "route": "/apispec.json",
+                "rule_filter": lambda rule: True,
+                "model_filter": lambda tag: True,
+            }
+        ],
+        "static_url_path": "/flasgger_static",
+        "swagger_ui": True,
+        "specs_route": "/docs/",
+    }
+
+    Swagger(app, config=swagger_config, template={
+        "info": {
+            "title": "STELLA API",
+            "description": """API documentation for STELLA endpoints.
+                    **Base URL:** /stella/api/v1
+                    All endpoints are prefixed with this base path, except `/proxy`, which operates at the root level.
+                    """,
+            "version": "1.0.0",
+        },
+        "servers": [
+        {"url": "/stella/api/v1", "description": "STELLA API base URL"},
+        {"url": "/", "description": "Root-level proxy"},
+    ],
+    })
 
     return app
 

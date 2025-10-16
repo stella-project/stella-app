@@ -12,14 +12,76 @@ from . import main
 
 @main.route("/proxy/<path:url>", methods=["GET"])
 def proxy(url):
-    """Proxy endpoint that directly forwards the request including sub-paths and parameters to the retrieval systems. Only the parameters starting with `stella-` are used by STELLA itself and removed before forwarding the request:
-    - `stella-container`: Name of the container to which the request should be forwarded. If not provided, the least served system is chosen.
-    - `stella-sid`: Session ID. If not provided or invalid, a new session is created. If no session_id or container name is provided consistent results across a session can not be ensured.
-    - `stella-system-type`: Type of the system, either `ranking` or `retrieval`. Defaults to `ranking`. This is to determine the pool of systems for interleaving.
-    Args:
-        url (str): The URL path to proxy the request to.
-    Returns:
-        Response: The response from the proxied request.
+    """
+    Proxy endpoint for forwarding requests to retrieval systems.
+    ---
+    tags:
+      - Proxy
+    basePath: /
+    description: |
+      The `/proxy` endpoint is directly available at the root level and is not part of the standard STELLA API (`/stella/api/v1`).
+      
+      It forwards requests to the systems registered to the STELLA app.
+
+      Experiment control parameters (`sid`, `container`, `system-type`, `page`, etc.) must be prefixed with `stella-` when calling this endpoint.
+      
+      Other query parameters are forwarded unchanged. Supports interleaved and non-interleaved experiments.
+ 
+      **Supported STELLA parameters:**
+      - **stella-container**: Name of the target container. If not provided, the least served system is used.
+      - **stella-sid**: Session ID. If not provided or invalid, a new session is created.
+      - **stella-system-type**: Type of system — either `ranking` or `retrieval`. Defaults to `ranking`.
+      - **stella-page**: Optional page indicator for cached results.
+
+      All other query parameters are forwarded unchanged to the underlying retrieval service.
+    parameters:
+      - name: url
+        in: path
+        type: string
+        required: true
+        description: The URL path (including subpaths) to forward the request to.
+      - name: stella-container
+        in: query
+        type: string
+        required: false
+        description: Name of the container/system to which the request should be forwarded.
+      - name: stella-sid
+        in: query
+        type: string
+        required: false
+        description: Existing session ID. If invalid or missing, a new session is created by STELLA.
+      - name: stella-system-type
+        in: query
+        type: string
+        required: false
+        enum: [ranking, retrieval]
+        default: ranking
+        description: Type of system for the proxy request.
+      - name: stella-page
+        in: query
+        type: integer
+        required: false
+        description: Page number for cached responses.
+      - name: query_params
+        in: query
+        type: object
+        additionalProperties:
+          type: string
+        required: false
+        description: |
+          Any other query parameters to forward to the underlying system (e.g., `query`, `page`, `rpp`, `sort`).
+          Users can provide arbitrary key-value pairs here.
+    responses:
+      200:
+        description: Successfully proxied the request to a retrieval system.
+        schema:
+          type: object
+          description: |
+            Returns the results from the target system(s). STELLA-specific metadata fields
+            are prefixed with `stella-`, including `stella-sid`, `stella-rid`, `stella-q`,
+            `stella-page`, `stella-rpp`, `stella-hits`, and `stella-container`.
+      400:
+        description: Invalid request parameters.
     """
     # extract stella specific parameters
     params = request.args.copy()  # copy to make them mutable
