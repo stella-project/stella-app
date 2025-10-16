@@ -64,7 +64,32 @@ class TestForwardRequest:
         for i in range(len(result.items)):
             assert list(result.items[str(i + 1)].keys()) == ["docid", "type"]
 
+    @pytest.mark.asyncio
+    async def test_query_system_long_query(
+        self, mock_request_custom_system_long_query, sessions, db_session
+    ):
+        container_name = "ranker"
+        query = "a" * (Result.q.property.columns[0].type.length + 1)
+        rpp = 10
+        page = 0
+        result = await forward_request(
+            container_name,
+            url="custom/path",
+            params={"custom-query": query, "custom-rpp": rpp, "custom-page": page},
+            session_id=sessions["ranker"].id,
+            system_role="EXP",
+        )
 
+        result = (
+            db_session.query(Result).filter_by(session_id=sessions["ranker"].id).first()
+        )
+
+        # sqlite that is used for testing does not enforce length limits
+        # we need to compare to the actual length of the query
+        assert len(result.q) != len(query)
+        assert len(result.q) == Result.q.property.columns[0].type.length
+        
+        
 class TestMakeResults:
     @pytest.mark.asyncio
     async def test_make_results_ab(

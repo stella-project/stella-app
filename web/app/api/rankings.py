@@ -1,17 +1,12 @@
 import asyncio
-from datetime import datetime
 
-from app.models import Feedback, Result, Session, System, db
-from app.services.profile_service import profile_route
+from app.models import Feedback, Result, Session, db
 from app.services.result_service import get_cached_response, make_results
 from app.services.session_service import create_new_session
 from app.services.system_service import get_least_served_system
 from flask import Response, current_app, json, jsonify, request
-from pytz import timezone
 
 from . import api
-
-tz = timezone("Europe/Berlin")
 
 
 @api.route("/ranking/<int:id>/feedback", methods=["POST"])

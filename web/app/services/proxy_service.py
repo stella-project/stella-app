@@ -1,6 +1,6 @@
 import asyncio
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import aiohttp
@@ -9,12 +9,9 @@ from app.models import Result, System
 from app.services.interleave_service import interleave_rankings
 from app.services.result_service import build_response, extract_hits
 from flask import current_app
-from pytz import timezone
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.future import select
 from werkzeug.datastructures.structures import MultiDict
-
-tz = timezone("Europe/Berlin")
 
 
 async def request_results_from_container(
@@ -99,7 +96,7 @@ async def forward_request(
     """
     current_app.logger.debug(f'Produce ranking with system: "{container_name}"')
 
-    q_date = datetime.now(tz).replace(tzinfo=None, microsecond=0)
+    q_date = datetime.now(timezone.utc).replace(tzinfo=None, microsecond=0)
     ts_start = time.time()
 
     # Get system ID
@@ -132,6 +129,13 @@ async def forward_request(
     q_time = round((ts_end - ts_start) * 1000)
 
     query = build_query_string(url, params)
+
+    # truncate long queries to fit in the database
+    query = query[: Result.q.property.columns[0].type.length]
+    if len(query) > Result.q.property.columns[0].type.length:
+        current_app.logger.warning(
+            f"Query truncated to {Result.q.property.columns[0].type.length} characters."
+        )
 
     # Save the ranking to the database
     async with AsyncSessionLocal() as session:

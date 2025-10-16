@@ -6,11 +6,8 @@ from app.services.result_service import get_cached_response, make_results
 from app.services.session_service import create_new_session
 from app.services.system_service import get_least_served_system
 from flask import Response, current_app, json, jsonify, request
-from pytz import timezone
 
 from . import api
-
-tz = timezone("Europe/Berlin")
 
 
 @api.route("/recommendation/<int:id>/feedback", methods=["POST"])
