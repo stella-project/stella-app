@@ -6,7 +6,7 @@ networks:
 
 services:
   app:
-    container_name: stella-app
+    container_name: stella-dev-app
     build:
       context: ./web
       dockerfile: Dockerfile.dev
@@ -58,7 +58,7 @@ services:
       - mlentory_experiment
 
   db-app:
-    container_name: stella-db-app
+    container_name: stella-dev-db-app
     image: postgres
     restart: unless-stopped
     volumes:
