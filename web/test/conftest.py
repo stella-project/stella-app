@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from aioresponses import aioresponses
 from app.app import create_app, db
-from app.models import Session
+from app.models import Result, Session
 
 from .create_test_data import (
     create_feedbacks,
@@ -210,6 +210,54 @@ def mock_request_custom_system(aio_mock):
     """Fixture to mock aiohttp requests for a system that does not follows the standard API."""
     container_name = "system"
     custom_query = "Test Query"
+    custom_rpp = 10
+    custom_page = 0
+    mock_url = f"http://ranker:5000/custom/path?custom-page={custom_page}&custom-query={custom_query}&custom-rpp={custom_rpp}"
+    mock_response = create_return_experimental()
+
+    aio_mock.get(mock_url, payload=mock_response, repeat=True)
+    return {
+        "container_name": container_name,
+        "custom-query": custom_query,
+        "custom-rpp": custom_rpp,
+        "custom-page": custom_page,
+        "mock_url": mock_url,
+        "mock_response": mock_response,
+    }
+    
+
+
+@pytest.fixture
+def mock_request_system_long_query(aio_mock):
+    """Fixture to mock aiohttp requests with a really long query"""
+    container_name = "ranker"
+    query = "a" * (Result.q.property.columns[0].type.length + 1)
+    assert len(query) > Result.q.property.columns[0].type.length
+    rpp = 10
+    page = 0
+    mock_url = (
+        f"http://{container_name}:5000/ranking?query={query}&rpp={rpp}&page={page}"
+    )
+    mock_response = create_return_experimental()
+
+    aio_mock.get(mock_url, payload=mock_response, repeat=True)
+    return {
+        "container_name": container_name,
+        "query": query,
+        "rpp": rpp,
+        "page": page,
+        "mock_url": mock_url,
+        "mock_response": mock_response,
+    }
+
+
+
+@pytest.fixture
+def mock_request_custom_system_long_query(aio_mock):
+    """Fixture to mock aiohttp requests for a system that does not follows the standard API."""
+    container_name = "system"
+    custom_query = "a" * (Result.q.property.columns[0].type.length + 1)
+    assert len(custom_query) > Result.q.property.columns[0].type.length
     custom_rpp = 10
     custom_page = 0
     mock_url = f"http://ranker:5000/custom/path?custom-page={custom_page}&custom-query={custom_query}&custom-rpp={custom_rpp}"
