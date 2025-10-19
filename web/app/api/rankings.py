@@ -11,11 +11,91 @@ from . import api
 
 @api.route("/ranking/<int:id>/feedback", methods=["POST"])
 def post_feedback(id):
-    """Add user feedback to database (collect data for statistics)
-    Tested: True
+    """
+    Send ranking user feedback to STELLA database.
+    ---
+    tags:
+      - Feedback
+    description: |
+        Sends user interaction feedback to STELLA APP database for a given ranking result ID.
 
-    @param id:  ranking id (int)
-    @return:    HTTP status message
+        The feedback captures:
+        - Which ranked items were **clicked** by the user.
+        - The **start** and **end timestamps** of the interaction session.
+        - Whether the session used **interleaving** (comparison between two systems).
+
+        #### 🧩 Payload Structure
+        The request must include the following top-level fields:
+        - **clicks** *(object, required)* — A mapping of rank positions (as strings) to interaction details.
+        - **start** *(string, required)* — ISO-like timestamp indicating when the session started.
+        - **end** *(string, required)* — ISO-like timestamp indicating when the session ended.
+        - **interleave** *(boolean, required)* — Whether this session used interleaved results.
+
+      
+        #### 🖱️ Clicks object structure
+        Each key corresponds to a rank position ("1", "2", ...), and the value contains:
+        - **clicked** *(bool)* — Whether the item was clicked.
+        - **date** *(string | null)* — Timestamp of click event or `null` if not clicked.
+        - **docid** *(string)* — Unique document identifier (e.g., internal ID).
+        - **type** *(string)* — Source type (`"BASE"` or `"EXP"`) indicating which system produced it.
+    
+        **Example curl:**
+        ```bash
+        curl -X POST "http://localhost:8080/stella/api/v1/ranking/3/feedback" \\
+            -H "Content-Type: application/json" \\
+            -d '{
+            "clicks": {
+                "1": {"clicked": false, "date": null, "docid": "M26923455", "type": "EXP"},
+                "2": {"clicked": true, "date": "2020-07-29 16:06:51", "docid": "M27515393", "type": "BASE"}
+            },
+            "start": "2020-07-29 16:06:51",
+            "end": "2020-07-29 16:12:53",
+            "interleave": true
+            }'
+        ```
+
+    parameters:
+      - name: id
+        in: path
+        type: integer
+        required: true
+        description: Unique identifier of the ranking result.
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          required:
+            - clicks
+            - start
+            - end
+            - interleave
+          properties:
+            clicks:
+              type: object
+              description: Mapping of ranking positions to click metadata.
+            start:
+              type: string
+              format: date-time
+              example: "2020-07-29 16:06:51"
+            end:
+              type: string
+              format: date-time
+              example: "2020-07-29 16:12:53"
+            interleave:
+              type: boolean
+              example: true
+    responses:
+      201:
+        description: Feedback added successfully
+        schema:
+          type: object
+          properties:
+            msg:
+              type: string
+              example: Added new feedback with success!
+      400:
+        description: No feedback provided. Bad request (missing clicks)
     """
     clicks = request.values.get("clicks", None)
     if clicks is None:
@@ -44,12 +124,48 @@ def post_feedback(id):
         db.session.commit()
 
         return jsonify({"msg": "Added new feedback with success!"}), 201
-
+    else:
+        return jsonify({"msg": "No feedback provided!"}), 400
 
 @api.route("/ranking/<int:rid>", methods=["GET"])
 def ranking_from_db(rid):
-    """Get a ranking by its result id from the database.
-    Tested: true"""
+    """
+    Get a ranking by its result ID from the database.
+    ---
+    tags:
+      - Ranking
+    description: |
+      Returns the ranking data stored in the database for a given result ID.
+      The response includes metadata and the ranked document list.
+    parameters:
+      - name: rid
+        in: path
+        type: integer
+        required: true
+        description: Ranking ID for which the rankings are to be retrieved.
+    responses:
+      200:
+        description: Ranking successfully retrived for the ID.
+        examples:
+          application/json:
+            header:
+                container:
+                    base: "rank_elastic_base"
+                    exp: "rank_elastic"
+                page: 0
+                q: "vaccine"
+                rid: 3
+                rpp: 20
+                hits: 12312
+                sid: 1
+            body:
+                "1": {"docid": "M27622217", "type": "BASE"}
+                "2": {"docid": "M27251231", "type": "EXP"}
+                "3": {"docid": "M27692969", "type": "BASE"}
+                "4": {"docid": "M26350569", "type": "EXP"}
+      404:
+        description: Ranking not found for the given ID.
+    """
     ranking = db.session.query(Result).get_or_404(rid)
     return Response(
         json.dumps(ranking.serialize, sort_keys=False, ensure_ascii=False, indent=2),
@@ -59,11 +175,64 @@ def ranking_from_db(rid):
 
 @api.route("/ranking", methods=["GET"])
 def ranking():
-    """Produce a ranking for current session
-
-    @return:    ranking result (dict)
-                header contains meta-data
-                body contains ranked document list
+    """
+    Generate rankings for a given query and session.
+    ---
+    tags:
+      - Ranking
+    description: |
+        Returns a ranked list of documents for the specified query and session ID.
+        If cached results exist, they are returned directly. Otherwise, a new session and ranking are created.
+        If no session ID is provided, STELLA automatically generates a new session ID.
+    parameters:
+      - name: query
+        in: query
+        type: string
+        required: true
+        description: Search query string.
+      - name: page
+        in: query
+        type: integer
+        required: false
+        description: Page number for pagination.
+      - name: rpp
+        in: query
+        type: integer
+        required: false
+        description: Results per page.
+      - name: sid
+        in: query
+        type: string
+        required: false
+        description: Session ID. If not provided, a new session is automatically created by STELLA.
+      - name: container
+        in: query
+        type: string
+        required: false
+        description: Name of the container/system to use for generating results.
+    responses:
+      200:
+        description: Ranking successfully generated.
+        examples:
+          application/json:
+            header:
+                container:
+                    base: "rank_elastic_base"
+                    exp: "rank_elastic"
+                page: 0
+                q: "vaccine"
+                rid: 3
+                rpp: 20
+                hits: 12312
+                sid: 1
+            body:
+                "1": {"docid": "M27622217", "type": "BASE"}
+                "2": {"docid": "M27251231", "type": "EXP"}
+                "3": {"docid": "M27692969", "type": "BASE"}
+                "4": {"docid": "M26350569", "type": "EXP"}
+            
+      400:
+        description: Missing query string or invalid parameters.
     """
     page = request.args.get("page", default=0, type=int)
     rpp = request.args.get("rpp", default=10, type=int)
