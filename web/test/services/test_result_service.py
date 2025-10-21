@@ -398,8 +398,9 @@ class TestBuildResponse:
         )
         assert response["header"]["q"] == "Test Query"
         assert response["header"]["rpp"] == 10
+        print(response)
         for i in range(len(response["body"])):
-            assert list(response["body"][i + 1].keys()) == ["docid", "type"]
+            assert list(response["body"][str(i + 1)].keys()) == ["docid", "type"]
 
     @pytest.mark.asyncio
     async def test_build_response_custom_return(
@@ -562,7 +563,7 @@ class TestBuildResponse:
         assert response["header"]["q"] == "test_item"
         assert response["header"]["rpp"] == 10
         for i in range(len(response["body"])):
-            assert list(response["body"][i + 1].keys()) == ["docid", "type"]
+            assert list(response["body"][str(i + 1)].keys()) == ["docid", "type"]
 
     @pytest.mark.asyncio
     async def test_build_response_custom_return_rec(
