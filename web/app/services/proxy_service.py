@@ -5,12 +5,10 @@ from typing import Any
 
 import aiohttp
 from aiohttp import ClientError, ClientResponseError
-from app.models import Result, System
+from app.models import Result, System, db
 from app.services.interleave_service import interleave_rankings
 from app.services.result_service import build_response, extract_hits
 from flask import current_app
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from sqlalchemy.future import select
 from werkzeug.datastructures.structures import MultiDict
 
 
@@ -106,15 +104,9 @@ async def forward_request(
         database_uri = database_uri.replace("sqlite:///", "sqlite+aiosqlite:///")
     else:
         database_uri = database_uri.replace("postgresql", "postgresql+asyncpg")
-    async_engine = create_async_engine(database_uri)
-    AsyncSessionLocal = async_sessionmaker(bind=async_engine, expire_on_commit=False)
-
-    async with AsyncSessionLocal() as session:
-        system = (
-            await session.execute(select(System).where(System.name == container_name))
-        ).scalar()
-        system.num_requests_no_head += 1
-        await session.commit()
+    system = db.session.query(System).where(System.name == container_name).first()
+    system.num_requests_no_head += 1
+    db.session.commit()
 
     # Get the results from the container
     async with aiohttp.ClientSession() as session:
@@ -138,26 +130,23 @@ async def forward_request(
         )
 
     # Save the ranking to the database
-    async with AsyncSessionLocal() as session:
-        system_id = (
-            await session.execute(select(System).where(System.name == container_name))
-        ).scalar()
+    system_id = db.session.query(System).where(System.name == container_name).first()
 
-        ranking = Result(
-            session_id=session_id,
-            system_id=system_id.id,
-            type=system_role,
-            q=query,
-            q_date=q_date,
-            q_time=q_time,
-            num_found=None,
-            page=None,
-            rpp=None,
-            items=item_dict,
-        )
+    ranking = Result(
+        session_id=session_id,
+        system_id=system_id.id,
+        type=system_role,
+        q=query,
+        q_date=q_date,
+        q_time=q_time,
+        num_found=None,
+        page=None,
+        rpp=None,
+        items=item_dict,
+    )
 
-        session.add(ranking)
-        await session.commit()
+    db.session.add(ranking)
+    db.session.commit()
 
     return ranking, result
 
