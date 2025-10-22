@@ -9,7 +9,7 @@ from flask import current_app
 
 def update_expired_sessions(sessions_not_exited):
     for session in sessions_not_exited:
-        delta = datetime.now(timezone.utc) - session.start
+        delta = datetime.now(timezone.utc) - session.start.replace(tzinfo=timezone.utc)
 
         if delta.seconds > current_app.config["SESSION_EXPIRATION"]:
             complete = True
