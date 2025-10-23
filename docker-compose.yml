@@ -58,7 +58,7 @@ services:
       - gesis_rank_pyserini
 
   db-app:
-    image: postgres
+    image: postgres:16
     expose:
       - "5430"
     ports:
