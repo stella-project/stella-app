@@ -169,13 +169,13 @@ def mock_request_base_recommender(aio_mock):
     query = "test_item"
     rpp = 10
     page = 0
-    mock_url = f"http://{container_name}:5000/recommendation?item_id={query}&rpp={rpp}&page={page}"
+    mock_url = f"http://{container_name}:5000/recommendation?itemid={query}&rpp={rpp}&page={page}"
     mock_response = create_return_recommendation_base()
 
     aio_mock.get(mock_url, payload=mock_response, repeat=True)
     return {
         "container_name": container_name,
-        "item_id": query,
+        "itemid": query,
         "rpp": rpp,
         "page": page,
         "mock_url": mock_url,
@@ -190,14 +190,14 @@ def mock_request_recommender(aio_mock):
     query = "test_item"
     rpp = 10
     page = 0
-    mock_url = f"http://{container_name}:5000/recommendation?item_id={query}&rpp={rpp}&page={page}"
+    mock_url = f"http://{container_name}:5000/recommendation?itemid={query}&rpp={rpp}&page={page}"
 
     mock_response = create_return_recommendation_experimental()
 
     aio_mock.get(mock_url, payload=mock_response, repeat=True)
     return {
         "container_name": container_name,
-        "item_id": query,
+        "itemid": query,
         "rpp": rpp,
         "page": page,
         "mock_url": mock_url,
