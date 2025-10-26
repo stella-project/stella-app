@@ -39,7 +39,7 @@ async def request_results_from_container(
 
     assert system_type in ["ranking", "recommendation"], "Invalid system type"
 
-    query_key = "item_id" if system_type == "recommendation" else "query"
+    query_key = "itemid" if system_type == "recommendation" else "query"
 
     if current_app.config["SYSTEMS_CONFIG"][container_name].get("url"):
         # Use custom URL if provided in the config
@@ -81,7 +81,7 @@ async def request_results_from_container(
         )
 
     return {
-        "item_id": query,
+        "itemid": query,
         "itemlist": [],
         "num_found": 0,
         "page": page,

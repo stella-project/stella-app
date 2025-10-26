@@ -74,7 +74,7 @@ class TestRequestResults:
         assert response == create_return_recommendation_base()
         assert response["num_found"] == 10
         assert len(response["itemlist"]) == 10
-        assert response["item_id"] == query
+        assert response["itemid"] == query
         assert response["page"] == page
         assert response["rpp"] == rpp
 

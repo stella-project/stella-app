@@ -58,8 +58,7 @@ services:
       - mlentory_experiment
 
   db-app:
-    container_name: stella-dev-db-app
-    image: postgres
+    image: postgres:16
     restart: unless-stopped
     volumes:
       - ./data/db-app-data:/var/lib/postgresql/data

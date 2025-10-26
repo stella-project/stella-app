@@ -56,10 +56,7 @@ services:
       - mlentory_experiment
 
   db-app:
-    container_name: stella-db-app
-    image: postgres
-    volumes:
-      - ./data/db-app-data:/var/lib/postgresql/data
+    image: postgres:16
     expose:
       - "5430"
     ports:
