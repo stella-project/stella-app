@@ -6,6 +6,7 @@ from app.extensions import scheduler
 from app.models import Feedback, Result, Session, System, db
 from flask import current_app
 
+logger = scheduler.app.logger
 
 def update_expired_sessions(sessions_not_exited):
     for session in sessions_not_exited:
@@ -25,7 +26,7 @@ def update_expired_sessions(sessions_not_exited):
                 db.session.add(session)
                 db.session.commit()
             else:
-                if delta.seconds > current_app.config["SESSION_KILL"]:
+                if current_app.config["SESSION_KILL"] is not None and delta.seconds > current_app.config["SESSION_KILL"]:
                     # 1. get all results that are NOT interleaved results
                     results_not_tdi = Result.query.filter(
                         Result.id != Result.tdi, Result.session_id == session.id
@@ -55,6 +56,7 @@ def update_token():
         ),
     )
     r_json = json.loads(r.text)
+    logger.debug("Received new token from Stella Server.", r_json.get("token"))
     delta_exp = r_json.get("expiration")
     # get new token five min (300 s) before expiration
     current_app.config["TOKEN_EXPIRATION"] = datetime.now(timezone.utc) + timedelta(
@@ -131,7 +133,7 @@ def post_feedback(feedback, session_id_server):
         data=payload,
         auth=(current_app.config["STELLA_SERVER_TOKEN"], ""),
     )
-
+    current_app.logger.debug(f"Posted feedback, received response: {r.text}")
     # get feedback id from stella-server
     r_json = json.loads(r.text)
 
@@ -266,6 +268,8 @@ def check_db_sessions():
         if current_app.config["STELLA_SERVER_TOKEN"] is None or current_app.config[
             "TOKEN_EXPIRATION"
         ] < datetime.now(timezone.utc):
+            
+            logger.info("Updating Stella Server token...", )
             update_token()
 
         if len(sessions_exited) > 0:
