@@ -22,7 +22,39 @@
       <tbody>
       </tbody>
     </table>
+    <div class="text-center" style="margin-top: 20px;">
+      <button id="openEditorBtn" type="button" class="btn btn-primary">
+        EDIT SYSTEMS_CONFIG
+      </button>
+    </div>
   </div>
+  <!-- Editor Modal -->
+    <div id="editorModal" class="modal fade" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Edit SYSTEMS_CONFIG</h4>
+          </div>
+
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="editorText">Text</label>
+              <textarea id="editorText" class="form-control" rows="12"
+                        placeholder="Write something..."></textarea>
+            </div>
+            <div id="editorMsg" style="margin-top:10px;"></div>
+          </div>
+
+          <div class="modal-footer">
+            <button id="saveEditorBtn" type="button" class="btn btn-primary">Save</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
     <!-- Modal -->
     <div id="myModal" class="modal fade" role="dialog">
       <div class="modal-dialog">
@@ -50,19 +82,24 @@
                 data: mydata,
                 columns: [ {},
                 {
+                  field: 'status',
+                  title: 'Status',
+                  sortable: true
+                },
+                {
                   field: 'operate',
                   title: 'Index',
                   align: 'center',
                   valign: 'middle',
                   clickToSelect: false,
                   formatter : function(value,row,index) {
-                    return '<button class=\'btn btn-primary \' pageName="'+row.name+'" pageDetails="'+row.index+'"  >Start indexing</button> ';
+                    return '<button class=\'btn btn-primary start-index\' pageName="'+row.name+'" pageDetails="'+row.index+'"  >Start indexing</button> ';
                   }
                 }
               ]
               });
 
-              $(".btn").click(function(){
+              $(".start-index").click(function(){
                   $.get("/index/".concat($(this).attr('pageName')));
                   // var pageDetails = $(this).attr('pageDetails');
                   // var pageName = $(this).attr('pageName');
@@ -70,7 +107,58 @@
                   // $(".modal .modal-body").html(pageDetails);
                   // $(".modal").modal("show");
               });
+
+            // ---- Editor open button handler ----
+            $(document).on('click', '#openEditorBtn', function () {
+              // Open modal immediately so you see *something* even if load fails
+              $('#editorText').val('Loading...');
+              $('#editorMsg').html('');
+              $('#editorModal').modal('show');
+
+              // Load current text
+              $.getJSON('/get_systems_config')
+                .done(function (resp) {
+                  var pretty = JSON.stringify(resp, null, 2);
+                  $('#editorText').val(pretty);
+                })
+                .fail(function (xhr) {
+                  $('#editorText').val('');
+                  $('#editorMsg').html(
+                    '<div class="alert alert-danger">Failed to load text (HTTP ' + xhr.status + '). Check /editor/data route.</div>'
+                  );
+                });
             });
+
+            // ---- Save handler ----
+            $(document).on('click', '#saveEditorBtn', function () {
+              $('#editorMsg').html('');
+              var newText = $('#editorText').val();
+              var parsed;
+
+              try {
+                parsed = JSON.parse(newText);
+              } catch (e) {
+                alert("Invalid JSON");
+                return;
+              }
+
+              $.ajax({
+                url: '/set_systems_config',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(parsed),
+                success: function () { alert("Saved"); }
+              })
+              .done(function () {
+                $('#editorMsg').html('<div class="alert alert-success">Saved.</div>');
+              })
+              .fail(function (xhr) {
+                $('#editorMsg').html(
+                  '<div class="alert alert-danger">Save failed (HTTP ' + xhr.status + '): ' + xhr.responseText + '.</div>'
+                );
+              });
+            });
+          });
     </script>
 </body>
 </html>

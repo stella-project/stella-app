@@ -37,6 +37,8 @@ def parse_systems_config(SYSTEMS_CONFIG):
             else:
                 RECOMMENDER_CONTAINER_NAMES.append(system)
             if SYSTEMS_CONFIG[system].get("base"):
+                if RECOMMENDER_BASELINE_CONTAINER != "":
+                    raise ValueError("Multiple recommender baselines defined!")
                 RECOMMENDER_BASELINE_CONTAINER = system
         elif SYSTEMS_CONFIG[system]["type"] == "ranker":
             if SYSTEMS_CONFIG[system].get("precomputed"):
@@ -44,12 +46,15 @@ def parse_systems_config(SYSTEMS_CONFIG):
             else:
                 RANKING_CONTAINER_NAMES.append(system)
             if SYSTEMS_CONFIG[system].get("base"):
+                if RANKING_BASELINE_CONTAINER != "":
+                    raise ValueError("Multiple ranking baselines defined!")
                 RANKING_BASELINE_CONTAINER = system
 
         # JSON Path
         if SYSTEMS_CONFIG[system].get("hits_path"):
             hits_path = parse(SYSTEMS_CONFIG[system]["hits_path"])
             SYSTEMS_CONFIG[system]["hits_path"] = hits_path
+
 
     return (
         RANKING_CONTAINER_NAMES,
