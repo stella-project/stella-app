@@ -7,7 +7,7 @@ networks:
 
 services:
   app:
-    build: thestellaproject/stella-app:latest
+    image: thestellaproject/stella-app:latest
     volumes:
       - ./data:/data
     expose:
