@@ -13,7 +13,7 @@ def update_expired_sessions(sessions_not_exited):
     for session in sessions_not_exited:
         delta = datetime.now(timezone.utc) - session.start.replace(tzinfo=timezone.utc)
 
-        if delta.seconds > current_app.config["SESSION_EXPIRATION"]:
+        if delta.total_seconds() > current_app.config["SESSION_EXPIRATION"]:
             complete = False
             feedbacks = Feedback.query.filter_by(session_id=session.id).all()
             for feedback in feedbacks:
@@ -27,7 +27,7 @@ def update_expired_sessions(sessions_not_exited):
                 db.session.add(session)
                 db.session.commit()
             else:
-                if current_app.config["SESSION_KILL"] is not None and delta.seconds > current_app.config["SESSION_KILL"]:
+                if current_app.config["SESSION_KILL"] is not None and delta.total_seconds() > current_app.config["SESSION_KILL"]:
                     # 1. get all results that are NOT interleaved results
                     results_not_tdi = Result.query.filter(
                         Result.id != Result.tdi, Result.session_id == session.id
