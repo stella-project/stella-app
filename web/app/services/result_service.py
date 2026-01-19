@@ -5,11 +5,9 @@ from typing import Dict, Optional, Union
 
 import aiohttp
 from aiohttp import ClientError, ClientResponseError
-from app.models import Result, Session, System, db
+from app.models import Result, System, db
 from app.services.interleave_service import interleave_rankings
 from flask import current_app
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from sqlalchemy.future import select
 
 
 async def request_results_from_container(
@@ -166,19 +164,14 @@ async def query_system(
         database_uri = database_uri.replace("sqlite:///", "sqlite+aiosqlite:///")
     else:
         database_uri = database_uri.replace("postgresql", "postgresql+asyncpg")
-    async_engine = create_async_engine(database_uri)
-    AsyncSessionLocal = async_sessionmaker(bind=async_engine, expire_on_commit=False)
 
-    async with AsyncSessionLocal() as session:
-        system = (
-            await session.execute(select(System).where(System.name == container_name))
-        ).scalar()
+    system = db.session.query(System).where(System.name == container_name).first()
 
-        if query in current_app.config["HEAD_QUERIES"]:
-            system.num_requests += 1
-        else:
-            system.num_requests_no_head += 1
-        await session.commit()
+    if query in current_app.config["HEAD_QUERIES"]:
+        system.num_requests += 1
+    else:
+        system.num_requests_no_head += 1
+    db.session.commit()
 
     # Get the results from the container
     async with aiohttp.ClientSession() as session:
@@ -200,26 +193,24 @@ async def query_system(
         )
 
     # Save the ranking to the database
-    async with AsyncSessionLocal() as session:
-        system_id = (
-            await session.execute(select(System).where(System.name == container_name))
-        ).scalar()
 
-        ranking = Result(
-            session_id=session_id,
-            system_id=system_id.id,
-            type=system_role,
-            q=query,
-            q_date=q_date,
-            q_time=q_time,
-            num_found=result.get("num_found"),
-            page=page,
-            rpp=rpp,
-            items=item_dict,
-        )
+    system_id = db.session.query(System).where(System.name == container_name).first()
 
-        session.add(ranking)
-        await session.commit()
+    ranking = Result(
+        session_id=session_id,
+        system_id=system_id.id,
+        type=system_role,
+        q=query,
+        q_date=q_date,
+        q_time=q_time,
+        num_found=result.get("num_found"),
+        page=page,
+        rpp=rpp,
+        items=item_dict,
+    )
+
+    db.session.add(ranking)
+    db.session.commit()
 
     return ranking, result
 

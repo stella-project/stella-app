@@ -1,11 +1,14 @@
-import requests as req
+import asyncio
+import datetime
 import json
 import random
-import datetime
+
+import click
+import requests as req
 
 STELLA_APP_API = "http://0.0.0.0:8080/stella/api/v1/"
 # STELLA_APP_API = "http://localhost:8080/stella/api/v1/"
-NUM = 100
+NUM = 200
 
 
 def simulate(req_json):
@@ -91,8 +94,52 @@ def dataset_recommendations(num=10, print_status_code=False):
             print(r_post.status_code)
 
 
+async def ranking_async(num=10, print_status_code=False):
+    import aiohttp
+
+    async def fetch_data(session, query, sid):
+
+        url = STELLA_APP_API + f"ranking?query={query}&sid=s{sid}"
+        async with session.get(url) as response:
+            # await asyncio.sleep(1)  # Simulating a delay
+            data = await response.json()
+            print(f"Completed task: {url}")
+            return data
+
+    tasks = []
+    async with aiohttp.ClientSession() as session:
+        for idx in range(num):
+            query = random.choice(
+                [
+                    "covid-19 OR sars-cov-2",
+                    "influenza",
+                    "bioenergy",
+                    "animal AND protection",
+                    "vegan AND diet",
+                    "demenz",
+                    "depression",
+                    "climate change",
+                    "hiv",
+                    "cancer",
+                    "borderline",
+                    "psychiatrie",
+                    "cannabis",
+                    "schlaf",
+                    "klimawandel AND in AND china",
+                    "corona AND virus",
+                ]
+            )
+            sid = f"s{idx}"
+            tasks.append(fetch_data(session, query, sid))
+
+        results = await asyncio.gather(*tasks)
+
+    for result in results:
+        print(result)
+
+
 def rankings(num=10, print_status_code=False):
-    for _ in range(num):
+    for idx in range(num):
         query = random.choice(
             [
                 "covid-19 OR sars-cov-2",
@@ -114,7 +161,7 @@ def rankings(num=10, print_status_code=False):
             ]
         )
 
-        r = req.get(STELLA_APP_API + "ranking?query=" + query)
+        r = req.get(STELLA_APP_API + f"ranking?query={query}&sid=s{idx}")
         print(query)
         r_json = r.json()
         rank_id = r_json.get("header").get("rid")
@@ -126,9 +173,31 @@ def rankings(num=10, print_status_code=False):
             print(r_post.status_code)
 
 
-def main():
-    dataset_recommendations(num=NUM)
-    # rankings(num=NUM, print_status_code=True)
+@click.command()
+@click.option("--num", default=NUM, help="Number of requests to simulate.")
+@click.option("--mode", default="ranking", help="Mode: ranking or recommendation.")
+@click.option(
+    "--async",
+    "_async",
+    default=False,
+    help="Enable asynchronous processing.",
+)
+@click.option(
+    "-v", is_flag=True, default=True, help="Verbosity flag to print status codes."
+)
+def main(num, mode, _async, v):
+    if mode == "ranking":
+        if _async:
+            asyncio.run(ranking_async(num=num, print_status_code=v))
+        else:
+            rankings(num=num, print_status_code=v)
+    elif mode == "recommendation":
+        if _async:
+            print("Asynchronous mode not implemented for recommendations.")
+        else:
+            dataset_recommendations(num=num, print_status_code=v)
+    else:
+        print("Invalid mode. Choose 'ranking' or 'recommendation'.")
 
 
 if __name__ == "__main__":

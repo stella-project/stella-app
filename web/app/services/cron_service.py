@@ -2,16 +2,18 @@ import json
 from datetime import datetime, timedelta, timezone
 
 import requests as req
+from requests.exceptions import ConnectionError, HTTPError
 from app.extensions import scheduler
 from app.models import Feedback, Result, Session, System, db
 from flask import current_app
 
+logger = scheduler.app.logger
 
 def update_expired_sessions(sessions_not_exited):
     for session in sessions_not_exited:
         delta = datetime.now(timezone.utc) - session.start.replace(tzinfo=timezone.utc)
 
-        if delta.seconds > current_app.config["SESSION_EXPIRATION"]:
+        if delta.total_seconds() > current_app.config["SESSION_EXPIRATION"]:
             complete = False
             feedbacks = Feedback.query.filter_by(session_id=session.id).all()
             for feedback in feedbacks:
@@ -25,7 +27,7 @@ def update_expired_sessions(sessions_not_exited):
                 db.session.add(session)
                 db.session.commit()
             else:
-                if delta.seconds > current_app.config["SESSION_KILL"]:
+                if current_app.config["SESSION_KILL"] is not None and delta.total_seconds() > current_app.config["SESSION_KILL"]:
                     # 1. get all results that are NOT interleaved results
                     results_not_tdi = Result.query.filter(
                         Result.id != Result.tdi, Result.session_id == session.id
@@ -47,14 +49,25 @@ def update_expired_sessions(sessions_not_exited):
 
 
 def update_token():
-    r = req.post(
-        current_app.config["STELLA_SERVER_API"] + "/tokens",
-        auth=(
-            current_app.config["STELLA_SERVER_USER"],
-            current_app.config["STELLA_SERVER_PASS"],
-        ),
-    )
+    try:
+        r = req.post(
+            current_app.config["STELLA_SERVER_API"] + "/tokens",
+            auth=(
+                current_app.config["STELLA_SERVER_USER"],
+                current_app.config["STELLA_SERVER_PASS"],
+            ),
+        )
+        r.raise_for_status()
+
+    except ConnectionError as e:
+        current_app.logger.error(f"Connection error while getting token from STELLA server")
+        return
+    except HTTPError as e:
+        current_app.logger.error(f"HTTP error while getting token from STELLA server: {e}")
+        return
+    
     r_json = json.loads(r.text)
+    logger.debug("Received new token from Stella Server.", r_json.get("token"))
     delta_exp = r_json.get("expiration")
     # get new token five min (300 s) before expiration
     current_app.config["TOKEN_EXPIRATION"] = datetime.now(timezone.utc) + timedelta(
@@ -64,15 +77,28 @@ def update_token():
 
 
 def get_side_identifier():
-    r = req.get(
-        current_app.config["STELLA_SERVER_API"]
-        + "/sites/"
-        + current_app.config["STELLA_SERVER_USERNAME"],
-        auth=(current_app.config["STELLA_SERVER_TOKEN"], ""),
-    )
-    r_json = json.loads(r.text)
+    try:
+        r = req.get(
+            current_app.config["STELLA_SERVER_API"]
+            + "/sites/"
+            + current_app.config["STELLA_SERVER_USERNAME"],
+            auth=(current_app.config["STELLA_SERVER_TOKEN"], ""),
+        )
+        r.raise_for_status
 
-    return r_json.get("id")
+        r_json = json.loads(r.text)
+
+        return r_json.get("id")
+    except ConnectionError as e:
+        current_app.logger.error(f"Connection error while getting site identifier from STELLA server")
+        return None
+    except HTTPError as e:
+        current_app.logger.error(f"HTTP error while getting site identifier from STELLA server: {e}")
+        return None
+    except Exception as e:
+        current_app.logger.error(f"Error while getting site identifier from STELLA server: {r.text}")
+        return None
+    
 
 
 def post_session(session, site_id):
@@ -131,7 +157,7 @@ def post_feedback(feedback, session_id_server):
         data=payload,
         auth=(current_app.config["STELLA_SERVER_TOKEN"], ""),
     )
-
+    current_app.logger.debug(f"Posted feedback, received response: {r.text}")
     # get feedback id from stella-server
     r_json = json.loads(r.text)
 
@@ -225,10 +251,13 @@ def post_feedbacks(session, session_id_server):
 
 
 def post_sessions(sessions_exited):
+    # get site identifier
+    site_id = get_side_identifier()
+    if site_id is None:
+        current_app.logger.error(f"Posting sessions aborted: Couldn't get site identifier")
+        return
+    
     for session in sessions_exited:
-
-        # get site identifier
-        site_id = get_side_identifier()
 
         # POST session/make new session
         session_id_server = post_session(session, site_id)
@@ -263,11 +292,11 @@ def check_db_sessions():
 
         sessions_exited = Session.query.filter_by(exit=True, sent=False).all()
 
-        if current_app.config["STELLA_SERVER_TOKEN"] is None or current_app.config[
-            "TOKEN_EXPIRATION"
-        ] < datetime.now(timezone.utc):
+        if current_app.config["STELLA_SERVER_TOKEN"] is None or current_app.config["TOKEN_EXPIRATION"] < datetime.now(timezone.utc):
+            
+            logger.info("Updating Stella Server token...", )
             update_token()
 
-        if len(sessions_exited) > 0:
+        if len(sessions_exited) > 0 and current_app.config["STELLA_SERVER_TOKEN"] is not None:
             scheduler.app.logger.info("Posting " + str(len(sessions_exited)) + " session(s).")
             post_sessions(sessions_exited)

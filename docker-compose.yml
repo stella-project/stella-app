@@ -7,8 +7,7 @@ networks:
 
 services:
   app:
-    container_name: stella-app
-    build: ./web
+    image: thestellaproject/stella-app:latest
     volumes:
       - ./data:/data
     expose:
