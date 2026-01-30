@@ -73,3 +73,15 @@ class System(db.Model):
     num_requests = db.Column(db.Integer)
     system_type = db.Column(db.String(64), index=True)
     num_requests_no_head = db.Column(db.Integer)
+
+    @property
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "type": self.type,
+            "system_type": self.system_type,
+            "num_requests": self.num_requests,
+            "num_requests_no_head": self.num_requests_no_head,
+        }    
+            

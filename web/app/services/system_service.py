@@ -59,6 +59,7 @@ def get_least_served_system(query: str = "", type: str = "RANK") -> str:
         container_name = (
             db.session.query(System)
             .filter(System.name.notin_(exclude_systems))
+            .filter(System.system_type == 'LIVE')
             .order_by(System.num_requests_no_head)
             .first()
             .name
