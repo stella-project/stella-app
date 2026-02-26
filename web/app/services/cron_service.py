@@ -186,25 +186,53 @@ def post_result(result, feedback_id_server):
     }
 
     # post rankings to stella-server with (remote) feedback id
-    if result.type == "RANK":
-        r = req.post(
-            current_app.config["STELLA_SERVER_API"]
-            + "/feedbacks/"
-            + str(feedback_id_server)
-            + "/rankings",
-            data=payload,
-            auth=(current_app.config["STELLA_SERVER_TOKEN"], ""),
-        )
+    if current_app.config["INTERLEAVE"]:
+        # In interleaved mode, we only expect results of type RANK/REC
+        if result.type == "RANK":
+            r = req.post(
+                current_app.config["STELLA_SERVER_API"]
+                + "/feedbacks/"
+                + str(feedback_id_server)
+                + "/rankings",
+                data=payload,
+                auth=(current_app.config["STELLA_SERVER_TOKEN"], ""),
+            )
+        elif result.type == "REC":
+            r = req.post(
+                current_app.config["STELLA_SERVER_API"]
+                + "/feedbacks/"
+                + str(feedback_id_server)
+                + "/recommendations",
+                data=payload,
+                auth=(current_app.config["STELLA_SERVER_TOKEN"], ""),
+            )
+        else:
+            return 400
     else:
-        r = req.post(
-            current_app.config["STELLA_SERVER_API"]
-            + "/feedbacks/"
-            + str(feedback_id_server)
-            + "/recommendations",
-            data=payload,
-            auth=(current_app.config["STELLA_SERVER_TOKEN"], ""),
-        )
+        # Non-interleaved: send all results of type EXP/BASE as well
+        if result.type not in ("EXP", "BASE"):
+            return 400
 
+        if system.type == "RANK":
+            r = req.post(
+                current_app.config["STELLA_SERVER_API"]
+                + "/feedbacks/"
+                + str(feedback_id_server)
+                + "/rankings",
+                data=payload,
+                auth=(current_app.config["STELLA_SERVER_TOKEN"], ""),
+            )
+        elif system.type == "REC":
+            r = req.post(
+                current_app.config["STELLA_SERVER_API"]
+                + "/feedbacks/"
+                + str(feedback_id_server)
+                + "/recommendations",
+                data=payload,
+                auth=(current_app.config["STELLA_SERVER_TOKEN"], ""),
+            )
+        else:
+            return 400
     return r.status_code
 
 
