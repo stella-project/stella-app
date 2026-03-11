@@ -231,9 +231,15 @@ def build_header(ranking: Result, experimental_system: Optional[str] = None) -> 
         elif ranking.type == "REC":
             container_name_base = current_app.config["RECOMMENDER_BASELINE_CONTAINER"]
         container = {"exp": experimental_system, "base": container_name_base}
+    
+    # Use TDI id when available (interleaved results), otherwise fall back to the
+    # primary key of this ranking. This ensures non-interleaved requests still
+    # get a valid rid instead of null.
+    rid = ranking.tdi if ranking.tdi is not None else ranking.id
+
     return {
         "sid": ranking.session_id,
-        "rid": ranking.tdi,
+        "rid": rid,
         "q": ranking.q,
         "page": ranking.page,
         "rpp": ranking.rpp,
@@ -274,8 +280,12 @@ def build_response(
         if hits_path:
             matches = hits_path.find(result)
             assert len(matches) == 1
-
-            id_map = {hit[docid_name]: hit for hit in matches[0].value}
+            hits = matches[0].value
+            if hits and isinstance(hits[0], dict):
+                id_map = {hit[docid_name]: hit for hit in hits}
+            else:
+                # hits is a list of strings → use the string itself as the docid
+                id_map = {hit: hit for hit in hits}
         else:
             id_map = {hit[docid_name]: hit for hit in ranking.items.values()}
         return id_map
