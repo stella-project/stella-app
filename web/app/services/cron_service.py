@@ -67,7 +67,7 @@ def update_token():
         return
     
     r_json = json.loads(r.text)
-    logger.debug("Received new token from Stella Server.", r_json.get("token"))
+    logger.debug("Received new token from Stella Server. Token: %s", r_json.get("token"))
     delta_exp = r_json.get("expiration")
     # get new token five min (300 s) before expiration
     current_app.config["TOKEN_EXPIRATION"] = datetime.now(timezone.utc) + timedelta(
