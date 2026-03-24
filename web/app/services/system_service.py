@@ -4,13 +4,40 @@ from flask import current_app
 
 
 def rest_index(container_name):
-    if current_app.config["SYSTEMS_CONFIG"][container_name].get("url"):
-        # Use custom URL if provided in the config
-        url = current_app.config["SYSTEMS_CONFIG"][container_name]["url"] + "/index"
-    else:
-        url = f"http://{container_name}:5000/index"
+    try:
+        if current_app.config["SYSTEMS_CONFIG"][container_name].get("url"):
+            # Use custom URL if provided in the config
+            url = current_app.config["SYSTEMS_CONFIG"][container_name]["url"] + "/index"
+        else:
+            url = f"http://{container_name}:5000/index"
+    except KeyError:
+        msg = f"Container '{container_name}' not found in SYSTEMS_CONFIG."
+        current_app.logger.error(msg)
+        return 400, msg
 
-    requests.get(url)
+    try:
+        # Force a trusted Host value while still routing to the container URL
+        response = requests.get(url, timeout=120, headers={"Host": "localhost"})
+        if response.status_code >= 400:
+            current_app.logger.error(
+                "Indexing failed for '%s' (%s): %s %s",
+                container_name,
+                url,
+                response.status_code,
+                response.text,
+            )
+        else:
+            current_app.logger.info(
+                "Indexing succeeded for '%s' (%s): %s",
+                container_name,
+                url,
+                response.status_code,
+            )
+        return response.status_code, response.text
+    except requests.RequestException as exc:
+        msg = f"Indexing request failed for '{container_name}' ({url}): {exc}"
+        current_app.logger.error(msg)
+        return 502, msg
 
 
 def get_least_served_system(query: str = "", type: str = "RANK") -> str:
