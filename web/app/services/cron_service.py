@@ -67,7 +67,7 @@ def update_token():
         return
     
     r_json = json.loads(r.text)
-    logger.debug("Received new token from Stella Server.", r_json.get("token"))
+    logger.debug("Received new token from Stella Server. Token: %s", r_json.get("token"))
     delta_exp = r_json.get("expiration")
     # get new token five min (300 s) before expiration
     current_app.config["TOKEN_EXPIRATION"] = datetime.now(timezone.utc) + timedelta(
@@ -164,7 +164,7 @@ def post_feedback(feedback, session_id_server):
     return r_json["feedback_id"]
 
 
-def post_result(result, feedback_id_server):
+def post_result(result, feedback_id_server, session_type):
     system = System.query.filter_by(id=result.system_id).first()
     system_name = system.name
     r = req.get(
@@ -186,25 +186,53 @@ def post_result(result, feedback_id_server):
     }
 
     # post rankings to stella-server with (remote) feedback id
-    if result.type == "RANK":
-        r = req.post(
-            current_app.config["STELLA_SERVER_API"]
-            + "/feedbacks/"
-            + str(feedback_id_server)
-            + "/rankings",
-            data=payload,
-            auth=(current_app.config["STELLA_SERVER_TOKEN"], ""),
-        )
+    if current_app.config["INTERLEAVE"]:
+        # In interleaved mode, we only expect results of type RANK/REC
+        if session_type == "RANK":
+            r = req.post(
+                current_app.config["STELLA_SERVER_API"]
+                + "/feedbacks/"
+                + str(feedback_id_server)
+                + "/rankings",
+                data=payload,
+                auth=(current_app.config["STELLA_SERVER_TOKEN"], ""),
+            )
+        elif session_type == "REC":
+            r = req.post(
+                current_app.config["STELLA_SERVER_API"]
+                + "/feedbacks/"
+                + str(feedback_id_server)
+                + "/recommendations",
+                data=payload,
+                auth=(current_app.config["STELLA_SERVER_TOKEN"], ""),
+            )
+        else:
+            return 400
     else:
-        r = req.post(
-            current_app.config["STELLA_SERVER_API"]
-            + "/feedbacks/"
-            + str(feedback_id_server)
-            + "/recommendations",
-            data=payload,
-            auth=(current_app.config["STELLA_SERVER_TOKEN"], ""),
-        )
+        # Non-interleaved: send all results of type EXP/BASE as well
+        if result.type not in ("EXP", "BASE"):
+            return 400
 
+        if system.type == "RANK":
+            r = req.post(
+                current_app.config["STELLA_SERVER_API"]
+                + "/feedbacks/"
+                + str(feedback_id_server)
+                + "/rankings",
+                data=payload,
+                auth=(current_app.config["STELLA_SERVER_TOKEN"], ""),
+            )
+        elif system.type == "REC":
+            r = req.post(
+                current_app.config["STELLA_SERVER_API"]
+                + "/feedbacks/"
+                + str(feedback_id_server)
+                + "/recommendations",
+                data=payload,
+                auth=(current_app.config["STELLA_SERVER_TOKEN"], ""),
+            )
+        else:
+            return 400
     return r.status_code
 
 
@@ -229,13 +257,15 @@ def delete_exited_session(session):
     db.session.commit()
 
 
-def post_results(results, feedback_id_server):
+def post_results(results, feedback_id_server, session_type):
     for result in results:
         # POST result
-        post_result(result, feedback_id_server)
+        post_result(result, feedback_id_server, session_type)
 
 
 def post_feedbacks(session, session_id_server):
+    session_type = 'RANK' if session.system_ranking is not None else 'REC'
+
     feedbacks = Feedback.query.filter_by(session_id=session.id).all()
     current_app.logger.debug(
         "There is/are " + str(len(feedbacks)) + " feedback(s) to be sent."
@@ -247,7 +277,7 @@ def post_feedbacks(session, session_id_server):
 
         # post results
         results = Result.query.filter_by(feedback_id=feedback.id).all()
-        post_results(results, feedback_id_server)
+        post_results(results, feedback_id_server, session_type)
 
 
 def post_sessions(sessions_exited):
