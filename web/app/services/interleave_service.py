@@ -4,50 +4,75 @@ from app.models import Result, System, db
 from flask import current_app
 
 
-def team_draft_interleave(result_list_base, result_list_exp, rpp):
-    # implementation based on https://bitbucket.org/living-labs/ll-api/src/master/ll/core/interleave.py
-    """
-    Perform Team Draft Interleaving between two ranked lists.
+def team_draft_interleave(ranking_base, ranking_exp, rpp=None):
+    # team draft interleaving
+    # implementation taken from https://bitbucket.org/living-labs/ll-api/src/master/ll/core/interleave.py
+    result = {}
+    result_set = set([])
     
-    Args:
-        result_list_base (List[str]): Ranked list of document IDs from BASE.
-        result_list_exp (List[str]): Ranked list of document IDs from EXP.
+    if rpp is not None:
+        max_length = rpp
+    else:
+        max_length = min(len(ranking_exp), len(ranking_base)) * 2
 
-    Returns:
-        interleaved (Dict): The interleaved list of document IDs.
-    """
-    # Initialize state
-    interleaved = {}
-    picked_docs = set()
+    pointer_base = 0
+    pointer_exp = 0
 
-    # Create iterators for both rankers
-    iter_base = iter(result_list_base)
-    iter_exp = iter(result_list_exp)
-    team_iters = {"BASE": iter_base, "EXP": iter_exp}
+    length_ranking_base = len(ranking_base)
+    length_ranking_exp = len(ranking_exp)
 
-    # Randomize who starts
-    teams = ["BASE", "EXP"]
-    random.shuffle(teams)
+    length_base = 0
+    length_exp = 0
 
-    unique_docs = set(result_list_base) | set(result_list_exp)
-    result_limit = min(len(unique_docs), rpp)
-    # Continue drafting until interleaved list is full
-    while len(interleaved) < result_limit:
-        for team in teams:
-            try:
-                # Keep trying to pick a new doc
-                while True:
-                    doc = next(team_iters[team])
-                    if doc not in picked_docs:
-                        interleaved[len(interleaved)+1] = {"docid": doc, "type": team}
-                        picked_docs.add(doc)
-                        break
-            except StopIteration:
-                continue
-            if len(interleaved) >= result_limit:
-                break
+    pos = 1
+    while len(result) < max_length:
+        base_available = pointer_base < length_ranking_base
+        exp_available = pointer_exp < length_ranking_exp
+        if not base_available and not exp_available:
+            break
 
-    return interleaved
+        select_base = False
+        if base_available and exp_available:
+            if length_base < length_exp or (length_base == length_exp and bool(random.getrandbits(1))):
+                select_base = True
+        elif base_available:
+            select_base = True
+
+        if select_base:
+            result.update({pos: {"docid": ranking_base[pointer_base], "type": "BASE"}})
+            result_set.add(ranking_base[pointer_base])
+            length_base += 1
+            pos += 1
+        else:
+            result.update({pos: {"docid": ranking_exp[pointer_exp], "type": "EXP"}})
+            result_set.add(ranking_exp[pointer_exp])
+            length_exp += 1
+            pos += 1
+        
+        while (
+            pointer_base < length_ranking_base
+            and ranking_base[pointer_base] in result_set
+        ):
+            pointer_base += 1
+        
+        while (
+            pointer_exp < length_ranking_exp and ranking_exp[pointer_exp] in result_set
+        ):
+            pointer_exp += 1
+
+    return result
+
+
+def add_missing_results(result_list, interleaved_results, type, rpp):
+    interleaved_ids = set([v['docid'] for k, v in interleaved_results.items()])
+    interleaved_length = len(interleaved_results)
+    for res in result_list:
+        if interleaved_length < rpp and res not in interleaved_ids:
+            interleaved_length += 1
+            interleaved_results[interleaved_length] = {'docid': res, 'type': type}
+
+    return interleaved_results
+
 
 def interleave_rankings(ranking_exp, ranking_base, system_type, rpp):
     """
@@ -66,7 +91,13 @@ def interleave_rankings(ranking_exp, ranking_base, system_type, rpp):
     base = [v.get("docid") for v in ranking_base.items.values()]
     exp = [v.get("docid") for v in ranking_exp.items.values()]
 
-    item_dict = team_draft_interleave(base, exp, rpp)
+    item_dict = team_draft_interleave(base, exp)
+    if len(item_dict) < rpp:
+        item_dict = add_missing_results(base, item_dict, "BASE", rpp)
+        item_dict = add_missing_results(exp, item_dict, "EXP", rpp)
+    elif len(item_dict) > rpp:
+        # if the interleaving is longer than rpp, we cut it down to rpp. This can happen if both systems have a lot of overlap in their rankings.
+        item_dict = {k: v for k, v in item_dict.items() if k <= rpp}
 
     ranking = Result(
         session_id=ranking_exp.session_id,
