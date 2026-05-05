@@ -112,6 +112,7 @@ def test_interleave_rankings(sessions):
         3: {"docid": "doc13", "type": "EXP"},
     }
 
+
     interleaved_results = interleave_rankings(
         results_exp, results_base, "ranking", rpp=len(results_base.items)
     )
@@ -191,7 +192,7 @@ def test_interleave_rankings_unbalanced(sessions):
 
 
 class TestInterleaving:
-    @patch("random.shuffle")
+    @patch("random.getrandbits")
     def test_number_shuffles(self, mock_shuffle):
         ranking_a = ["d1", "d2", "d3", "d4"]
         ranking_b = ["d1", "d2", "d3", "d4"]
