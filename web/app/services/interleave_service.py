@@ -25,14 +25,16 @@ def team_draft_interleave(result_list_base, result_list_exp, rpp):
     iter_exp = iter(result_list_exp)
     team_iters = {"BASE": iter_base, "EXP": iter_exp}
 
-    # Randomize who starts
     teams = ["BASE", "EXP"]
-    random.shuffle(teams)
 
     unique_docs = set(result_list_base) | set(result_list_exp)
     result_limit = min(len(unique_docs), rpp)
     # Continue drafting until interleaved list is full
     while len(interleaved) < result_limit:
+        
+        # Randomize who selects next
+        random.shuffle(teams)
+
         for team in teams:
             try:
                 # Keep trying to pick a new doc
