@@ -70,6 +70,7 @@ def add_missing_results(result_list, interleaved_results, type, rpp):
         if interleaved_length < rpp and res not in interleaved_ids:
             interleaved_length += 1
             interleaved_results[interleaved_length] = {'docid': res, 'type': type}
+            interleaved_ids.add(res)
 
     return interleaved_results
 
@@ -91,8 +92,8 @@ def interleave_rankings(ranking_exp, ranking_base, system_type, rpp):
     base = [v.get("docid") for v in ranking_base.items.values()]
     exp = [v.get("docid") for v in ranking_exp.items.values()]
 
-    item_dict = team_draft_interleave(base, exp)
-    if len(item_dict) < rpp:
+    item_dict = team_draft_interleave(base, exp, rpp=rpp)
+    if len(item_dict) < len(set(base + exp)):
         item_dict = add_missing_results(base, item_dict, "BASE", rpp)
         item_dict = add_missing_results(exp, item_dict, "EXP", rpp)
     elif len(item_dict) > rpp:
