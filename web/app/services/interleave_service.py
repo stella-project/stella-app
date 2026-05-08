@@ -8,8 +8,8 @@ def team_draft_interleave(ranking_base, ranking_exp, rpp=None):
     # team draft interleaving
     # implementation taken from https://bitbucket.org/living-labs/ll-api/src/master/ll/core/interleave.py
     result = {}
-    result_set = set([])
-    
+    result_set = set()
+
     if rpp is not None:
         max_length = rpp
     else:
@@ -33,7 +33,9 @@ def team_draft_interleave(ranking_base, ranking_exp, rpp=None):
 
         select_base = False
         if base_available and exp_available:
-            if length_base < length_exp or (length_base == length_exp and bool(random.getrandbits(1))):
+            if length_base < length_exp or (
+                length_base == length_exp and bool(random.getrandbits(1))
+            ):
                 select_base = True
         elif base_available:
             select_base = True
@@ -48,13 +50,13 @@ def team_draft_interleave(ranking_base, ranking_exp, rpp=None):
             result_set.add(ranking_exp[pointer_exp])
             length_exp += 1
             pos += 1
-        
+
         while (
             pointer_base < length_ranking_base
             and ranking_base[pointer_base] in result_set
         ):
             pointer_base += 1
-        
+
         while (
             pointer_exp < length_ranking_exp and ranking_exp[pointer_exp] in result_set
         ):
@@ -63,13 +65,16 @@ def team_draft_interleave(ranking_base, ranking_exp, rpp=None):
     return result
 
 
-def add_missing_results(result_list, interleaved_results, type, rpp):
-    interleaved_ids = set([v['docid'] for k, v in interleaved_results.items()])
+def add_missing_results(result_list, interleaved_results, result_type, rpp):
+    interleaved_ids = set(v["docid"] for k, v in interleaved_results.items())
     interleaved_length = len(interleaved_results)
     for res in result_list:
         if interleaved_length < rpp and res not in interleaved_ids:
             interleaved_length += 1
-            interleaved_results[interleaved_length] = {'docid': res, 'type': type}
+            interleaved_results[interleaved_length] = {
+                "docid": res,
+                "type": result_type,
+            }
             interleaved_ids.add(res)
 
     return interleaved_results
@@ -93,12 +98,11 @@ def interleave_rankings(ranking_exp, ranking_base, system_type, rpp):
     exp = [v.get("docid") for v in ranking_exp.items.values()]
 
     item_dict = team_draft_interleave(base, exp, rpp=rpp)
-    if len(item_dict) < len(set(base + exp)):
+
+    # The tdi implementations returns interleavings as long as the shortest imput ranking.
+    if len(item_dict) < rpp:
         item_dict = add_missing_results(base, item_dict, "BASE", rpp)
         item_dict = add_missing_results(exp, item_dict, "EXP", rpp)
-    elif len(item_dict) > rpp:
-        # if the interleaving is longer than rpp, we cut it down to rpp. This can happen if both systems have a lot of overlap in their rankings.
-        item_dict = {k: v for k, v in item_dict.items() if k <= rpp}
 
     ranking = Result(
         session_id=ranking_exp.session_id,
@@ -115,7 +119,7 @@ def interleave_rankings(ranking_exp, ranking_base, system_type, rpp):
     )
 
     db.session.add(ranking)
-    db.session.commit()
+    db.session.flush()
 
     ranking_id = ranking.id
     ranking.tdi = ranking_id
