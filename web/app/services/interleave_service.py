@@ -1,7 +1,6 @@
 import random
 
-from app.models import Result, System, db
-from flask import current_app
+from app.models import Result, db
 
 
 def team_draft_interleave(ranking_base, ranking_exp, rpp=None):
@@ -100,6 +99,7 @@ def interleave_rankings(ranking_exp, ranking_base, system_type, rpp):
     item_dict = team_draft_interleave(base, exp, rpp=rpp)
 
     # The tdi implementations returns interleavings as long as the shortest imput ranking.
+    # TODO: Make this configurable to allow setups without result padding.
     if len(item_dict) < rpp:
         item_dict = add_missing_results(base, item_dict, "BASE", rpp)
         item_dict = add_missing_results(exp, item_dict, "EXP", rpp)
