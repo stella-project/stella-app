@@ -117,3 +117,115 @@ class TestMakeResults:
 
         result.pop("_stella", None)
         assert result == create_return_experimental()
+
+
+class TestProxyCacheRegression:
+    @pytest.mark.usefixtures("systems")
+    def test_proxy_cache_uses_page(
+        self, client, aio_mock, sessions, db_session
+    ):
+        """
+        The proxy endpoint looks up cached results by (q, page, session_id). If 'page'
+        isn't stored on the initial Result row, cached responses won't be returned
+        """
+        container_name = "ranker"
+        session_id = sessions["ranker"].id
+        page = 2
+        url_path = "custom/path"
+
+        # `stella-page` is popped and must NOT be forwarded to the container.
+        mock_url = (
+            "http://ranker:5000/custom/path"
+            "?custom-page=0&custom-query=Test Query&custom-rpp=10"
+        )
+        aio_mock.get(mock_url, payload=create_return_experimental(), repeat=True)
+
+        qs = (
+            f"stella-container={container_name}"
+            f"&stella-sid={session_id}"
+            f"&stella-system-type=ranking"
+            f"&stella-page={page}"
+            f"&custom-page=0"
+            f"&custom-query=Test Query"
+            f"&custom-rpp=10"
+        )
+
+        # First request stores the Result.
+        resp1 = client.get(f"/proxy/{url_path}?{qs}")
+        assert resp1.status_code == 200
+
+        data1 = resp1.get_json()
+        assert data1 is not None
+        assert data1.get("_stella", {}).get("page") == page
+        assert data1.get("_stella", {}).get("container", {}).get("exp") == container_name
+
+        data1_no_stella = dict(data1)
+        data1_no_stella.pop("_stella", None)
+        assert data1_no_stella == create_return_experimental()
+
+        system = db_session.query(System).filter_by(name=container_name).first()
+        assert system.num_requests_no_head == 1
+
+        stored = (
+            db_session.query(Result)
+            .filter_by(session_id=session_id, page=page)
+            .all()
+        )
+        assert len(stored) == 1
+
+        # Second request should be served from cache and not hit the container again.
+        resp2 = client.get(f"/proxy/{url_path}?{qs}")
+        assert resp2.status_code == 200
+
+        data2 = resp2.get_json()
+        assert data2 is not None
+        assert data2.get("_stella", {}).get("page") == page
+        assert data2.get("_stella", {}).get("container", {}).get("exp") == container_name
+
+        data2_no_stella = dict(data2)
+        data2_no_stella.pop("_stella", None)
+        assert data2_no_stella == create_return_experimental()
+
+        system = db_session.query(System).filter_by(name=container_name).first()
+        assert system.num_requests_no_head == 1
+
+        stored = (
+            db_session.query(Result)
+            .filter_by(session_id=session_id, page=page)
+            .all()
+        )
+        # get_cached_response() creates a new Result record with updated timestamp
+        assert len(stored) == 2
+
+        # A different page should NOT share cache and should hit the container again.
+        other_page = page + 1
+        qs_other_page = (
+            f"stella-container={container_name}"
+            f"&stella-sid={session_id}"
+            f"&stella-system-type=ranking"
+            f"&stella-page={other_page}"
+            f"&custom-page=0"
+            f"&custom-query=Test Query"
+            f"&custom-rpp=10"
+        )
+        resp3 = client.get(f"/proxy/{url_path}?{qs_other_page}")
+        assert resp3.status_code == 200
+
+        data3 = resp3.get_json()
+        assert data3 is not None
+        assert data3.get("_stella", {}).get("page") == other_page
+        assert data3.get("_stella", {}).get("container", {}).get("exp") == container_name
+
+        data3_no_stella = dict(data3)
+        data3_no_stella.pop("_stella", None)
+        assert data3_no_stella == create_return_experimental()
+
+        system = db_session.query(System).filter_by(name=container_name).first()
+        assert system.num_requests_no_head == 2
+
+        stored_other_page = (
+            db_session.query(Result)
+            .filter_by(session_id=session_id, page=other_page)
+            .all()
+        )
+        assert len(stored_other_page) == 1

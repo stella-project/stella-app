@@ -109,10 +109,14 @@ async def forward_request(
     system.num_requests_no_head += 1
     db.session.commit()
 
+    # Remove page value from params to retrieve the results from the container.
+    params_out = params.copy()
+    params_out.pop("page", None)
+
     # Get the results from the container
     async with aiohttp.ClientSession() as session:
         result = await request_results_from_container(
-            session, container_name, url, params
+            session, container_name, url, params_out
         )
 
     item_dict, hits = extract_hits(result, container_name, system_role)
@@ -121,7 +125,8 @@ async def forward_request(
     ts_end = time.time()
     q_time = round((ts_end - ts_start) * 1000)
 
-    query = build_query_string(url, params)
+    # Build the query string from the cleaned params.
+    query = build_query_string(url, params_out)
 
     # truncate long queries to fit in the database
     query = query[: Result.q.property.columns[0].type.length]
@@ -133,6 +138,9 @@ async def forward_request(
     # Save the ranking to the database
     system_id = db.session.query(System).where(System.name == container_name).first()
 
+    # Get the page value from the params.
+    page = params.get("page", 0)
+    
     ranking = Result(
         session_id=session_id,
         system_id=system_id.id,
@@ -141,7 +149,7 @@ async def forward_request(
         q_date=q_date,
         q_time=q_time,
         num_found=None,
-        page=None,
+        page=page,
         rpp=None,
         items=item_dict,
     )
