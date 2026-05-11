@@ -85,6 +85,7 @@ def get_least_served_system(query: str = "", type: str = "RANK") -> str:
         # Select least served container
         container_name = (
             db.session.query(System)
+            .filter(System.name.in_(current_app.config["RANKING_CONTAINER_NAMES"] + current_app.config["RECOMMENDER_CONTAINER_NAMES"]))
             .filter(System.name.notin_(exclude_systems))
             .filter(System.system_type == 'LIVE')
             .order_by(System.num_requests_no_head)
