@@ -87,12 +87,19 @@ def proxy(url):
     params = request.args.copy()  # copy to make them mutable
     system_type = params.pop("stella-system-type", "ranking")
     page = params.pop("stella-page", None)
+    if page is not None:
+        page = int(page)
+        # Store page value for caching but do not forward to the system. Is used to store page value in the Result table.
+        params["page"] = page
     container_name = params.pop("stella-container", None)
 
     session_id = params.pop("stella-sid", None)
     session_exists = db.session.query(Session).filter_by(id=session_id).first()
 
-    query = build_query_string(url, params)
+    # Remove page value from params to build the query string.
+    params_out = params.copy()
+    params_out.pop("page", None)
+    query = build_query_string(url, params_out)
 
     # without a session ID we can not guarantee consistency and avoid showing different users the same results
     if session_exists:
