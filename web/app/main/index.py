@@ -8,8 +8,8 @@ from . import main
 
 @main.route("/index/<string:container_name>")
 def index(container_name):
-    rest_index(container_name)
-    return "Indexing started", 200
+    status_code, body = rest_index(container_name)
+    return body, status_code
 
 
 @main.route("/index/bulk")

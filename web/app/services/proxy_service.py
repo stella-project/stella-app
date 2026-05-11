@@ -46,6 +46,7 @@ async def request_results_from_container(
         async with session.get(
             url=url,
             params=params,
+            headers={"Host": "localhost"},
             timeout=aiohttp.ClientTimeout(total=3),
         ) as response:
             response.raise_for_status()
