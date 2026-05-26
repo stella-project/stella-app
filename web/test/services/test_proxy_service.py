@@ -46,7 +46,9 @@ class TestForwardRequest:
             url="custom/path",
             params={"custom-query": query, "custom-rpp": rpp, "custom-page": page},
             session_id=sessions["ranker"].id,
-            system_role="EXP",
+            page=page,
+            rpp=rpp,
+            system_role="EXP"
         )
 
         system = db_session.query(System).filter_by(name=container_name).first()
@@ -59,7 +61,7 @@ class TestForwardRequest:
             result.q
             == "custom/path?custom-query=Test Query&custom-rpp=10&custom-page=0"
         )
-        assert result.rpp == None
+        assert result.rpp == rpp
         assert result.system_id == system.id
         for i in range(len(result.items)):
             assert list(result.items[str(i + 1)].keys()) == ["docid", "type"]
@@ -77,7 +79,9 @@ class TestForwardRequest:
             url="custom/path",
             params={"custom-query": query, "custom-rpp": rpp, "custom-page": page},
             session_id=sessions["ranker"].id,
-            system_role="EXP",
+            page=page,
+            rpp=rpp,
+            system_role="EXP"
         )
 
         result = (
@@ -112,6 +116,8 @@ class TestMakeResults:
             url=url,
             params=params,
             system_type=system_type,
+            page=page,
+            rpp=rpp
         )
         assert set(result["_stella"].keys()) == STELLA_RETURN_PARAMETER
 
