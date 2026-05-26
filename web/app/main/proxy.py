@@ -88,6 +88,7 @@ def proxy(url):
     system_type = params.pop("stella-system-type", "ranking")
     page = params.pop("stella-page", None)
     container_name = params.pop("stella-container", None)
+    rpp = params.get("rpp", default=None, type=int)
 
     session_id = params.pop("stella-sid", None)
     session_exists = db.session.query(Session).filter_by(id=session_id).first()
@@ -115,7 +116,7 @@ def proxy(url):
         session_id = create_new_session(container_name, sid=session_id, type=type)
 
     response = asyncio.run(
-        make_results(container_name, session_id, url, params, system_type)
+        make_results(container_name, session_id, url, params, system_type, page, rpp)
     )
 
     return Response(
