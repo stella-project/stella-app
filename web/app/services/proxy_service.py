@@ -142,7 +142,7 @@ async def forward_request(
         q=query,
         q_date=q_date,
         q_time=q_time,
-        num_found=result.get("num_found", None),
+        num_found=None,
         page=page,
         rpp=rpp,
         items=item_dict,
@@ -197,7 +197,7 @@ async def make_results(
 
 
         interleaved_ranking = interleave_rankings(
-            ranking, ranking_base, system_type, rpp if rpp else len(ranking_base.items)
+            ranking, ranking_base, system_type, rpp if rpp else min(len(ranking.items), len(ranking_base.items)) * 2
         )
 
         response = build_response(

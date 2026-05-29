@@ -23,7 +23,7 @@ def proxy(url):
       
       It forwards requests to the systems registered to the STELLA app.
 
-      Experiment control parameters (`sid`, `container`, `system-type`, `page`, etc.) must be prefixed with `stella-` when calling this endpoint.
+      Experiment control parameters (`sid`, `container`, `system-type`, `page`, `rpp`, etc.) must be prefixed with `stella-` when calling this endpoint.
       
       Other query parameters are forwarded unchanged. Supports interleaved and non-interleaved experiments.
  
@@ -32,6 +32,7 @@ def proxy(url):
       - **stella-sid**: Session ID. If not provided or invalid, a new session is created.
       - **stella-system-type**: Type of system — either `ranking` or `retrieval`. Defaults to `ranking`.
       - **stella-page**: Optional page indicator for cached results.
+      - **stella-rpp**: Results per page.
 
       All other query parameters are forwarded unchanged to the underlying retrieval service.
     parameters:
@@ -62,6 +63,11 @@ def proxy(url):
         type: integer
         required: false
         description: Page number for cached responses.
+      - name: stella-rpp
+        in: query
+        type: integer
+        required: false
+        description: Results per page.
       - name: query_params
         in: query
         type: object
@@ -86,9 +92,12 @@ def proxy(url):
     # extract stella specific parameters
     params = request.args.copy()  # copy to make them mutable
     system_type = params.pop("stella-system-type", "ranking")
-    page = params.pop("stella-page", None)
     container_name = params.pop("stella-container", None)
-    rpp = params.get("rpp", default=None, type=int)
+
+    page = request.args.get("stella-page", default=None, type=int)
+    rpp = request.args.get("stella-rpp", default=None, type=int)
+    params.pop("stella-page", None)
+    params.pop("stella-rpp", None)
 
     session_id = params.pop("stella-sid", None)
     session_exists = db.session.query(Session).filter_by(id=session_id).first()
