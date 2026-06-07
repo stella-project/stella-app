@@ -88,6 +88,8 @@ async def forward_request(
     url: str,
     params: Any,
     session_id: str,
+    page: int,
+    rpp: int,
     system_role: str = "EXP",
 ) -> Any:
     """Equivalent to the query_system function.
@@ -109,14 +111,10 @@ async def forward_request(
     system.num_requests_no_head += 1
     db.session.commit()
 
-    # Remove page value from params to retrieve the results from the container.
-    params_out = params.copy()
-    params_out.pop("page", None)
-
     # Get the results from the container
     async with aiohttp.ClientSession() as session:
         result = await request_results_from_container(
-            session, container_name, url, params_out
+            session, container_name, url, params
         )
 
     item_dict, hits = extract_hits(result, container_name, system_role)
@@ -125,8 +123,7 @@ async def forward_request(
     ts_end = time.time()
     q_time = round((ts_end - ts_start) * 1000)
 
-    # Build the query string from the cleaned params.
-    query = build_query_string(url, params_out)
+    query = build_query_string(url, params)
 
     # truncate long queries to fit in the database
     query = query[: Result.q.property.columns[0].type.length]
@@ -138,9 +135,6 @@ async def forward_request(
     # Save the ranking to the database
     system_id = db.session.query(System).where(System.name == container_name).first()
 
-    # Get the page value from the params.
-    page = params.get("page", 0)
-    
     ranking = Result(
         session_id=session_id,
         system_id=system_id.id,
@@ -150,7 +144,7 @@ async def forward_request(
         q_time=q_time,
         num_found=None,
         page=page,
-        rpp=None,
+        rpp=rpp,
         items=item_dict,
     )
 
@@ -166,6 +160,8 @@ async def make_results(
     url: str,
     params: MultiDict,
     system_type: str,
+    page: int,
+    rpp: int,
 ):
     """Produce a ranking for the given query and container."""
     if current_app.config["INTERLEAVE"]:
@@ -181,21 +177,27 @@ async def make_results(
                 url=url,
                 params=params,
                 session_id=session_id,
-                system_role="BASE",
+                page=page,
+                rpp=rpp,
+                system_role="BASE"
             ),
             forward_request(
                 container_name=container_name,
                 url=url,
                 params=params,
                 session_id=session_id,
-                system_role="EXP",
+                page=page,
+                rpp=rpp,
+                system_role="EXP"
             ),
         )
         ranking_base, result_base = baseline
         ranking, result = experimental
 
+
+
         interleaved_ranking = interleave_rankings(
-            ranking, ranking_base, system_type, rpp=len(ranking_base.items)
+            ranking, ranking_base, system_type, rpp if rpp else min(len(ranking.items), len(ranking_base.items)) * 2
         )
 
         response = build_response(
@@ -215,7 +217,9 @@ async def make_results(
             url=url,
             params=params,
             session_id=session_id,
-            system_role="EXP",
+            page=page,
+            rpp=rpp,
+            system_role="EXP"
         )
         response = build_response(ranking, container_name, result=result)
     return response
