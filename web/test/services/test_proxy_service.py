@@ -123,3 +123,178 @@ class TestMakeResults:
 
         result.pop("_stella", None)
         assert result == create_return_experimental()
+
+
+class TestProxyCacheRegression:
+    """The proxy endpoint looks up cached results by (q, page, session_id)."""
+
+    @pytest.mark.usefixtures("systems")
+    def test_initial_request_persists_result_with_page(
+        self, client, aio_mock, sessions, db_session
+    ):
+        """First request hits the container and stores a Result keyed by page and rpp."""
+        container_name = "ranker"
+        session_id = sessions["ranker"].id
+        page = 2
+        rpp = 10
+        url_path = "custom/path"
+
+        # `stella-page` and `stella-rpp` are popped and must NOT be forwarded to the container.
+        mock_url = (
+            "http://ranker:5000/custom/path"
+            "?custom-page=0&custom-query=Test Query&custom-rpp=10"
+        )
+        aio_mock.get(mock_url, payload=create_return_experimental(), repeat=True)
+
+        qs = (
+            f"stella-container={container_name}"
+            f"&stella-sid={session_id}"
+            f"&stella-system-type=ranking"
+            f"&stella-page={page}"
+            f"&stella-rpp={rpp}"
+            f"&custom-page=0"
+            f"&custom-query=Test Query"
+            f"&custom-rpp=10"
+        )
+
+        resp = client.get(f"/proxy/{url_path}?{qs}")
+        assert resp.status_code == 200
+
+        data = resp.get_json()
+        assert data is not None
+        assert data.get("_stella", {}).get("page") == page
+        assert data.get("_stella", {}).get("rpp") == rpp
+        assert data.get("_stella", {}).get("container", {}).get("exp") == container_name
+
+        data_no_stella = dict(data)
+        data_no_stella.pop("_stella", None)
+        assert data_no_stella == create_return_experimental()
+
+        system = db_session.query(System).filter_by(name=container_name).first()
+        assert system.num_requests_no_head == 1
+
+        stored = (
+            db_session.query(Result)
+            .filter_by(session_id=session_id, page=page)
+            .all()
+        )
+        assert len(stored) == 1
+        assert stored[0].page == page
+        assert stored[0].rpp == rpp
+
+    @pytest.mark.usefixtures("systems")
+    def test_repeated_request_is_served_from_cache(
+        self, client, aio_mock, sessions, db_session
+    ):
+        """A second identical request reuses the cache and does not hit the container."""
+        container_name = "ranker"
+        session_id = sessions["ranker"].id
+        page = 2
+        rpp = 10
+        url_path = "custom/path"
+
+        mock_url = (
+            "http://ranker:5000/custom/path"
+            "?custom-page=0&custom-query=Test Query&custom-rpp=10"
+        )
+        aio_mock.get(mock_url, payload=create_return_experimental(), repeat=True)
+
+        qs = (
+            f"stella-container={container_name}"
+            f"&stella-sid={session_id}"
+            f"&stella-system-type=ranking"
+            f"&stella-page={page}"
+            f"&stella-rpp={rpp}"
+            f"&custom-page=0"
+            f"&custom-query=Test Query"
+            f"&custom-rpp=10"
+        )
+
+        client.get(f"/proxy/{url_path}?{qs}")
+
+        resp = client.get(f"/proxy/{url_path}?{qs}")
+        assert resp.status_code == 200
+
+        data = resp.get_json()
+        assert data is not None
+        assert data.get("_stella", {}).get("page") == page
+        assert data.get("_stella", {}).get("container", {}).get("exp") == container_name
+
+        data_no_stella = dict(data)
+        data_no_stella.pop("_stella", None)
+        assert data_no_stella == create_return_experimental()
+
+        system = db_session.query(System).filter_by(name=container_name).first()
+        assert system.num_requests_no_head == 1
+
+        stored = (
+            db_session.query(Result)
+            .filter_by(session_id=session_id, page=page)
+            .all()
+        )
+        # get_cached_response() creates a new Result record with updated timestamp
+        assert len(stored) == 2
+
+    @pytest.mark.usefixtures("systems")
+    def test_different_page_bypasses_cache(
+        self, client, aio_mock, sessions, db_session
+    ):
+        """A request for a different page does not share cache and hits the container again."""
+        container_name = "ranker"
+        session_id = sessions["ranker"].id
+        page = 2
+        other_page = page + 1
+        rpp = 10
+        url_path = "custom/path"
+
+        mock_url = (
+            "http://ranker:5000/custom/path"
+            "?custom-page=0&custom-query=Test Query&custom-rpp=10"
+        )
+        aio_mock.get(mock_url, payload=create_return_experimental(), repeat=True)
+
+        qs = (
+            f"stella-container={container_name}"
+            f"&stella-sid={session_id}"
+            f"&stella-system-type=ranking"
+            f"&stella-page={page}"
+            f"&stella-rpp={rpp}"
+            f"&custom-page=0"
+            f"&custom-query=Test Query"
+            f"&custom-rpp=10"
+        )
+
+        client.get(f"/proxy/{url_path}?{qs}")
+
+        qs_other_page = (
+            f"stella-container={container_name}"
+            f"&stella-sid={session_id}"
+            f"&stella-system-type=ranking"
+            f"&stella-page={other_page}"
+            f"&stella-rpp={rpp}"
+            f"&custom-page=0"
+            f"&custom-query=Test Query"
+            f"&custom-rpp=10"
+        )
+
+        resp = client.get(f"/proxy/{url_path}?{qs_other_page}")
+        assert resp.status_code == 200
+
+        data = resp.get_json()
+        assert data is not None
+        assert data.get("_stella", {}).get("page") == other_page
+        assert data.get("_stella", {}).get("container", {}).get("exp") == container_name
+
+        data_no_stella = dict(data)
+        data_no_stella.pop("_stella", None)
+        assert data_no_stella == create_return_experimental()
+
+        system = db_session.query(System).filter_by(name=container_name).first()
+        assert system.num_requests_no_head == 2
+
+        stored_other_page = (
+            db_session.query(Result)
+            .filter_by(session_id=session_id, page=other_page)
+            .all()
+        )
+        assert len(stored_other_page) == 1
