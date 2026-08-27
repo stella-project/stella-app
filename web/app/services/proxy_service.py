@@ -42,12 +42,12 @@ async def request_results_from_container(
     url = f"{system_url}/{url}"
 
     try:
-
+        timeout_sec = current_app.config["SYSTEM_TIMEOUT"]
         async with session.get(
             url=url,
             params=params,
             headers={"Host": "localhost"},
-            timeout=aiohttp.ClientTimeout(total=3),
+            timeout=aiohttp.ClientTimeout(total=timeout_sec),
         ) as response:
             response.raise_for_status()
             return await response.json()

@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import aiohttp
 import pytest
 from app.models import Result, System
@@ -30,6 +32,31 @@ class TestRequestResults:
                 params={"custom-query": query, "custom-rpp": rpp, "custom-page": page},
             )
         assert response == create_return_experimental()
+
+    @pytest.mark.asyncio
+    async def test_request_results_uses_configured_timeout(
+        self, app, mock_request_custom_system
+    ):
+        """Use SYSTEM_TIMEOUT instead of a hard-coded client timeout."""
+        app.config["SYSTEM_TIMEOUT"] = 17
+
+        async with aiohttp.ClientSession() as session:
+            with patch(
+                "app.services.proxy_service.aiohttp.ClientTimeout",
+                wraps=aiohttp.ClientTimeout,
+            ) as client_timeout:
+                await request_results_from_container(
+                    session=session,
+                    container_name="ranker",
+                    url="custom/path",
+                    params={
+                        "custom-query": "Test Query",
+                        "custom-rpp": 10,
+                        "custom-page": 0,
+                    },
+                )
+
+        client_timeout.assert_called_once_with(total=17)
 
 
 class TestForwardRequest:
