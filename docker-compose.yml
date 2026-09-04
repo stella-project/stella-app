@@ -28,6 +28,7 @@ services:
       INTERVAL_DB_CHECK: 3
       SESSION_EXPIRATION: 6
       SESSION_KILL: 120
+      SYSTEM_TIMEOUT: 3
 
       # Systems
       SYSTEMS_CONFIG: |

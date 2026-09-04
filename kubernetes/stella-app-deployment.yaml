@@ -57,6 +57,8 @@ spec:
               value: "6"
             - name: SESSION_KILL
               value: "120"
+            - name: SYSTEM_TIMEOUT
+              value: "3"
             - name: STELLA_SERVER_ADDRESS
               value: http://stella-server:8000
             - name: STELLA_SERVER_PASS

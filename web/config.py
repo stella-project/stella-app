@@ -79,6 +79,7 @@ class Config:
     SESSION_EXPIRATION = int(os.environ.get("SESSION_EXPIRATION") or 6)
     SESSION_KILL = None if os.environ.get("SESSION_KILL") is None else int(os.environ.get("SESSION_KILL"))
     INTERVAL_DB_CHECK = int(os.environ.get("INTERVAL_DB_CHECK") or 3)  # seconds
+    SYSTEM_TIMEOUT = int(os.environ.get("SYSTEM_TIMEOUT") or 3)  # seconds
 
     SENDFEEDBACK = (
         False if os.environ.get("SENDFEEDBACK") == "False" else True

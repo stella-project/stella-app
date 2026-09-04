@@ -1,6 +1,7 @@
 import json
 import os
 import time
+from unittest.mock import patch
 
 import aiohttp
 import pytest
@@ -51,6 +52,28 @@ class TestRequestResults:
         assert response["query"] == query
         assert response["page"] == page
         assert response["rpp"] == rpp
+
+    @pytest.mark.asyncio
+    async def test_request_results_uses_configured_timeout(
+        self, app, mock_request_base_system
+    ):
+        """Use SYSTEM_TIMEOUT instead of a hard-coded client timeout."""
+        app.config["SYSTEM_TIMEOUT"] = 17
+
+        async with aiohttp.ClientSession() as session:
+            with patch(
+                "app.services.result_service.aiohttp.ClientTimeout",
+                wraps=aiohttp.ClientTimeout,
+            ) as client_timeout:
+                await request_results_from_container(
+                    session=session,
+                    container_name="ranker_base",
+                    query="Test Query",
+                    rpp=10,
+                    page=0,
+                )
+
+        client_timeout.assert_called_once_with(total=17)
 
     @pytest.mark.asyncio
     async def test_request_results_from_container_base_rec(
