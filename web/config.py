@@ -50,8 +50,8 @@ def parse_systems_config(SYSTEMS_CONFIG):
                     raise ValueError("Multiple ranking baselines defined!")
                 RANKING_BASELINE_CONTAINER = system
 
-        # JSON Path
-        if SYSTEMS_CONFIG[system].get("hits_path"):
+        # JSON Path (may already be parsed when called again on update)
+        if isinstance(SYSTEMS_CONFIG[system].get("hits_path"), str):
             hits_path = parse(SYSTEMS_CONFIG[system]["hits_path"])
             SYSTEMS_CONFIG[system]["hits_path"] = hits_path
 

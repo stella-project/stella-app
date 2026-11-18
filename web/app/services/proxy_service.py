@@ -8,6 +8,7 @@ from aiohttp import ClientError, ClientResponseError
 from app.models import Result, System, db
 from app.services.interleave_service import interleave_rankings
 from app.services.result_service import build_response, extract_hits
+from app.services.system_service import get_baseline_container
 from flask import current_app
 from werkzeug.datastructures.structures import MultiDict
 
@@ -25,7 +26,6 @@ async def request_results_from_container(
         query (str): Query string or item id for which results are requested.
         rpp (int): Results Per Page (rpp).
         page (int): Page ID for pagination.
-        system_type (str, optional): Type of the system (ranking or recommendation). Defaults to "ranking".
     Returns:
         dict: Dictionary containing the results from the system.
     """
@@ -165,10 +165,7 @@ async def make_results(
 ):
     """Produce a ranking for the given query and container."""
     if current_app.config["INTERLEAVE"]:
-        if system_type == "ranking":
-            container_name_base = current_app.config["RANKING_BASELINE_CONTAINER"]
-        elif system_type == "recommendation":
-            container_name_base = current_app.config["RECOMMENDER_BASELINE_CONTAINER"]
+        container_name_base = get_baseline_container(system_type)
         current_app.logger.debug("Started gathering")
 
         baseline, experimental = await asyncio.gather(

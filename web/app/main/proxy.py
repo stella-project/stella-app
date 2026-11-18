@@ -30,7 +30,7 @@ def proxy(url):
       **Supported STELLA parameters:**
       - **stella-container**: Name of the target container. If not provided, the least served system is used.
       - **stella-sid**: Session ID. If not provided or invalid, a new session is created.
-      - **stella-system-type**: Type of system — either `ranking` or `retrieval`. Defaults to `ranking`.
+      - **stella-system-type**: Type of system — either `ranking` or `recommendation`. Defaults to `ranking`.
       - **stella-page**: Optional page indicator for cached results.
       - **stella-rpp**: Results per page.
 
@@ -55,7 +55,7 @@ def proxy(url):
         in: query
         type: string
         required: false
-        enum: [ranking, retrieval]
+        enum: [ranking, recommendation]
         default: ranking
         description: Type of system for the proxy request.
       - name: stella-page
@@ -92,6 +92,11 @@ def proxy(url):
     # extract stella specific parameters
     params = request.args.copy()  # copy to make them mutable
     system_type = params.pop("stella-system-type", "ranking")
+    if system_type not in ("ranking", "recommendation"):
+        return Response(
+            f"Invalid stella-system-type {system_type!r}. Must be 'ranking' or 'recommendation'.",
+            status=400,
+        )
     container_name = params.pop("stella-container", None)
 
     page = request.args.get("stella-page", default=None, type=int)
@@ -116,13 +121,13 @@ def proxy(url):
 
     if container_name is None:
         current_app.logger.debug("No container name provided")
-        container_name = get_least_served_system(type="RANK" if system_type == "ranking" else "REC")
+        container_name = get_least_served_system(system_type=system_type)
 
     if not session_exists:
-        # TODO: `create_new_session` and `make_results` use different identifiers to distinguish ranking and recommendation systems. This should be unified.
-        type = "ranker" if system_type == "ranking" else "recommendation"
         current_app.logger.debug(f"Session {session_id} does not exist, create new")
-        session_id = create_new_session(container_name, sid=session_id, type=type)
+        session_id = create_new_session(
+            container_name, sid=session_id, system_type=system_type
+        )
 
     response = asyncio.run(
         make_results(container_name, session_id, url, params, system_type, page, rpp)

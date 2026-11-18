@@ -7,6 +7,7 @@ import aiohttp
 from aiohttp import ClientError, ClientResponseError
 from app.models import Result, System, db
 from app.services.interleave_service import interleave_rankings
+from app.services.system_service import get_baseline_container
 from flask import current_app
 
 
@@ -228,10 +229,9 @@ def build_header(ranking: Result, experimental_system: Optional[str] = None) -> 
     if not current_app.config["INTERLEAVE"]:
         container = {"exp": experimental_system}
     else:
-        if ranking.type == "RANK":
-            container_name_base = current_app.config["RANKING_BASELINE_CONTAINER"]
-        elif ranking.type == "REC":
-            container_name_base = current_app.config["RECOMMENDER_BASELINE_CONTAINER"]
+        container_name_base = get_baseline_container(
+            "ranking" if ranking.type == "RANK" else "recommendation"
+        )
         container = {"exp": experimental_system, "base": container_name_base}
     
     # Use TDI id when available (interleaved results), otherwise fall back to the
@@ -367,10 +367,7 @@ async def make_results(
 ):
     """Produce a ranking for the given query and container."""
     if current_app.config["INTERLEAVE"]:
-        if system_type == "ranking":
-            container_name_base = current_app.config["RANKING_BASELINE_CONTAINER"]
-        elif system_type == "recommendation":
-            container_name_base = current_app.config["RECOMMENDER_BASELINE_CONTAINER"]
+        container_name_base = get_baseline_container(system_type)
         current_app.logger.debug("Started gathering")
 
         baseline, experimental = await asyncio.gather(

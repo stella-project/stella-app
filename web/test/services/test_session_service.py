@@ -4,7 +4,7 @@ from app.services.session_service import create_new_session
 
 def test_create_new_session_ranker(client, systems, db_session):
     session_id = create_new_session(
-        container_name="ranker_base", sid=None, type="ranker"
+        container_name="ranker_base", sid=None, system_type="ranking"
     )
 
     session = db_session.query(Session).first()
@@ -14,7 +14,7 @@ def test_create_new_session_ranker(client, systems, db_session):
 
 def test_create_new_session_recommender(client, systems, db_session):
     session_id = create_new_session(
-        container_name="recommender_base", sid=None, type="recommendation"
+        container_name="recommender_base", sid=None, system_type="recommendation"
     )
 
     session = db_session.query(Session).filter_by(id=session_id).first()

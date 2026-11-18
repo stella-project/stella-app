@@ -40,17 +40,30 @@ def rest_index(container_name):
         return 502, msg
 
 
-def get_least_served_system(query: str = "", type: str = "RANK") -> str:
+def get_baseline_container(system_type: str) -> str:
+    """Get the name of the baseline container for the given system type ("ranking" or "recommendation")."""
+    if system_type == "ranking":
+        return current_app.config["RANKING_BASELINE_CONTAINER"]
+    elif system_type == "recommendation":
+        return current_app.config["RECOMMENDER_BASELINE_CONTAINER"]
+    raise ValueError(
+        f"Invalid system type {system_type!r}. Must be 'ranking' or 'recommendation'."
+    )
+
+
+def get_least_served_system(
+    query: str = "", system_type: str = "ranking"
+) -> str:
     """Get the least served system of a given system type. If a query is provided, it is first checked if a precomputed system is available for that query.
 
     Args:
         query (str, optional): Query to check for precomputed runs. Defaults to "".
-        type (str, optional): System type. Either RANK or REC. Defaults to "RANK".
+        system_type (str, optional): Either "ranking" or "recommendation". Defaults to "ranking".
 
     Returns:
         str: Name of the least served system.
     """
-    if type == "RANK":
+    if system_type == "ranking":
         exclude_systems = (
             [current_app.config["RANKING_BASELINE_CONTAINER"]]
             + [current_app.config["RECOMMENDER_BASELINE_CONTAINER"]]
@@ -58,13 +71,17 @@ def get_least_served_system(query: str = "", type: str = "RANK") -> str:
             + current_app.config["RANKING_PRECOMPUTED_CONTAINER_NAMES"]
             + current_app.config["RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES"]
         )
-    elif type == "REC":
+    elif system_type == "recommendation":
         exclude_systems = (
             [current_app.config["RANKING_BASELINE_CONTAINER"]]
             + [current_app.config["RECOMMENDER_BASELINE_CONTAINER"]]
             + current_app.config["RANKING_CONTAINER_NAMES"]
             + current_app.config["RANKING_PRECOMPUTED_CONTAINER_NAMES"]
             + current_app.config["RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES"]
+        )
+    else:
+        raise ValueError(
+            f"Invalid system type {system_type!r}. Must be 'ranking' or 'recommendation'."
         )
 
     if query in current_app.config["HEAD_QUERIES"]:
