@@ -76,9 +76,9 @@ def index_systems():
     """run indexing methods for all available containers"""
     container_list = (
         current_app.config["RANKING_CONTAINER_NAMES"]
-        + current_app.config["RECOMMENDATION_CONTAINER_NAMES"]
-        + current_app.config["PRECOM_CONTAINER_NAMES"]
-        + current_app.config["PRECOM_RECOMMENDATION_CONTAINER_NAMES"]
+        + current_app.config["RECOMMENDER_CONTAINER_NAMES"]
+        + current_app.config["RANKING_PRECOMPUTED_CONTAINER_NAMES"]
+        + current_app.config["RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES"]
     )
 
     time.sleep(30)

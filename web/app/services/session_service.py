@@ -4,14 +4,16 @@ from uuid import uuid4
 from app.models import Session, System, db
 
 
-def create_new_session(container_name=None, sid=None, type=None):
-    """
-    create a new session and set experimental ranking and recommender-container for session
+def create_new_session(container_name=None, sid=None, system_type=None):
+    """Create a new session and assign the experimental system to it.
 
-    @param container_name:      ranking container name (str)
-    @param container_rec_name:  recommendation container name (str)
+    Args:
+        container_name (str, optional): Name of the experimental system container.
+        sid (str, optional): Session ID to use. A random one is generated if missing.
+        system_type (str): Type of the system, either "ranking" or "recommendation".
 
-    @return:                    session-id (int)
+    Returns:
+        str: The session ID.
     """
 
     if sid is None or not isinstance(sid, str):
@@ -24,14 +26,16 @@ def create_new_session(container_name=None, sid=None, type=None):
     else:
         container_id = None
 
-    if type == "ranker":
+    if system_type == "ranking":
         system_ranking = container_id
         system_recommendation = None
-    elif type == "recommendation":
+    elif system_type == "recommendation":
         system_ranking = None
         system_recommendation = container_id
     else:
-        raise ValueError("Invalid type. Must be 'ranker' or 'recommendation'.")
+        raise ValueError(
+            f"Invalid system type {system_type!r}. Must be 'ranking' or 'recommendation'."
+        )
 
     session = Session(
         id=sid,

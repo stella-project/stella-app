@@ -76,11 +76,11 @@ def create_sessions(systems):
     for system in systems.keys():
         if system.startswith("ranker"):
             result[system] = create_new_session(
-                container_name=system, sid=None, type="ranker"
+                container_name=system, sid=None, system_type="ranking"
             )
         elif system.startswith("recommender"):
             result[system] = create_new_session(
-                container_name=system, sid=None, type="recommendation"
+                container_name=system, sid=None, system_type="recommendation"
             )
     return result
 

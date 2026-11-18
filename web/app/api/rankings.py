@@ -259,13 +259,24 @@ def ranking():
 
     if container_name is None:
         current_app.logger.debug("No container name provided")
-        container_name = get_least_served_system(query)
+        container_name = get_least_served_system(query, system_type="ranking")
 
     if not session_exists:
         current_app.logger.debug(f"Session {session_id} does not exist, create new")
-        session_id = create_new_session(container_name, sid=session_id, type="ranker")
+        session_id = create_new_session(
+            container_name, sid=session_id, system_type="ranking"
+        )
 
-    response = asyncio.run(make_results(container_name, query, rpp, page, session_id))
+    response = asyncio.run(
+        make_results(
+            container_name,
+            query,
+            rpp,
+            page,
+            session_id,
+            system_type="ranking",
+        )
+    )
     return Response(
         json.dumps(response, sort_keys=False, ensure_ascii=False, indent=2),
         mimetype="application/json",

@@ -18,7 +18,7 @@ def update_system():
         systemName = dbSystem.name
 
         if systemName not in current_app.config["SYSTEMS_CONFIG"]: # if a system is in db-app but not in SYSTEMS_CONFIG, add it to SYSTEMS_CONFIG
-            current_app.config["SYSTEMS_CONFIG"][systemName] = {"type": 'ranking' if dbSystem.type == 'RANK' else 'recommender'}
+            current_app.config["SYSTEMS_CONFIG"][systemName] = {"type": "ranker" if dbSystem.type == "RANK" else "recommender"}
         
         if systemName not in server_systems: # if system removed from server, remove it from db-app
             if systemName in current_app.config["SYSTEMS_CONFIG"] and current_app.config["SYSTEMS_CONFIG"][systemName].get("base", False):
@@ -46,11 +46,17 @@ def update_system():
 
 
     for systemName, sys_data in server_systems.items(): # iterate over server systems to find new systems
-        systemType = sys_data.get("type", None)
         systemStatus = sys_data.get("status", None)
 
         dbSystem = db.session.query(System).filter_by(name=systemName).first()
         if dbSystem is None: # if new system from server, add it to app
+            systemType = sys_data.get("type")
+            if systemType not in ("RANK", "REC"):
+                current_app.logger.error(
+                    f"Cannot add system {systemName}: invalid type {systemType!r}, expected 'RANK' or 'REC'"
+                )
+                continue
+
             newSystem = System(
                 name=systemName, 
                 type=systemType, 
@@ -61,7 +67,7 @@ def update_system():
             db.session.add(newSystem)
             db.session.commit()
 
-            current_app.config["SYSTEMS_CONFIG"][systemName] = {"type": 'ranking' if systemType == 'RANK' else 'recommender'}
+            current_app.config["SYSTEMS_CONFIG"][systemName] = {"type": "ranker" if systemType == "RANK" else "recommender"}
 
             current_app.logger.info(f"System added: {systemName}")
         
