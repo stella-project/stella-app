@@ -15,61 +15,43 @@ def init_db():
 
 
 def seed_db():
-    """Use this function to setup a database with set of pre-registered users."""
-    # TODO: Make this more verbose and configurable
-    # add ranking systems to database
-    systems = []
-    for system_name in current_app.config["RANKING_CONTAINER_NAMES"]:
-        systems.append(
-            System(
-                name=system_name,
-                type="RANK",
-                system_type="LIVE",
-                num_requests=0,
-                num_requests_no_head=0,
-            )
-        )
+    """Register all configured systems in the database.
 
-    for system_name in current_app.config["RANKING_PRECOMPUTED_CONTAINER_NAMES"]:
-        systems.append(
-            System(
-                name=system_name,
-                type="RANK",
-                system_type="PRECOM",
-                num_requests=0,
-                num_requests_no_head=0,
+    Systems are identified by their name. A system whose name already exists in
+    the database is skipped, so running this command multiple times does not
+    create duplicate entries.
+    """
+    system_groups = [
+        ("RANKING_CONTAINER_NAMES", "RANK", "LIVE"),
+        ("RANKING_PRECOMPUTED_CONTAINER_NAMES", "RANK", "PRECOM"),
+        ("RECOMMENDER_CONTAINER_NAMES", "REC", "LIVE"),
+        ("RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES", "REC", "PRECOM"),
+    ]
+
+    existing_names = {name for (name,) in db.session.query(System.name).all()}
+
+    systems = []
+    for config_key, type_, system_type in system_groups:
+        for system_name in current_app.config.get(config_key, []):
+            if system_name in existing_names:
+                current_app.logger.warning(
+                    f"System '{system_name}' already exists in the database. Skipping."
+                )
+                continue
+            systems.append(
+                System(
+                    name=system_name,
+                    type=type_,
+                    system_type=system_type,
+                    num_requests=0,
+                    num_requests_no_head=0,
+                )
             )
-        )
+            existing_names.add(system_name)
 
     db.session.add_all(systems)
     db.session.commit()
-
-    # add recommendation systems to database
-    systems = []
-    for system_name in current_app.config["RECOMMENDER_CONTAINER_NAMES"]:
-        systems.append(
-            System(
-                name=system_name,
-                type="REC",
-                system_type="LIVE",
-                num_requests=0,
-                num_requests_no_head=0,
-            )
-        )
-
-    for sysname in current_app.config["RECOMMENDER_PRECOMPUTED_CONTAINER_NAMES"]:
-        systems.append(
-            System(
-                name=sysname,
-                type="REC",
-                system_type="PRECOM",
-                num_requests=0,
-                num_requests_no_head=0,
-            )
-        )
-
-    db.session.add_all(systems)
-    db.session.commit()
+    return systems
 
 
 def index_systems():
