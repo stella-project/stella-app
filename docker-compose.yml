@@ -71,6 +71,8 @@ services:
       - POSTGRES_PASSWORD=change-me
       - POSTGRES_DB=postgres
     command: -p 5430
+    volume:
+      - postgres_data_app:/var/lib/postgresql/data
 
   gesis_rank_pyserini_base:
     build: https://github.com/stella-project/gesis_rank_pyserini_base.git#main
@@ -103,3 +105,6 @@ services:
       - ./data/:/data/
     networks:
       - stella-shared
+
+volumes:
+  postgres_data_app:
